@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Edu Space 🚀</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink:#ff6b9d; --purple:#a78bfa; --yellow:#ffd166; --teal:#4ecdc4; --blue:#4d96ff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Baloo 2', sans-serif; margin:0; padding:2rem; min-height:100vh;
+    background:linear-gradient(135deg,#ffe6f2 0%,#e6f2ff 50%,#fff9e6 100%);
+    background-attachment:fixed; color:#333;
+  }
+  .header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;}
+  h1{
+    margin:0; font-weight:800; font-size:2.6rem;
+    background:linear-gradient(90deg,var(--pink),var(--purple),var(--blue));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    display:inline-block; transform:rotate(-1deg); animation:float 3.5s ease-in-out infinite;
+  }
+  @keyframes float{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-4px) rotate(-1deg);}}
+  .subtitle{margin-top:0.2rem;margin-bottom:0;color:#777;font-size:1.05rem;}
+  .admin-btn{
+    cursor:pointer;padding:0.5rem 1rem;border:none;border-radius:50px;
+    background:#fff;color:#666;font-family:inherit;font-weight:700;font-size:0.9rem;
+    box-shadow:0 3px 8px rgba(0,0,0,.1);
+  }
+  .admin-btn.active{background:linear-gradient(90deg,var(--teal),var(--blue));color:#fff;}
+  .toolbar{margin:1.8rem 0;min-height:3rem;}
+  button#addBtn{
+    cursor:pointer;padding:0.9rem 1.6rem;border:none;border-radius:50px;
+    background:linear-gradient(90deg,var(--pink),var(--purple));color:#fff;
+    font-family:inherit;font-weight:700;font-size:1.05rem;
+    box-shadow:0 6px 0 #c94f81, 0 8px 14px rgba(0,0,0,.15);
+    transition:transform .12s ease;
+  }
+  button#addBtn:hover{transform:translateY(-2px) scale(1.03) rotate(-1deg);}
+  button#addBtn:disabled{opacity:0.5;cursor:not-allowed;}
+  #status{margin-top:0.6rem;font-size:0.9rem;color:#888;}
+  #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.6rem;}
+  .card{
+    background:#fff;border-radius:18px;
+    box-shadow:0 6px 0 rgba(0,0,0,.06), 0 10px 20px rgba(0,0,0,.08);
+    overflow:hidden;display:flex;flex-direction:column;border:3px solid #fff;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .card:nth-child(5n+1){border-color:var(--pink);}
+  .card:nth-child(5n+2){border-color:var(--purple);}
+  .card:nth-child(5n+3){border-color:var(--teal);}
+  .card:nth-child(5n+4){border-color:var(--yellow);}
+  .card:nth-child(5n+5){border-color:var(--blue);}
+  .card:hover{transform:translateY(-6px) rotate(-1deg);box-shadow:0 10px 0 rgba(0,0,0,.06), 0 16px 26px rgba(0,0,0,.14);}
+  .thumb{
+    position:relative;width:100%;height:150px;overflow:hidden;border-bottom:2px dashed #eee;
+    background:repeating-linear-gradient(45deg,#fafafa,#fafafa 10px,#fff 10px,#fff 20px);cursor:pointer;
+  }
+  .thumb iframe{position:absolute;top:0;left:0;width:800px;height:600px;border:none;transform:scale(0.275);transform-origin:top left;pointer-events:none;background:#fff;}
+  .card-body{padding:0.8rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:0.5rem;background:#fffefc;}
+  .card-title{font-size:0.92rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .remove-btn{background:#fff0f0;color:#e0507a;border:none;border-radius:50%;width:28px;height:28px;font-size:1rem;cursor:pointer;transition:transform .12s ease;}
+  .remove-btn:hover{background:#ffd6e0;transform:scale(1.15) rotate(90deg);}
+  #empty{color:#999;font-style:italic;font-size:1.1rem;padding:2rem;text-align:center;border:3px dashed #ddd;border-radius:20px;background:rgba(255,255,255,.5);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>✨ Edu Space 🚀</h1>
+    <p class="subtitle">Deine bunte Sammlung eigener HTML-Seiten 🎨</p>
+  </div>
+  <button id="adminToggle" class="admin-btn">🔐 Admin</button>
+</div>
+
+<div class="toolbar">
+  <button id="addBtn" disabled>➕ HTML-Seite hinzufügen</button>
+  <input type="file" id="fileInput" accept=".html,.htm" multiple hidden>
+  <div id="status"></div>
+</div>
+
+<div id="grid"></div>
+<p id="empty" style="display:none;">🦄 Noch keine Seiten hier.</p>
+
+<script>
+/* ====== KONFIGURATION – hier deine Repo-Daten eintragen ====== */
+const OWNER  = 'mischmid85-maker';
+const REPO   = 'edu-space';
+const BRANCH = 'main';
+const FOLDER = 'pages'; // Ordner im Repo, in dem die HTML-Dateien liegen
+/* =============================================================== */
+
+const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}`;
+const grid = document.getElementById('grid');
+const emptyMsg = document.getElementById('empty');
+const addBtn = document.getElementById('addBtn');
+const fileInput = document.getElementById('fileInput');
+const adminToggle = document.getElementById('adminToggle');
+const statusEl = document.getElementById('status');
+
+let token = sessionStorage.getItem('gh_token') || null;
+
+function setStatus(msg, isError){
+  statusEl.textContent = msg || '';
+  statusEl.style.color = isError ? '#e0507a' : '#888';
+}
+
+async function checkAdmin(){
+  if(!token) return false;
+  try{
+    const res = await fetch(`${API_BASE}`, { headers:{ Authorization:`token ${token}` } });
+    return res.ok;
+  }catch(e){ return false; }
+}
+
+async function updateAdminUI(){
+  const ok = await checkAdmin();
+  addBtn.disabled = !ok;
+  adminToggle.textContent = ok ? '🔓 Angemeldet' : '🔐 Admin';
+  adminToggle.classList.toggle('active', ok);
+  if(!ok && token){
+    token = null;
+    sessionStorage.removeItem('gh_token');
+  }
+}
+
+adminToggle.addEventListener('click', async () => {
+  if(addBtn.disabled){
+    const input = prompt('GitHub Personal Access Token eingeben (nur für dieses Repo, Contents Read & Write):');
+    if(!input) return;
+    token = input.trim();
+    setStatus('Prüfe Token...');
+    const ok = await checkAdmin();
+    if(ok){
+      sessionStorage.setItem('gh_token', token);
+      setStatus('Angemeldet ✅');
+    } else {
+      token = null;
+      setStatus('Token ungültig oder ohne Rechte für dieses Repo.', true);
+    }
+    updateAdminUI();
+  } else {
+    token = null;
+    sessionStorage.removeItem('gh_token');
+    updateAdminUI();
+    setStatus('Abgemeldet.');
+  }
+});
+
+async function loadPages(){
+  setStatus('Lade Seiten...');
+  try{
+    const res = await fetch(`${API_BASE}/contents/${FOLDER}?ref=${BRANCH}`);
+    if(res.status === 404){ renderCards([]); setStatus(''); return; }
+    if(!res.ok) throw new Error('API-Fehler ' + res.status);
+    const files = await res.json();
+    const htmlFiles = files.filter(f => f.type === 'file' && /\.html?$/i.test(f.name));
+    const pages = await Promise.all(htmlFiles.map(async f => {
+      const raw = await fetch(f.download_url);
+      const content = await raw.text();
+      return { name: f.name, path: f.path, sha: f.sha, content };
+    }));
+    renderCards(pages);
+    setStatus('');
+  }catch(e){
+    setStatus('Seiten konnten nicht geladen werden: ' + e.message, true);
+    renderCards([]);
+  }
+}
+
+function renderCards(pages){
+  grid.innerHTML = '';
+  emptyMsg.style.display = pages.length ? 'none' : 'block';
+  pages.forEach(page => {
+    const card = document.createElement('div');
+    card.className = 'card';
+
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    const iframe = document.createElement('iframe');
+    iframe.srcdoc = page.content;
+    thumb.appendChild(iframe);
+    thumb.addEventListener('click', () => {
+      const win = window.open('', '_blank');
+      win.document.open(); win.document.write(page.content); win.document.close();
+    });
+
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    const title = document.createElement('span');
+    title.className = 'card-title';
+    title.textContent = '📄 ' + page.name;
+    body.appendChild(title);
+
+    if(!addBtn.disabled){
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.textContent = '✕';
+      removeBtn.title = 'Löschen';
+      removeBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if(!confirm(`"${page.name}" wirklich löschen?`)) return;
+        await deleteFile(page);
+      });
+      body.appendChild(removeBtn);
+    }
+
+    card.appendChild(thumb);
+    card.appendChild(body);
+    grid.appendChild(card);
+  });
+}
+
+async function deleteFile(page){
+  setStatus('Lösche ' + page.name + '...');
+  try{
+    const res = await fetch(`${API_BASE}/contents/${page.path}`, {
+      method:'DELETE',
+      headers:{ Authorization:`token ${token}`, 'Content-Type':'application/json' },
+      body: JSON.stringify({ message:`Remove ${page.name}`, sha: page.sha, branch: BRANCH })
+    });
+    if(!res.ok) throw new Error(await res.text());
+    setStatus('Gelöscht ✅');
+    loadPages();
+  }catch(e){
+    setStatus('Löschen fehlgeschlagen: ' + e.message, true);
+  }
+}
+
+addBtn.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files);
+  for(const file of files){
+    await uploadFile(file);
+  }
+  fileInput.value = '';
+  loadPages();
+});
+
+function toBase64(str){
+  return btoa(unescape(encodeURIComponent(str)));
+}
+
+async function uploadFile(file){
+  setStatus('Lade hoch: ' + file.name + '...');
+  const content = await file.text();
+  const safeName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  try{
+    const res = await fetch(`${API_BASE}/contents/${FOLDER}/${safeName}`, {
+      method:'PUT',
+      headers:{ Authorization:`token ${token}`, 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        message: `Add ${safeName}`,
+        content: toBase64(content),
+        branch: BRANCH
+      })
+    });
+    if(!res.ok) throw new Error(await res.text());
+    setStatus('Hochgeladen ✅');
+  }catch(e){
+    setStatus('Upload fehlgeschlagen: ' + e.message, true);
+  }
+}
+
+(async function init(){
+  await updateAdminUI();
+  loadPages();
+})();
+</script>
+</body>
+</html>

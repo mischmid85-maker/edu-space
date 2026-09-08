@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wochentage: Deutsch → Französisch</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 30px 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    color: white;
+    text-align: center;
+    margin-bottom: 5px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+  }
+  p.subtitle {
+    color: #f0f0ff;
+    margin-top: 0;
+    margin-bottom: 25px;
+    text-align: center;
+  }
+  .game-container {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    max-width: 650px;
+    width: 100%;
+  }
+  .columns {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+  }
+  .column {
+    flex: 1;
+  }
+  .column h3 {
+    text-align: center;
+    color: #444;
+    margin-bottom: 15px;
+  }
+  .item {
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    font-size: 16px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+  }
+  .german .item {
+    background: #e3ecff;
+    color: #223;
+  }
+  .french .item {
+    background: #ffe9e3;
+    color: #322;
+  }
+  .item.selected {
+    border-color: #333;
+    transform: scale(1.03);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  }
+  .item.correct {
+    background: #b6f2c1 !important;
+    color: #14401f;
+    cursor: default;
+    border-color: #2e7d32;
+  }
+  .item.wrong {
+    animation: shake 0.4s;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .status {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 17px;
+    color: #333;
+    min-height: 24px;
+  }
+  .controls {
+    text-align: center;
+    margin-top: 15px;
+  }
+  button {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  button:hover {
+    background: #5568d3;
+  }
+  .win-message {
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #2e7d32;
+    margin-top: 15px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<h1>🇩🇪 Wochentage 🇫🇷</h1>
+<p class="subtitle">Klicke zuerst auf einen deutschen Wochentag, dann auf die passende französische Übersetzung.</p>
+
+<div class="game-container">
+  <div class="columns">
+    <div class="column german" id="german-col">
+      <h3>Deutsch</h3>
+    </div>
+    <div class="column french" id="french-col">
+      <h3>Französisch</h3>
+    </div>
+  </div>
+  <div class="status" id="status"></div>
+  <div class="win-message" id="win-message">🎉 Super gemacht! Alle Wochentage richtig zugeordnet! 🎉</div>
+  <div class="controls">
+    <button onclick="restartGame()">🔄 Neu starten</button>
+  </div>
+</div>
+
+<script>
+  const pairs = [
+    { de: "Montag", fr: "lundi" },
+    { de: "Dienstag", fr: "mardi" },
+    { de: "Mittwoch", fr: "mercredi" },
+    { de: "Donnerstag", fr: "jeudi" },
+    { de: "Freitag", fr: "vendredi" },
+    { de: "Samstag", fr: "samedi" },
+    { de: "Sonntag", fr: "dimanche" }
+  ];
+
+  let selectedGerman = null;
+  let matchedCount = 0;
+  const totalPairs = pairs.length;
+
+  function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function buildGame() {
+    const germanCol = document.getElementById("german-col");
+    const frenchCol = document.getElementById("french-col");
+
+    // remove old items
+    germanCol.querySelectorAll(".item").forEach(el => el.remove());
+    frenchCol.querySelectorAll(".item").forEach(el => el.remove());
+
+    const germanShuffled = shuffle(pairs);
+    const frenchShuffled = shuffle(pairs);
+
+    germanShuffled.forEach(pair => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.textContent = pair.de;
+      div.dataset.de = pair.de;
+      div.addEventListener("click", () => selectGerman(div));
+      germanCol.appendChild(div);
+    });
+
+    frenchShuffled.forEach(pair => {
+      const div = document.createElement("div");
+      div.className = "item";
+      div.textContent = pair.fr;
+      div.dataset.fr = pair.fr;
+      div.addEventListener("click", () => selectFrench(div));
+      frenchCol.appendChild(div);
+    });
+
+    matchedCount = 0;
+    selectedGerman = null;
+    document.getElementById("status").textContent = "";
+    document.getElementById("win-message").style.display = "none";
+  }
+
+  function selectGerman(el) {
+    if (el.classList.contains("correct")) return;
+    document.querySelectorAll(".german .item").forEach(i => i.classList.remove("selected"));
+    el.classList.add("selected");
+    selectedGerman = el;
+    document.getElementById("status").textContent = "Wähle nun die passende französische Übersetzung für „" + el.dataset.de + "“.";
+  }
+
+  function selectFrench(el) {
+    if (!selectedGerman || el.classList.contains("correct")) return;
+
+    const correctFr = pairs.find(p => p.de === selectedGerman.dataset.de).fr;
+
+    if (el.dataset.fr === correctFr) {
+      selectedGerman.classList.add("correct");
+      selectedGerman.classList.remove("selected");
+      el.classList.add("correct");
+      matchedCount++;
+      document.getElementById("status").textContent = "✅ Richtig! „" + selectedGerman.dataset.de + "“ = „" + el.dataset.fr + "“";
+      selectedGerman = null;
+
+      if (matchedCount === totalPairs) {
+        document.getElementById("status").textContent = "";
+        document.getElementById("win-message").style.display = "block";
+      }
+    } else {
+      el.classList.add("wrong");
+      document.getElementById("status").textContent = "❌ Leider falsch. Versuch es noch einmal!";
+      setTimeout(() => el.classList.remove("wrong"), 400);
+    }
+  }
+
+  function restartGame() {
+    buildGame();
+  }
+
+  buildGame();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le Français en Pratique — Verben-Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1F2A44;
+    --ink-soft:#4B5670;
+    --paper:#EEF1F6;
+    --card:#FFFFFF;
+    --gold:#E8A33D;
+    --gold-dark:#C9852A;
+    --rose:#D65F5F;
+    --rose-dark:#B94747;
+    --green:#3F9A5C;
+    --green-dark:#2F7A46;
+    --line:#D6DEEA;
+    --shadow: 0 10px 28px rgba(31,42,68,0.08);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 8% 0%, rgba(232,163,61,0.10), transparent 40%),
+      radial-gradient(circle at 100% 10%, rgba(214,95,95,0.08), transparent 35%),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{ font-family:'Fraunces', serif; }
+  #app-shell{
+    max-width:760px;
+    margin:0 auto;
+    padding:24px 18px 60px;
+  }
+
+  /* ---------- HEADER ---------- */
+  .top-bar{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:18px;
+    flex-wrap:wrap;
+    margin-bottom:22px;
+  }
+  .brand h1{
+    font-size:1.9rem;
+    font-weight:700;
+    margin:0 0 2px;
+    letter-spacing:0.2px;
+  }
+  .brand p{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:0.92rem;
+  }
+  .stats{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .level-badge{
+    width:52px;height:52px;border-radius:50%;
+    background:linear-gradient(155deg, var(--gold), var(--gold-dark));
+    color:#fff;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;
+    box-shadow:0 6px 14px rgba(201,133,42,0.35);
+    flex-shrink:0;
+  }
+  .level-badge span:first-child{font-size:0.58rem; letter-spacing:0.6px; opacity:0.9;}
+  .level-badge span:last-child{font-size:1.15rem; font-weight:700; line-height:1;}
+  .xp-wrap{min-width:140px;}
+  .xp-label{font-size:0.72rem;color:var(--ink-soft); margin-bottom:4px; display:flex; justify-content:space-between; gap:10px;}
+  .xp-bar{
+    width:100%;height:8px;border-radius:6px;
+    background:#DCE3EE;
+    overflow:hidden;
+  }
+  .xp-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--gold), var(--rose));
+    border-radius:6px;
+    transition:width 0.5s ease;
+  }
+  .streak-stamp{
+    border:2px dashed var(--rose);
+    color:var(--rose-dark);
+    border-radius:10px;
+    padding:6px 12px;
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:0.95rem;
+    transform:rotate(-3deg);
+    display:flex; align-items:center; gap:6px;
+    background:rgba(214,95,95,0.06);
+    white-space:nowrap;
+  }
+
+  /* ---------- NAV ---------- */
+  .mode-tabs{
+    display:flex;
+    gap:22px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:16px;
+    overflow-x:auto;
+  }
+  .mode-tab{
+    background:none;border:none;cursor:pointer;
+    font-family:'Work Sans',sans-serif;
+    font-size:0.95rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    padding:10px 2px 12px;
+    border-bottom:3px solid transparent;
+    white-space:nowrap;
+    transition:color 0.15s ease;
+  }
+  .mode-tab.active{ color:var(--ink); border-bottom-color:var(--gold); }
+  .mode-tab:hover{ color:var(--ink); }
+
+  .difficulty-row{
+    display:flex; gap:8px; margin-bottom:22px; flex-wrap:wrap;
+  }
+  .diff-pill{
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink-soft);
+    padding:7px 14px;
+    border-radius:999px;
+    font-size:0.82rem;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .diff-pill.active{
+    background:var(--ink);
+    border-color:var(--ink);
+    color:#fff;
+  }
+
+  /* ---------- STAGE / CAHIER CARD ---------- */
+  .cahier{
+    background:var(--card);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    border-left:3px solid var(--rose);
+    padding:28px 30px 30px 26px;
+    position:relative;
+    min-height:280px;
+  }
+  .cahier::before{
+    content:"";
+    position:absolute; left:0; top:0; bottom:0; width:26px;
+    background-image: repeating-linear-gradient(180deg, transparent 0 37px, var(--line) 37px 38px);
+    opacity:0.5;
+    pointer-events:none;
+    border-radius:var(--radius) 0 0 var(--radius);
+  }
+  .eyebrow{
+    font-size:0.78rem;
+    color:var(--rose-dark);
+    font-weight:600;
+    margin:0 0 6px;
+  }
+  .stage-title{
+    font-size:1.3rem;
+    margin:0 0 14px;
+  }
+  .progress-note{ font-size:0.82rem; color:var(--ink-soft); margin-bottom:18px;}
+
+  /* home cards */
+  .home-hero{ margin-bottom:8px;}
+  .home-hero h2{ font-size:1.6rem; margin:0 0 8px; }
+  .home-hero p{ color:var(--ink-soft); line-height:1.55; max-width:52ch; margin:0 0 22px;}
+  .mode-cards{ display:flex; flex-direction:column; gap:12px; }
+  .mode-card{
+    display:flex; align-items:center; gap:14px;
+    padding:16px 16px;
+    border-radius:10px;
+    background:#F9FAFC;
+    border-left:4px solid var(--accent, var(--gold));
+    cursor:pointer;
+    text-align:left;
+    border-top:none;border-right:none;border-bottom:none;
+    width:100%;
+    font-family:'Work Sans',sans-serif;
+  }
+  .mode-card .icon{ font-size:1.6rem; flex-shrink:0;}
+  .mode-card h3{ margin:0 0 3px; font-size:1.02rem; }
+  .mode-card p{ margin:0; font-size:0.85rem; color:var(--ink-soft); }
+
+  /* question elements */
+  .question-text{ font-size:1.25rem; margin:0 0 20px; line-height:1.5;}
+  .question-text b{ color:var(--rose-dark); }
+  .choice-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;
+  }
+  @media(max-width:480px){ .choice-grid{ grid-template-columns:1fr; } }
+  .choice-btn{
+    border:1.5px solid var(--line);
+    background:#fff;
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:1rem;
+    font-family:'Work Sans',sans-serif;
+    cursor:pointer;
+    text-align:left;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .choice-btn:hover{ border-color:var(--gold); }
+  .choice-btn.correct{ background:rgba(63,154,92,0.12); border-color:var(--green); color:var(--green-dark); font-weight:600;}
+  .choice-btn.wrong{ background:rgba(214,95,95,0.12); border-color:var(--rose); color:var(--rose-dark); font-weight:600;}
+  .choice-btn[disabled]{ cursor:default; }
+
+  .input-row{ display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+  .text-input{
+    flex:1; min-width:180px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    font-size:1rem;
+    font-family:'Work Sans',sans-serif;
+  }
+  .text-input:focus{ outline:none; border-color:var(--gold); }
+  .btn{
+    font-family:'Work Sans',sans-serif;
+    font-weight:600;
+    font-size:0.92rem;
+    padding:11px 20px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    transition:transform 0.08s ease;
+  }
+  .btn:active{ transform:scale(0.97); }
+  .btn-primary{ background:var(--ink); color:#fff; }
+  .btn-primary:hover{ background:#12192c; }
+  .btn-ghost{ background:transparent; color:var(--ink-soft); border:1.5px solid var(--line); }
+  .btn-gold{ background:var(--gold); color:#fff; }
+
+  .feedback{
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:0.95rem;
+    font-weight:600;
+    margin-bottom:16px;
+    display:none;
+  }
+  .feedback.show{ display:block; }
+  .feedback.ok{ background:rgba(63,154,92,0.12); color:var(--green-dark); }
+  .feedback.bad{ background:rgba(214,95,95,0.12); color:var(--rose-dark); }
+
+  /* story / gap fill */
+  .story-text{
+    font-size:1.12rem;
+    line-height:2.15;
+    margin-bottom:20px;
+  }
+  .blank-input{
+    display:inline-block;
+    width:150px;
+    text-align:center;
+    padding:4px 8px;
+    margin:0 2px;
+    border:none;
+    border-bottom:2px dashed var(--gold-dark);
+    background:#FBF3E4;
+    border-radius:6px 6px 0 0;
+    font-weight:600;
+    font-size:1rem;
+    color:var(--ink);
+    font-family:'Work Sans',sans-serif;
+  }
+  .blank-input:focus{ outline:none; background:#F5DFAF; }
+  .blank-input.correct{ background:rgba(63,154,92,0.16); border-bottom-color:var(--green); color:var(--green-dark);}
+  .blank-input.wrong{ background:rgba(214,95,95,0.16); border-bottom-color:var(--rose); color:var(--rose-dark);}
+  .verb-pool-label{
+    font-size:0.82rem; color:var(--ink-soft); margin:-8px 0 6px;
+  }
+  .word-bank{
+    display:flex; flex-wrap:wrap; gap:8px;
+    padding:14px 16px;
+    background:#F6F8FB;
+    border-radius:10px;
+    margin-bottom:20px;
+  }
+  .word-chip{
+    border:1.5px solid var(--line);
+    background:#fff;
+    padding:7px 13px;
+    border-radius:999px;
+    font-size:0.88rem;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:default;
+  }
+  .below-check-correct{ color:var(--green-dark); font-weight:600; font-size:0.85rem; margin-left:6px;}
+  .below-check-wrong{ color:var(--rose-dark); font-weight:600; font-size:0.85rem; margin-left:6px;}
+
+  .translate-item{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; padding:12px 0; border-bottom:1px solid var(--line);
+  }
+  .translate-item .de{ font-weight:600; min-width:150px;}
+  .translate-item input{
+    flex:1; padding:9px 12px; border-radius:8px; border:1.5px solid var(--line); font-size:0.95rem; font-family:'Work Sans',sans-serif;
+  }
+  .translate-item .mark{ width:22px; text-align:center; font-weight:700; }
+
+  .summary-box{ text-align:center; padding:30px 10px 10px;}
+  .summary-box .big-score{ font-family:'Fraunces',serif; font-size:2.6rem; margin:6px 0;}
+  .summary-box p{ color:var(--ink-soft); margin:0 0 22px; }
+
+  /* toasts */
+  #toast-root{
+    position:fixed; bottom:18px; right:18px; display:flex; flex-direction:column; gap:10px; z-index:999;
+  }
+  .toast{
+    background:var(--ink); color:#fff;
+    padding:12px 18px; border-radius:10px;
+    font-size:0.88rem; font-weight:600;
+    box-shadow:0 10px 22px rgba(0,0,0,0.18);
+    animation:toastIn 0.25s ease;
+    max-width:260px;
+  }
+  .toast.badge{ background:linear-gradient(135deg, var(--gold), var(--rose)); }
+  @keyframes toastIn{ from{ transform:translateY(10px); opacity:0;} to{ transform:translateY(0); opacity:1;} }
+
+  .stage-foot{ display:flex; justify-content:space-between; align-items:center; margin-top:10px; flex-wrap:wrap; gap:10px;}
+
+  @media(max-width:520px){
+    .cahier{ padding:22px 18px 24px 20px; }
+    .top-bar{ align-items:flex-start; }
+  }
+</style>
+</head>
+<body>
+<div id="app-shell">
+
+  <div class="top-bar">
+    <div class="brand">
+      <h1>Le Français en Pratique</h1>
+      <p>Reflexivverben · -er-Verben · avoir — présent</p>
+    </div>
+    <div class="stats">
+      <div class="level-badge">
+        <span>LEVEL</span>
+        <span id="levelNum">1</span>
+      </div>
+      <div class="xp-wrap">
+        <div class="xp-label"><span id="xpLabel">0 / 100 XP</span></div>
+        <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+      </div>
+      <div class="streak-stamp">🔥 <span id="streakNum">0</span></div>
+    </div>
+  </div>
+
+  <nav class="mode-tabs" id="modeTabs">
+    <button class="mode-tab active" data-mode="home">Start</button>
+    <button class="mode-tab" data-mode="conj">Konjugation</button>
+    <button class="mode-tab" data-mode="trans">Reflexivverben übersetzen</button>
+    <button class="mode-tab" data-mode="story">Lückentext</button>
+  </nav>
+
+  <div class="difficulty-row" id="diffRow" style="display:none;">
+    <button class="diff-pill active" data-diff="leicht">Leicht</button>
+    <button class="diff-pill" data-diff="mittel">Mittel</button>
+    <button class="diff-pill" data-diff="schwer">Schwer</button>
+  </div>
+
+  <main class="cahier" id="stage"></main>
+
+</div>
+<div id="toast-root"></div>
+
+<script>
+/* ============================= DATA ============================= */
+const erVerbs = {
+  sonner:    { de:"klingeln",              forms:["sonne","sonnes","sonne","sonnons","sonnez","sonnent"] },
+  casser:    { de:"kaputt machen",         forms:["casse","casses","casse","cassons","cassez","cassent"] },
+  glander:   { de:"faulenzen",             forms:["glande","glandes","glande","glandons","glandez","glandent"] },
+  quitter:   { de:"verlassen",             forms:["quitte","quittes","quitte","quittons","quittez","quittent"] },
+  arriver:   { de:"ankommen",              forms:["arrive","arrives","arrive","arrivons","arrivez","arrivent"] },
+  paniquer:  { de:"in Panik geraten",      forms:["panique","paniques","panique","paniquons","paniquez","paniquent"] },
+  rester:    { de:"bleiben",               forms:["reste","restes","reste","restons","restez","restent"] },
+  manger:    { de:"essen",                 forms:["mange","manges","mange","mangeons","mangez","mangent"] },
+  préparer:  { de:"vorbereiten",           forms:["prépare","prépares","prépare","préparons","préparez","préparent"] },
+  chercher:  { de:"suchen",                forms:["cherche","cherches","cherche","cherchons","cherchez","cherchent"] },
+  trouver:   { de:"finden",                forms:["trouve","trouves","trouve","trouvons","trouvez","trouvent"] },
+  oublier:   { de:"vergessen",             forms:["oublie","oublies","oublie","oublions","oubliez","oublient"] },
+  réviser:   { de:"wiederholen / lernen",  forms:["révise","révises","révise","révisons","révisez","révisent"] },
+  jouer:     { de:"spielen",               forms:["joue","joues","joue","jouons","jouez","jouent"] },
+  rater:     { de:"verpassen / durchfallen", forms:["rate","rates","rate","ratons","ratez","ratent"] },
+  crier:     { de:"schreien",              forms:["crie","cries","crie","crions","criez","crient"] },
+  avoir:     { de:"haben", irregular:true, forms:["ai","as","a","avons","avez","ont"] }
+};
+
+const reflexives = {
+  "se lever":     { de:"aufstehen",            forms:["lève","lèves","lève","levons","levez","lèvent"] },
+  "se réveiller": { de:"aufwachen",            forms:["réveille","réveilles","réveille","réveillons","réveillez","réveillent"] },
+  "se raser":     { de:"sich rasieren",        forms:["rase","rases","rase","rasons","rasez","rasent"] },
+  "se doucher":   { de:"duschen (sich)",       forms:["douche","douches","douche","douchons","douchez","douchent"] },
+  "s'amuser":     { de:"sich amüsieren",       forms:["amuse","amuses","amuse","amusons","amusez","amusent"], elide:true },
+  "se laver":     { de:"sich waschen",         forms:["lave","laves","lave","lavons","lavez","lavent"] },
+  "s'habiller":   { de:"sich anziehen",        forms:["habille","habilles","habille","habillons","habillez","habillent"], elide:true },
+  "se coiffer":   { de:"sich kämmen / frisieren", forms:["coiffe","coiffes","coiffe","coiffons","coiffez","coiffent"] },
+  "se maquiller": { de:"sich schminken",       forms:["maquille","maquilles","maquille","maquillons","maquillez","maquillent"] },
+  "se brosser les dents": { de:"sich die Zähne putzen", forms:["brosse","brosses","brosse","brossons","brossez","brossent"], suffix:"les dents" },
+  "se dépêcher":  { de:"sich beeilen",         forms:["dépêche","dépêches","dépêche","dépêchons","dépêchez","dépêchent"] },
+  "s'excuser":    { de:"sich entschuldigen",   forms:["excuse","excuses","excuse","excusons","excusez","excusent"], elide:true }
+};
+
+const PRONOUNS = ["je","tu","il / elle","nous","vous","ils / elles"];
+
+function conjugate(verbKey, personIdx){
+  const v = erVerbs[verbKey];
+  const form = v.forms[personIdx];
+  if(verbKey === "avoir"){
+    if(personIdx===0) return "j'"+form;
+    return PRONOUNS[personIdx].split(" / ")[0] + " " + form;
+  }
+  return PRONOUNS[personIdx].split(" / ")[0] + " " + form;
+}
+
+function buildReflexive(verbKey, personIdx){
+  const v = reflexives[verbKey];
+  const base = ["me","te","se","nous","vous","se"][personIdx];
+  const elideThis = v.elide && (personIdx===0 || personIdx===1 || personIdx===2 || personIdx===5);
+  const pronoun = elideThis ? base[0]+"'" : base;
+  const sep = elideThis ? "" : " ";
+  let result = pronoun + sep + v.forms[personIdx];
+  if(v.suffix) result += " " + v.suffix;
+  return result;
+}
+
+/* ============================= STATE ============================= */
+const state = {
+  mode: "home",
+  diff: "leicht",
+  points: 0,
+  streak: 0,
+  round: null
+};
+
+function addPoints(n){
+  const beforeLevel = Math.floor(state.points/100);
+  state.points += n;
+  state.streak += 1;
+  const afterLevel = Math.floor(state.points/100);
+  if(afterLevel > beforeLevel) showToast("🎉 Level "+(afterLevel+1)+" erreicht!", true);
+  if(state.streak>0 && state.streak%5===0) showToast("🔥 "+state.streak+" richtige in Folge!", true);
+  updateHeader();
+}
+function breakStreak(){
+  state.streak = 0;
+  updateHeader();
+}
+function updateHeader(){
+  const level = Math.floor(state.points/100)+1;
+  const xpInLevel = state.points%100;
+  document.getElementById("levelNum").textContent = level;
+  document.getElementById("xpLabel").textContent = xpInLevel+" / 100 XP";
+  document.getElementById("xpFill").style.width = xpInLevel+"%";
+  document.getElementById("streakNum").textContent = state.streak;
+}
+function showToast(msg, badge){
+  const root = document.getElementById("toast-root");
+  const t = document.createElement("div");
+  t.className = "toast"+(badge?" badge":"");
+  t.textContent = msg;
+  root.appendChild(t);
+  setTimeout(()=>{ t.remove(); }, 3200);
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function normalize(str){
+  return str.trim().toLowerCase()
+    .replace(/’/g,"'")
+    .replace(/\s+/g," ");
+}
+
+/* ============================= NAV ============================= */
+document.getElementById("modeTabs").addEventListener("click", e=>{
+  const btn = e.target.closest(".mode-tab");
+  if(!btn) return;
+  setMode(btn.dataset.mode);
+});
+document.getElementById("diffRow").addEventListener("click", e=>{
+  const btn = e.target.closest(".diff-pill");
+  if(!btn) return;
+  document.querySelectorAll(".diff-pill").forEach(p=>p.classList.remove("active"));
+  btn.classList.add("active");
+  state.diff = btn.dataset.diff;
+  renderMode();
+});
+function setMode(mode){
+  state.mode = mode;
+  document.querySelectorAll(".mode-tab").forEach(t=>t.classList.toggle("active", t.dataset.mode===mode));
+  document.getElementById("diffRow").style.display = mode==="home" ? "none":"flex";
+  renderMode();
+}
+function renderMode(){
+  if(state.mode==="home") renderHome();
+  else if(state.mode==="conj") startConjugation();
+  else if(state.mode==="trans") startTranslation();
+  else if(state.mode==="story") startStoryPhaseA();
+}
+
+/* ============================= HOME ============================= */
+function renderHome(){
+  const stage = document.getElementById("stage");
+  stage.innerHTML = `
+    <div class="home-hero">
+      <p class="eyebrow">Bienvenue</p>
+      <h2>Bonjour ! Bereit für dein Training?</h2>
+      <p>Übe französische Verben im Présent — Konjugation, Übersetzung und Lückentexte mit steigendem Schwierigkeitsgrad. Sammle Punkte, halte deine Serie am Leben und steig im Level auf.</p>
+    </div>
+    <div class="mode-cards">
+      <button class="mode-card" style="--accent:var(--gold)" data-go="conj">
+        <div class="icon">📘</div>
+        <div><h3>Konjugationstraining</h3><p>-er-Verben und avoir im Présent richtig konjugieren.</p></div>
+      </button>
+      <button class="mode-card" style="--accent:var(--rose)" data-go="trans">
+        <div class="icon">🪞</div>
+        <div><h3>Reflexivverben übersetzen</h3><p>Deutsche Reflexivverben ins Französische übertragen.</p></div>
+      </button>
+      <button class="mode-card" style="--accent:var(--green)" data-go="story">
+        <div class="icon">📝</div>
+        <div><h3>Lückentext</h3><p>Übersetzen und anschliessend an der richtigen Stelle in eine Geschichte einsetzen — die Reihenfolge ist jedes Mal neu gemischt.</p></div>
+      </button>
+    </div>
+  `;
+  stage.querySelectorAll("[data-go]").forEach(b=>{
+    b.addEventListener("click", ()=> setMode(b.dataset.go));
+  });
+}
+document.addEventListener("DOMContentLoaded", ()=>{ updateHeader(); renderHome(); });
+
+/* ============================= MODE 1: KONJUGATION ============================= */
+function startConjugation(){
+  state.round = { total: 8, index:0, correct:0, queue: buildConjQueue() };
+  nextConjQuestion();
+}
+function buildConjQueue(){
+  const keys = Object.keys(erVerbs);
+  const q = [];
+  for(let i=0;i<8;i++){
+    const verbKey = keys[Math.floor(Math.random()*keys.length)];
+    let personIdx;
+    if(state.diff==="leicht") personIdx = Math.floor(Math.random()*3); // je, tu, il/elle
+    else personIdx = Math.floor(Math.random()*6);
+    q.push({verbKey, personIdx});
+  }
+  return q;
+}
+function nextConjQuestion(){
+  const r = state.round;
+  if(r.index >= r.total){ return showRoundSummary("conj"); }
+  const {verbKey, personIdx} = r.queue[r.index];
+  const correctForm = erVerbs[verbKey].forms[personIdx];
+  const correctFull = conjugate(verbKey, personIdx);
+  const stage = document.getElementById("stage");
+
+  let bodyHtml = "";
+  if(state.diff==="leicht"){
+    const distractors = shuffle(erVerbs[verbKey].forms.filter(f=>f!==correctForm)).slice(0,3);
+    const options = shuffle([correctForm, ...distractors]);
+    bodyHtml = `
+      <div class="choice-grid" id="choices">
+        ${options.map(o=>`<button class="choice-btn" data-val="${o}">${o}</button>`).join("")}
+      </div>`;
+  } else {
+    bodyHtml = `
+      <div class="input-row">
+        <input type="text" class="text-input" id="answerInput" placeholder="z. B. ${state.diff==='schwer'? 'je '+correctForm.slice(0,1)+'…':'…'}" autocomplete="off">
+        <button class="btn btn-primary" id="checkBtn">Prüfen</button>
+      </div>`;
+  }
+
+  const sentenceHint = state.diff==="schwer"
+    ? `<p class="progress-note">Tipp: Achte auf Unregelmässigkeiten (z. B. <i>nous mangeons</i>, <i>avoir</i>).</p>`
+    : "";
+
+  stage.innerHTML = `
+    <p class="eyebrow">Konjugation · ${state.diff}</p>
+    <p class="progress-note">Frage ${r.index+1} / ${r.total}</p>
+    <p class="question-text">Wie lautet die richtige Form von <b>${verbKey}</b> für <b>${PRONOUNS[personIdx]}</b>?</p>
+    ${bodyHtml}
+    ${sentenceHint}
+    <div class="feedback" id="feedback"></div>
+    <div class="stage-foot">
+      <span style="font-size:0.82rem;color:var(--ink-soft)">Punkte in dieser Runde: ${r.correct}</span>
+      <button class="btn btn-ghost" id="skipBtn">Überspringen</button>
+    </div>
+  `;
+
+  function evaluate(userVal){
+    const ok = normalize(userVal) === normalize(state.diff==="leicht" ? correctForm : correctFull) ||
+               normalize(userVal) === normalize(correctForm);
+    const fb = document.getElementById("feedback");
+    fb.classList.add("show");
+    if(ok){
+      fb.classList.add("ok"); fb.classList.remove("bad");
+      fb.textContent = "Richtig ! → "+correctFull;
+      r.correct++; addPoints(state.diff==="leicht"?10:state.diff==="mittel"?15:20);
+    } else {
+      fb.classList.add("bad"); fb.classList.remove("ok");
+      fb.textContent = "Nicht ganz. Richtig wäre: "+correctFull;
+      breakStreak();
+    }
+    r.index++;
+    setTimeout(nextConjQuestion, 1300);
+  }
+
+  if(state.diff==="leicht"){
+    document.getElementById("choices").addEventListener("click", e=>{
+      const b = e.target.closest(".choice-btn");
+      if(!b) return;
+      document.querySelectorAll(".choice-btn").forEach(x=>{
+        x.setAttribute("disabled","true");
+        if(x.dataset.val===correctForm) x.classList.add("correct");
+      });
+      if(b.dataset.val!==correctForm) b.classList.add("wrong");
+      evaluate(b.dataset.val);
+    });
+  } else {
+    const input = document.getElementById("answerInput");
+    const submit = ()=> evaluate(input.value);
+    document.getElementById("checkBtn").addEventListener("click", submit);
+    input.addEventListener("keydown", e=>{ if(e.key==="Enter") submit(); });
+    input.focus();
+  }
+  document.getElementById("skipBtn").addEventListener("click", ()=>{
+    breakStreak();
+    r.index++;
+    nextConjQuestion();
+  });
+}
+
+/* ============================= MODE 2: REFLEXIVVERBEN ÜBERSETZEN ============================= */
+function startTranslation(){
+  const keys = shuffle(Object.keys(reflexives));
+  const total = state.diff==="leicht"?5 : state.diff==="mittel"?7:10;
+  state.round = { total, index:0, correct:0, queue: keys.slice(0,total) };
+  nextTransQuestion();
+}
+function nextTransQuestion(){
+  const r = state.round;
+  if(r.index >= r.total) return showRoundSummary("trans");
+  const verbKey = r.queue[r.index];
+  const de = reflexives[verbKey].de;
+  const stage = document.getElementById("stage");
+
+  let choicesHtml = "";
+  if(state.diff==="leicht"){
+    const distractors = shuffle(Object.keys(reflexives).filter(k=>k!==verbKey)).slice(0,3);
+    const options = shuffle([verbKey, ...distractors]);
+    choicesHtml = `<div class="choice-grid" id="choices">
+      ${options.map(o=>`<button class="choice-btn" data-val="${o}">${o}</button>`).join("")}
+    </div>`;
+  } else {
+    choicesHtml = `<div class="input-row">
+      <input type="text" class="text-input" id="answerInput" placeholder="Infinitiv auf Französisch…" autocomplete="off">
+      <button class="btn btn-primary" id="checkBtn">Prüfen</button>
+    </div>`;
+  }
+
+  stage.innerHTML = `
+    <p class="eyebrow">Reflexivverben übersetzen · ${state.diff}</p>
+    <p class="progress-note">Frage ${r.index+1} / ${r.total}</p>
+    <p class="question-text">Wie heisst <b>„${de}"</b> auf Französisch? <span style="font-weight:400;color:var(--ink-soft)">(Infinitiv)</span></p>
+    ${choicesHtml}
+    <div class="feedback" id="feedback"></div>
+  `;
+
+  function evaluate(userVal){
+    const ok = normalize(userVal)===normalize(verbKey);
+    const fb = document.getElementById("feedback");
+    fb.classList.add("show");
+    if(ok){
+      fb.classList.add("ok"); fb.classList.remove("bad");
+      fb.textContent = "Richtig ! → "+verbKey;
+      r.correct++; addPoints(state.diff==="leicht"?10:state.diff==="mittel"?15:20);
+    } else {
+      fb.classList.add("bad"); fb.classList.remove("ok");
+      fb.textContent = "Richtig wäre: "+verbKey;
+      breakStreak();
+    }
+    r.index++;
+    setTimeout(nextTransQuestion, 1300);
+  }
+
+  if(state.diff==="leicht"){
+    document.getElementById("choices").addEventListener("click", e=>{
+      const b = e.target.closest(".choice-btn");
+      if(!b) return;
+      document.querySelectorAll(".choice-btn").forEach(x=>{
+        x.setAttribute("disabled","true");
+        if(x.dataset.val===verbKey) x.classList.add("correct");
+      });
+      if(b.dataset.val!==verbKey) b.classList.add("wrong");
+      evaluate(b.dataset.val);
+    });
+  } else {
+    const input = document.getElementById("answerInput");
+    const submit = ()=> evaluate(input.value);
+    document.getElementById("checkBtn").addEventListener("click", submit);
+    input.addEventListener("keydown", e=>{ if(e.key==="Enter") submit(); });
+    input.focus();
+  }
+}
+
+/* ============================= MODE 3: LÜCKENTEXT ============================= */
+const stories = {
+  leicht: [
+    {
+      title:"Der Morgen von Sophie",
+      subjectLabel:"elle (Sophie)",
+      template:"Le matin, Sophie {{1}} à 6h30. Elle {{2}} tout de suite. Ensuite, elle {{3}}. Elle {{4}} rapidement avant de partir. Puis elle {{5}} parce qu'elle est en retard.",
+      blanks:[
+        {id:1, verb:"se réveiller", person:2, hint:"wacht auf"},
+        {id:2, verb:"se lever",     person:2, hint:"steht auf"},
+        {id:3, verb:"se doucher",   person:2, hint:"duscht sich"},
+        {id:4, verb:"s'habiller",   person:2, hint:"zieht sich an"},
+        {id:5, verb:"se dépêcher",  person:2, hint:"beeilt sich"}
+      ]
+    },
+    {
+      title:"Le samedi de Paul",
+      subjectLabel:"il (Paul)",
+      template:"Le samedi, Paul {{1}} tard. Il {{2}} les mains et le visage. Ensuite, il {{3}} devant le miroir. Il {{4}} avec un pull chaud. Finalement, il {{5}} avant de sortir.",
+      blanks:[
+        {id:1, verb:"se réveiller", person:2, hint:"wacht auf"},
+        {id:2, verb:"se laver",     person:2, hint:"wäscht sich"},
+        {id:3, verb:"se raser",     person:2, hint:"rasiert sich"},
+        {id:4, verb:"s'habiller",   person:2, hint:"zieht sich an"},
+        {id:5, verb:"se coiffer",   person:2, hint:"kämmt sich"}
+      ]
+    },
+    {
+      title:"La routine de Léa",
+      subjectLabel:"elle (Léa)",
+      template:"Le lundi matin, Léa {{1}} à 6h45. Elle {{2}} immédiatement. Elle {{3}} avant l'école. Devant le miroir, elle {{4}} un peu. Puis elle {{5}} pour attraper le bus.",
+      blanks:[
+        {id:1, verb:"se réveiller", person:2, hint:"wacht auf"},
+        {id:2, verb:"se lever",     person:2, hint:"steht auf"},
+        {id:3, verb:"se doucher",   person:2, hint:"duscht sich"},
+        {id:4, verb:"se maquiller", person:2, hint:"schminkt sich"},
+        {id:5, verb:"se dépêcher",  person:2, hint:"beeilt sich"}
+      ]
+    }
+  ],
+  mittel: [
+    {
+      title:"Ein geteilter Morgen",
+      subjectLabel:"je, tu, elle, nous, vous",
+      template:"Aujourd'hui, je {{1}} à 7h. Je {{2}} rapidement. Tu {{3}}, puis tu {{4}} devant le miroir. Marie {{5}} avant la fête. Nous {{6}} les mains avant de manger. Finalement, vous {{7}} pour ne pas être en retard.",
+      blanks:[
+        {id:1, verb:"se réveiller", person:0, hint:"wache auf"},
+        {id:2, verb:"se lever",     person:0, hint:"stehe auf"},
+        {id:3, verb:"se doucher",   person:1, hint:"duschst dich"},
+        {id:4, verb:"se coiffer",   person:1, hint:"kämmst dich"},
+        {id:5, verb:"se maquiller", person:2, hint:"schminkt sich"},
+        {id:6, verb:"se laver",     person:3, hint:"waschen uns"},
+        {id:7, verb:"se dépêcher",  person:4, hint:"beeilt euch"}
+      ]
+    },
+    {
+      title:"Zwei amis pressés",
+      subjectLabel:"tu, il, elle, nous, vous",
+      template:"Le matin, tu {{1}} tôt. Tu {{2}} avant tout le monde. Marc {{3}} rapidement. Ensuite, il {{4}} devant le miroir. Sa sœur Julie {{5}} un peu avant de partir. Nous {{6}} vite pour ne pas rater le bus. Vous {{7}} de votre retard auprès du professeur.",
+      blanks:[
+        {id:1, verb:"se réveiller", person:1, hint:"wachst auf"},
+        {id:2, verb:"se lever",     person:1, hint:"stehst auf"},
+        {id:3, verb:"se doucher",   person:2, hint:"duscht sich (Marc)"},
+        {id:4, verb:"se coiffer",   person:2, hint:"kämmt sich (Marc)"},
+        {id:5, verb:"se maquiller", person:2, hint:"schminkt sich (Julie)"},
+        {id:6, verb:"se dépêcher",  person:3, hint:"beeilen uns"},
+        {id:7, verb:"s'excuser",    person:4, hint:"entschuldigt euch"}
+      ]
+    },
+    {
+      title:"Le dimanche en famille",
+      subjectLabel:"je, tu, elle, il, nous, vous",
+      template:"Le dimanche, je {{1}} tard, vers 10h. Tu {{2}} les mains avant le petit-déjeuner. Puis, elle {{3}} avec une jolie robe. Pendant ce temps, il {{4}} devant le miroir. Papa {{5}} dans la salle de bain. Au parc, nous {{6}} avec le chien. Le soir, vous {{7}} pour arriver à temps au cinéma.",
+      blanks:[
+        {id:1, verb:"se lever",    person:0, hint:"stehe auf"},
+        {id:2, verb:"se laver",    person:1, hint:"wäschst dir (die Hände)"},
+        {id:3, verb:"s'habiller",  person:2, hint:"zieht sich an"},
+        {id:4, verb:"se coiffer",  person:2, hint:"kämmt sich"},
+        {id:5, verb:"se raser",    person:2, hint:"rasiert sich (Papa)"},
+        {id:6, verb:"s'amuser",    person:3, hint:"amüsieren uns"},
+        {id:7, verb:"se dépêcher", person:4, hint:"beeilt euch"}
+      ]
+    }
+  ],
+  schwer: [
+    {
+      title:"Ein turbulenter Samstagmorgen",
+      subjectLabel:"ils, il, elle, nous, je, tu",
+      template:"Le samedi matin, les enfants {{1}} tard. Ils {{2}} vers 10h. Léo {{3}} rapidement, pendant que sa sœur Emma {{4}} devant le miroir. Papa {{5}} dans la salle de bain. Emma {{6}} un peu pour la fête. Nous {{7}} les mains avant le petit-déjeuner. Après le repas, je {{8}}. Tu {{9}} avec tes amis au parc. Plus tard, nous sommes en retard, alors nous {{10}} beaucoup. Léo {{11}} d'avoir cassé un verre.",
+      blanks:[
+        {id:1,  verb:"se réveiller", person:5, hint:"wachen auf"},
+        {id:2,  verb:"se lever",     person:5, hint:"stehen auf"},
+        {id:3,  verb:"se doucher",   person:2, hint:"duscht sich (Léo)"},
+        {id:4,  verb:"se coiffer",   person:2, hint:"kämmt sich (Emma)"},
+        {id:5,  verb:"se raser",     person:2, hint:"rasiert sich (Papa)"},
+        {id:6,  verb:"se maquiller", person:2, hint:"schminkt sich (Emma)"},
+        {id:7,  verb:"se laver",     person:3, hint:"waschen uns"},
+        {id:8,  verb:"se brosser les dents", person:0, hint:"putze mir die Zähne"},
+        {id:9,  verb:"s'amuser",     person:1, hint:"amüsierst dich"},
+        {id:10, verb:"se dépêcher",  person:3, hint:"beeilen uns"},
+        {id:11, verb:"s'excuser",    person:2, hint:"entschuldigt sich (Léo)"}
+      ]
+    },
+    {
+      title:"La rentrée scolaire",
+      subjectLabel:"ils, elle, il, je, nous, tu",
+      template:"Le premier jour d'école, les enfants {{1}} très tôt. Ils {{2}} avec enthousiasme. Emma {{3}} avant de choisir ses vêtements. Elle {{4}} avec sa nouvelle robe. Son frère Tom {{5}} devant le miroir. Papa {{6}} rapidement ce matin. Après le petit-déjeuner, je {{7}}. Nous {{8}} les mains avant de partir. Tu {{9}} beaucoup avec tes nouveaux camarades. Mais nous sommes en retard, alors nous {{10}}. Tom {{11}} d'avoir oublié son sac.",
+      blanks:[
+        {id:1,  verb:"se réveiller",        person:5, hint:"wachen auf"},
+        {id:2,  verb:"se lever",            person:5, hint:"stehen auf"},
+        {id:3,  verb:"se doucher",          person:2, hint:"duscht sich (Emma)"},
+        {id:4,  verb:"s'habiller",          person:2, hint:"zieht sich an (Emma)"},
+        {id:5,  verb:"se coiffer",          person:2, hint:"kämmt sich (Tom)"},
+        {id:6,  verb:"se raser",            person:2, hint:"rasiert sich (Papa)"},
+        {id:7,  verb:"se brosser les dents",person:0, hint:"putze mir die Zähne"},
+        {id:8,  verb:"se laver",            person:3, hint:"waschen uns"},
+        {id:9,  verb:"s'amuser",            person:1, hint:"amüsierst dich"},
+        {id:10, verb:"se dépêcher",         person:3, hint:"beeilen uns"},
+        {id:11, verb:"s'excuser",           person:2, hint:"entschuldigt sich (Tom)"}
+      ]
+    },
+    {
+      title:"Un mariage stressant",
+      subjectLabel:"elle, il, nous, je, vous, ils",
+      template:"Le jour du mariage, la mariée {{1}} avant le lever du soleil. Elle {{2}} tout de suite, pleine d'énergie. Elle {{3}} longuement sous l'eau chaude. Devant le miroir, elle {{4}} avec soin. Elle {{5}} magnifiquement pour la cérémonie. Le marié {{6}} dans la salle de bain d'à côté. Il {{7}} avec un costume élégant. Nous, les témoins, {{8}} les mains avant de nous habiller. Je {{9}} nerveusement après le petit-déjeuner. Vous {{10}} de votre retard auprès des invités. Finalement, ils {{11}} tous pour arriver à l'église à temps.",
+      blanks:[
+        {id:1,  verb:"se réveiller",        person:2, hint:"wacht auf (die Braut)"},
+        {id:2,  verb:"se lever",            person:2, hint:"steht auf"},
+        {id:3,  verb:"se doucher",          person:2, hint:"duscht sich"},
+        {id:4,  verb:"se coiffer",          person:2, hint:"kämmt sich / frisiert sich"},
+        {id:5,  verb:"se maquiller",        person:2, hint:"schminkt sich"},
+        {id:6,  verb:"se raser",            person:2, hint:"rasiert sich (der Bräutigam)"},
+        {id:7,  verb:"s'habiller",          person:2, hint:"zieht sich an"},
+        {id:8,  verb:"se laver",            person:3, hint:"waschen uns"},
+        {id:9,  verb:"se brosser les dents",person:0, hint:"putze mir die Zähne"},
+        {id:10, verb:"s'excuser",           person:4, hint:"entschuldigt euch"},
+        {id:11, verb:"se dépêcher",         person:5, hint:"beeilen sich"}
+      ]
+    }
+  ]
+};
+
+if(!state.storyIndex) state.storyIndex = { leicht:0, mittel:0, schwer:0 };
+
+function startStoryPhaseA(){
+  const list = stories[state.diff];
+  const story = list[state.storyIndex[state.diff]];
+  const uniqueVerbs = [...new Set(story.blanks.map(b=>b.verb))];
+  state.round = { phase:"A", story, verbs: shuffle(uniqueVerbs), answers:{} };
+  renderStoryPhaseA();
+}
+function goToNextStory(){
+  const list = stories[state.diff];
+  state.storyIndex[state.diff] = (state.storyIndex[state.diff] + 1) % list.length;
+  startStoryPhaseA();
+}
+function renderStoryPhaseA(){
+  const r = state.round;
+  const stage = document.getElementById("stage");
+  stage.innerHTML = `
+    <p class="eyebrow">Lückentext · Schritt 1 von 2 · ${state.diff}</p>
+    <h3 class="stage-title">${r.story.title}</h3>
+    <p class="progress-note">Übersetze zuerst diese Reflexivverben ins Französische (Infinitiv). Danach setzt du sie in die Geschichte ein — in zufälliger Reihenfolge.</p>
+    <div id="transList">
+      ${r.verbs.map((v,i)=>`
+        <div class="translate-item" data-verb="${v}">
+          <span class="de">${reflexives[v].de}</span>
+          <input type="text" placeholder="Infinitiv auf Französisch…" data-idx="${i}">
+          <span class="mark"></span>
+        </div>
+      `).join("")}
+    </div>
+    <div class="stage-foot">
+      <span></span>
+      <button class="btn btn-primary" id="checkTransBtn">Übersetzungen prüfen</button>
+    </div>
+  `;
+  document.getElementById("checkTransBtn").addEventListener("click", ()=>{
+    let allCorrect = true;
+    document.querySelectorAll(".translate-item").forEach(item=>{
+      const verb = item.dataset.verb;
+      const input = item.querySelector("input");
+      const mark = item.querySelector(".mark");
+      const ok = normalize(input.value)===normalize(verb);
+      mark.textContent = ok ? "✓" : "✗";
+      mark.style.color = ok ? "var(--green-dark)" : "var(--rose-dark)";
+      input.style.borderColor = ok ? "var(--green)" : "var(--rose)";
+      if(ok){ addPoints(state.diff==="leicht"?8:state.diff==="mittel"?10:12); }
+      else { breakStreak(); input.value = verb; input.disabled = true; }
+      if(!ok) allCorrect = false;
+    });
+    document.getElementById("checkTransBtn").textContent = "Weiter zum Lückentext →";
+    document.getElementById("checkTransBtn").onclick = startStoryPhaseB;
+    if(allCorrect) showToast("Alle Übersetzungen richtig! 🌟", true);
+  });
+}
+
+function startStoryPhaseB(){
+  const r = state.round;
+  r.phase = "B";
+  const story = r.story;
+  const uniqueVerbs = [...new Set(story.blanks.map(b=>b.verb))];
+  r.germanPool = shuffle(uniqueVerbs.map(v=>reflexives[v].de));
+  renderStoryPhaseB();
+}
+function renderStoryPhaseB(){
+  const r = state.round;
+  const story = r.story;
+  const stage = document.getElementById("stage");
+
+  let html = story.template;
+  story.blanks.forEach(b=>{
+    html = html.replace("{{"+b.id+"}}", `<input type="text" class="blank-input" data-blank="${b.id}" autocomplete="off" spellcheck="false">`);
+  });
+
+  stage.innerHTML = `
+    <p class="eyebrow">Lückentext · Schritt 2 von 2 · ${state.diff}</p>
+    <h3 class="stage-title">${story.title}</h3>
+    <p class="progress-note">Schreib das passende Reflexivverb selbst in der richtigen Form in jede Lücke. Nutze den Kontext des Satzes, um zu erkennen, welches Verb gemeint ist.</p>
+    <p class="verb-pool-label">Diese Verben brauchst du (in zufälliger Reihenfolge, nicht der Lückenreihenfolge):</p>
+    <div class="word-bank">
+      ${r.germanPool.map(de=>`<span class="word-chip">${de}</span>`).join("")}
+    </div>
+    <p class="story-text" id="storyText">${html}</p>
+    <div class="feedback" id="feedback"></div>
+    <div class="stage-foot">
+      <button class="btn btn-ghost" id="resetBtn">Zurücksetzen</button>
+      <button class="btn btn-primary" id="checkStoryBtn">Prüfen</button>
+    </div>
+  `;
+
+  const inputs = Array.from(document.querySelectorAll(".blank-input"));
+  inputs.forEach((inp, idx)=>{
+    inp.addEventListener("keydown", e=>{
+      if(e.key==="Enter"){
+        e.preventDefault();
+        if(inputs[idx+1]) inputs[idx+1].focus();
+        else document.getElementById("checkStoryBtn").click();
+      }
+    });
+  });
+  if(inputs[0]) inputs[0].focus();
+
+  document.getElementById("resetBtn").addEventListener("click", ()=>{
+    inputs.forEach(i=>{ i.value=""; i.classList.remove("correct","wrong"); i.disabled=false; });
+    document.querySelectorAll(".below-check-correct,.below-check-wrong").forEach(n=>n.remove());
+    const fb = document.getElementById("feedback");
+    fb.classList.remove("show","ok","bad");
+    if(inputs[0]) inputs[0].focus();
+  });
+
+  document.getElementById("checkStoryBtn").addEventListener("click", ()=>{
+    let correctCount = 0;
+    story.blanks.forEach(b=>{
+      const correctText = buildReflexive(b.verb, b.person);
+      const inputEl = document.querySelector(`.blank-input[data-blank="${b.id}"]`);
+      const given = inputEl.value;
+      inputEl.classList.remove("correct","wrong");
+      const existingMark = inputEl.nextSibling;
+      if(existingMark && existingMark.classList && (existingMark.classList.contains("below-check-correct")||existingMark.classList.contains("below-check-wrong"))){
+        existingMark.remove();
+      }
+      if(normalize(given)===normalize(correctText)){
+        inputEl.classList.add("correct");
+        correctCount++;
+      } else {
+        inputEl.classList.add("wrong");
+        const mark = document.createElement("span");
+        mark.className = "below-check-wrong";
+        mark.textContent = "→ "+correctText;
+        inputEl.insertAdjacentElement("afterend", mark);
+      }
+      inputEl.disabled = true;
+    });
+    const fb = document.getElementById("feedback");
+    fb.classList.add("show");
+    const perfect = correctCount===story.blanks.length;
+    if(perfect){
+      fb.classList.add("ok"); fb.classList.remove("bad");
+      fb.textContent = "Parfait ! Alle "+story.blanks.length+" Lücken richtig ausgefüllt.";
+      addPoints((state.diff==="leicht"?15:state.diff==="mittel"?20:25) + 20);
+      showToast("🏅 Geschichte perfekt gelöst!", true);
+    } else {
+      fb.classList.add("bad"); fb.classList.remove("ok");
+      fb.textContent = correctCount+" von "+story.blanks.length+" Lücken richtig.";
+      for(let i=0;i<correctCount;i++) addPoints(state.diff==="leicht"?8:state.diff==="mittel"?10:12);
+      breakStreak();
+    }
+    document.getElementById("checkStoryBtn").style.display = "none";
+    document.getElementById("resetBtn").textContent = "Neue Geschichte";
+    document.getElementById("resetBtn").onclick = goToNextStory;
+  });
+}
+
+/* ============================= ROUND SUMMARY ============================= */
+function showRoundSummary(mode){
+  const r = state.round;
+  const stage = document.getElementById("stage");
+  const pct = Math.round((r.correct/r.total)*100);
+  stage.innerHTML = `
+    <div class="summary-box">
+      <p class="eyebrow">Runde beendet</p>
+      <div class="big-score">${r.correct} / ${r.total}</div>
+      <p>${pct}% richtig — ${pct>=80?"ausgezeichnet !":pct>=50?"gut gemacht, weiter so.":"übe ruhig noch etwas."}</p>
+      <button class="btn btn-primary" id="retryBtn">Nochmal üben</button>
+      <button class="btn btn-ghost" id="homeBtn" style="margin-left:8px;">Zur Startseite</button>
+    </div>
+  `;
+  if(pct>=80) showToast("💪 Starke Runde!", true);
+  document.getElementById("retryBtn").addEventListener("click", ()=>{
+    if(mode==="conj") startConjugation();
+    else if(mode==="trans") startTranslation();
+  });
+  document.getElementById("homeBtn").addEventListener("click", ()=> setMode("home"));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escape Pumpkin Manor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#0d0417;
+    --bg2:#1a0a2e;
+    --orange:#ff7518;
+    --orange-light:#ffa84d;
+    --purple:#8b3fc7;
+    --green:#39ff88;
+    --card:#170a28;
+    --card-border:#3a1a5c;
+    --text:#f1e9ff;
+    --muted:#b8a8d9;
+    --danger:#ff4d5e;
+    --ok:#39ff88;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 20%, rgba(139,63,199,0.25), transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(255,117,24,0.18), transparent 45%),
+      linear-gradient(180deg, var(--bg1), var(--bg2));
+    color:var(--text);
+    font-family:'Nunito', sans-serif;
+    padding:20px;
+    overflow-x:hidden;
+  }
+  .bats{
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    pointer-events:none;
+    z-index:0;
+    overflow:hidden;
+  }
+  .bat{
+    position:absolute;
+    font-size:22px;
+    opacity:0.35;
+    animation: fly 18s linear infinite;
+  }
+  @keyframes fly{
+    0%{transform:translateX(-10vw) translateY(0px);}
+    50%{transform:translateX(60vw) translateY(-40px);}
+    100%{transform:translateX(120vw) translateY(10px);}
+  }
+  .wrap{
+    max-width:800px;
+    margin:0 auto;
+    position:relative;
+    z-index:1;
+  }
+  header{
+    text-align:center;
+    margin-bottom:18px;
+  }
+  h1{
+    font-family:'Creepster', cursive;
+    font-size:2.6rem;
+    letter-spacing:2px;
+    color:var(--orange);
+    text-shadow: 0 0 12px rgba(255,117,24,0.6), 0 0 30px rgba(139,63,199,0.4);
+    margin:6px 0;
+  }
+  .subtitle{
+    color:var(--muted);
+    font-size:1rem;
+  }
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:14px;
+    padding:10px 18px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .timer{
+    font-weight:800;
+    font-size:1.3rem;
+    color:var(--orange-light);
+  }
+  .progress-dots{
+    display:flex;
+    gap:8px;
+  }
+  .dot{
+    width:14px;height:14px;border-radius:50%;
+    background:#3a1a5c;
+    border:2px solid var(--card-border);
+    display:flex;align-items:center;justify-content:center;
+    font-size:0;
+  }
+  .dot.done{background:var(--green); border-color:var(--green);}
+  .dot.active{background:var(--orange); border-color:var(--orange); box-shadow:0 0 8px var(--orange);}
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:18px;
+    padding:26px 26px 22px;
+    margin-bottom:18px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.4);
+    animation: fadeIn 0.5s ease;
+  }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  .room-label{
+    display:inline-block;
+    background:rgba(255,117,24,0.15);
+    color:var(--orange-light);
+    border:1px solid rgba(255,117,24,0.4);
+    border-radius:999px;
+    padding:4px 14px;
+    font-size:0.8rem;
+    font-weight:700;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin-bottom:12px;
+  }
+  h2{
+    font-family:'Creepster', cursive;
+    font-size:1.7rem;
+    color:var(--orange);
+    margin:0 0 12px;
+    letter-spacing:1px;
+  }
+  .story{
+    background:rgba(139,63,199,0.1);
+    border-left:4px solid var(--purple);
+    padding:12px 16px;
+    border-radius:8px;
+    margin-bottom:16px;
+    font-size:0.98rem;
+    color:var(--muted);
+    line-height:1.5;
+  }
+  .puzzle-text{
+    font-size:1.05rem;
+    line-height:1.6;
+    margin-bottom:16px;
+  }
+  .puzzle-box{
+    background:rgba(0,0,0,0.25);
+    border:1px dashed var(--card-border);
+    border-radius:10px;
+    padding:16px;
+    margin-bottom:16px;
+    font-size:1.05rem;
+    line-height:1.7;
+  }
+  .word-grid{
+    display:grid;
+    grid-template-columns:repeat(9, minmax(0,1fr));
+    gap:4px;
+    max-width:400px;
+    margin:0 auto 6px;
+    font-family:'Nunito', monospace;
+    font-weight:800;
+  }
+  .word-grid div{
+    background:rgba(255,255,255,0.04);
+    border:1px solid var(--card-border);
+    border-radius:6px;
+    text-align:center;
+    padding:8px 0;
+    font-size:1rem;
+  }
+  .answer-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:14px;
+  }
+  input[type=text]{
+    flex:1;
+    min-width:180px;
+    padding:12px 14px;
+    border-radius:10px;
+    border:2px solid var(--card-border);
+    background:#0d0417;
+    color:var(--text);
+    font-size:1rem;
+    font-weight:700;
+    letter-spacing:1px;
+  }
+  input[type=text]:focus{
+    outline:none;
+    border-color:var(--orange);
+  }
+  button{
+    cursor:pointer;
+    border:none;
+    border-radius:10px;
+    padding:12px 20px;
+    font-weight:800;
+    font-size:0.95rem;
+    font-family:'Nunito', sans-serif;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  button:active{transform:scale(0.97);}
+  .btn-submit{
+    background:linear-gradient(135deg, var(--orange), #ff9a3c);
+    color:#1a0a2e;
+  }
+  .btn-submit:hover{opacity:0.92;}
+  .hint-row{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+    flex-wrap:wrap;
+  }
+  .btn-hint{
+    background:rgba(139,63,199,0.25);
+    border:1px solid var(--purple);
+    color:var(--text);
+    position:relative;
+  }
+  .btn-hint:disabled{
+    opacity:0.45;
+    cursor:not-allowed;
+  }
+  .hint-text{
+    margin-top:10px;
+    background:rgba(57,255,136,0.08);
+    border:1px solid rgba(57,255,136,0.35);
+    color:#d6ffe8;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:0.95rem;
+    display:none;
+  }
+  .hint-text.show{display:block;}
+  .feedback{
+    margin-top:12px;
+    font-weight:700;
+    min-height:24px;
+  }
+  .feedback.ok{color:var(--ok);}
+  .feedback.bad{color:var(--danger);}
+  .hint-timer-note{
+    font-size:0.8rem;
+    color:var(--muted);
+    margin-top:6px;
+  }
+  .final-door{
+    text-align:center;
+  }
+  .final-door .letters{
+    font-family:'Creepster', cursive;
+    font-size:2.2rem;
+    letter-spacing:10px;
+    color:var(--orange-light);
+    margin:14px 0;
+  }
+  .win-screen{
+    text-align:center;
+    padding:40px 20px;
+  }
+  .win-screen h2{
+    font-size:2.4rem;
+  }
+  .win-screen p{
+    color:var(--muted);
+    font-size:1.05rem;
+  }
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.8rem;
+    margin-top:20px;
+    opacity:0.7;
+  }
+  .hidden{display:none !important;}
+  .letter-badge{
+    display:inline-block;
+    background:var(--orange);
+    color:#1a0a2e;
+    font-weight:900;
+    border-radius:8px;
+    padding:4px 10px;
+    margin-left:6px;
+    font-size:0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="bats" id="bats"></div>
+
+<div class="wrap">
+  <header>
+    <h1>🎃 Escape Pumpkin Manor 🕸️</h1>
+    <div class="subtitle">A Halloween Escape Room</div>
+  </header>
+
+  <div class="topbar">
+    <div class="timer">⏱️ <span id="timer">00:00</span></div>
+    <div class="progress-dots" id="progressDots"></div>
+  </div>
+
+  <!-- INTRO -->
+  <div class="card" id="intro">
+    <div class="room-label">Entrance</div>
+    <h2>Welcome, Ghost Hunters!</h2>
+    <div class="story">
+      It is Halloween night. You and your friends want to visit the old Pumpkin Manor.
+      But when you walk in... the door closes behind you! 👻<br><br>
+      A little voice laughs: <em>"You cannot leave, unless you find my secret word!"</em><br><br>
+      You must solve <b>5 puzzles</b>. Every puzzle gives you <b>one letter</b>.
+      Put all letters together to find the secret word and open the door.<br><br>
+      You have about <b>45 minutes</b>. Good luck! 🦇
+    </div>
+    <button class="btn-submit" onclick="startGame()">Start the Game ▶</button>
+  </div>
+
+  <!-- ROOM 1: RIDDLE -->
+  <div class="card hidden" id="room1">
+    <div class="room-label">Room 1 · The Hall</div>
+    <h2>The Riddle of the Hall</h2>
+    <div class="story">You step into a dark hall. On the wall, you see a riddle written in glowing paint.</div>
+    <div class="puzzle-box">
+      "I have no skin, no bones, no face,<br>
+      yet people say they saw my trace.<br>
+      I drift through walls without a sound,<br>
+      at midnight hours I'm often found.<br>
+      Some people fear me, some feel cold,<br>
+      but no one ever sees me grow old.<br>
+      What am I?"
+    </div>
+    <p class="puzzle-text">Write your answer in capital letters below.</p>
+    <div class="answer-row">
+      <input type="text" id="input1" placeholder="YOUR ANSWER">
+      <button class="btn-submit" onclick="checkAnswer(1)">Check ✔</button>
+    </div>
+    <div class="feedback" id="feedback1"></div>
+    <div class="hint-row">
+      <button class="btn-hint" id="hintBtn1a" disabled onclick="showHint(1,'a')">💡 Hint 1</button>
+      <button class="btn-hint" id="hintBtn1b" disabled onclick="showHint(1,'b')">💡 Hint 2</button>
+    </div>
+    <div class="hint-timer-note" id="hintNote1">Hints unlock after 5 minutes of puzzling.</div>
+    <div class="hint-text" id="hintText1a">This creature cannot be touched. It has no real body — but people believe they can still see it at night.</div>
+    <div class="hint-text" id="hintText1b">The word rhymes with "most" and "toast". It is a spirit that haunts old houses.</div>
+  </div>
+
+  <!-- ROOM 2: ANAGRAM -->
+  <div class="card hidden" id="room2">
+    <div class="room-label">Room 2 · The Living Room</div>
+    <h2>The Mixed-Up Letters</h2>
+    <div class="story">On an old table, you find a piece of paper with mixed-up letters. Maybe it is a Halloween word?</div>
+    <div class="puzzle-box" style="text-align:center; font-size:1.6rem; letter-spacing:8px; font-weight:800;">
+      U D N A T E H
+    </div>
+    <p class="puzzle-text">
+      Some old houses have a special word to describe them: something scary lives inside, and strange noises come from the walls.
+      Unscramble the letters above to find this Halloween word (an adjective, not "house" itself). Write your answer in capital letters.
+    </p>
+    <div class="answer-row">
+      <input type="text" id="input2" placeholder="YOUR ANSWER">
+      <button class="btn-submit" onclick="checkAnswer(2)">Check ✔</button>
+    </div>
+    <div class="feedback" id="feedback2"></div>
+    <div class="hint-row">
+      <button class="btn-hint" id="hintBtn2a" disabled onclick="showHint(2,'a')">💡 Hint 1</button>
+      <button class="btn-hint" id="hintBtn2b" disabled onclick="showHint(2,'b')">💡 Hint 2</button>
+    </div>
+    <div class="hint-timer-note" id="hintNote2">Hints unlock after 5 minutes of puzzling.</div>
+    <div class="hint-text" id="hintText2a">This word is an adjective (a describing word). It often appears right before the word "house" in scary stories.</div>
+    <div class="hint-text" id="hintText2b">The word has 7 letters. It rhymes with "wanted" and starts with the same letter as "Halloween".</div>
+  </div>
+
+  <!-- ROOM 3: MATH -->
+  <div class="card hidden" id="room3">
+    <div class="room-label">Room 3 · The Kitchen</div>
+    <h2>The Witch's Cauldron</h2>
+    <div class="story">In the kitchen, a big black cauldron is bubbling. A recipe card lies next to it, but it is a math problem!</div>
+    <div class="puzzle-box">
+      There are <b>6 tables</b> in the kitchen.<br>
+      Each table holds <b>3 pumpkins</b>.<br>
+      During the night, <b>5 pumpkins</b> roll under the tables and disappear.<br>
+      In the morning, the cook finds <b>2</b> of the lost pumpkins again.<br><br>
+      How many pumpkins are on the tables now?
+    </div>
+    <p class="puzzle-text">
+      Now use the <b>alphabet code</b> to find your letter:<br>
+      A=1, B=2, C=3 ... Z=26.<br>
+      Your number is the answer to the math problem. Find the matching letter and type it below.
+    </p>
+    <div class="answer-row">
+      <input type="text" id="input3" placeholder="YOUR LETTER">
+      <button class="btn-submit" onclick="checkAnswer(3)">Check ✔</button>
+    </div>
+    <div class="feedback" id="feedback3"></div>
+    <div class="hint-row">
+      <button class="btn-hint" id="hintBtn3a" disabled onclick="showHint(3,'a')">💡 Hint 1</button>
+      <button class="btn-hint" id="hintBtn3b" disabled onclick="showHint(3,'b')">💡 Hint 2</button>
+    </div>
+    <div class="hint-timer-note" id="hintNote3">Hints unlock after 5 minutes of puzzling.</div>
+    <div class="hint-text" id="hintText3a">Solve it step by step, in order: first multiply the tables by the pumpkins per table, then subtract, then add. Don't skip a step!</div>
+    <div class="hint-text" id="hintText3b">Your final number is between 10 and 20. Count carefully through the alphabet from A to find the matching letter.</div>
+  </div>
+
+  <!-- ROOM 4: WORD SEARCH -->
+  <div class="card hidden" id="room4">
+    <div class="room-label">Room 4 · The Attic</div>
+    <h2>The Hidden Creature</h2>
+    <div class="story">Something is hiding in this letter grid... a small, scary creature that likes dark corners!</div>
+    <div class="word-grid" id="wordGrid"></div>
+    <p class="puzzle-text" style="text-align:center;">
+      A Halloween word is hidden somewhere in the grid. It could run left to right, top to bottom,
+      or even along a diagonal line.<br>Find it and write the word below in capital letters.
+    </p>
+    <div class="answer-row">
+      <input type="text" id="input4" placeholder="YOUR ANSWER">
+      <button class="btn-submit" onclick="checkAnswer(4)">Check ✔</button>
+    </div>
+    <div class="feedback" id="feedback4"></div>
+    <div class="hint-row">
+      <button class="btn-hint" id="hintBtn4a" disabled onclick="showHint(4,'a')">💡 Hint 1</button>
+      <button class="btn-hint" id="hintBtn4b" disabled onclick="showHint(4,'b')">💡 Hint 2</button>
+    </div>
+    <div class="hint-timer-note" id="hintNote4">Hints unlock after 5 minutes of puzzling.</div>
+    <div class="hint-text" id="hintText4a">This creature makes webs in dark, quiet corners of old houses. The word does not run straight across one row and not straight down one column — look for a diagonal line.</div>
+    <div class="hint-text" id="hintText4b">The first letter of the hidden word is close to the top-left corner of the grid, in the second row.</div>
+  </div>
+
+  <!-- ROOM 5: CIPHER -->
+  <div class="card hidden" id="room5">
+    <div class="room-label">Room 5 · The Basement</div>
+    <h2>The Secret Code</h2>
+    <div class="story">In the dark basement, you find a note written in a secret code. Every letter was changed to a different letter, always using the same rule.</div>
+    <div class="puzzle-box">
+      Here is one example from the same code:<br>
+      the letter <b>E</b> in the code means <b>B</b> in normal writing.<br><br>
+      Now use this example to discover the rule. Then decode the secret word below:
+    </div>
+    <div class="puzzle-box" style="text-align:center; font-size:1.6rem; letter-spacing:8px; font-weight:800;">
+      W U H D W
+    </div>
+    <p class="puzzle-text">
+      Write the real word in capital letters below.
+    </p>
+    <div class="answer-row">
+      <input type="text" id="input5" placeholder="YOUR ANSWER">
+      <button class="btn-submit" onclick="checkAnswer(5)">Check ✔</button>
+    </div>
+    <div class="feedback" id="feedback5"></div>
+    <div class="hint-row">
+      <button class="btn-hint" id="hintBtn5a" disabled onclick="showHint(5,'a')">💡 Hint 1</button>
+      <button class="btn-hint" id="hintBtn5b" disabled onclick="showHint(5,'b')">💡 Hint 2</button>
+    </div>
+    <div class="hint-timer-note" id="hintNote5">Hints unlock after 5 minutes of puzzling.</div>
+    <div class="hint-text" id="hintText5a">Look carefully at the example: E → B. How many steps backward in the alphabet is that? Use the same number of steps, but backward, to decode each letter of the secret word.</div>
+    <div class="hint-text" id="hintText5b">Every letter in the code was moved 3 steps forward in the alphabet. To read the real word, move each letter 3 steps back.</div>
+  </div>
+
+  <!-- FINAL DOOR -->
+  <div class="card hidden final-door" id="finalDoor">
+    <div class="room-label">The Front Door</div>
+    <h2>Escape Pumpkin Manor!</h2>
+    <div class="story" style="text-align:left;">
+      You have collected all 5 letters! They are mixed up below. Think back to which room gave you
+      each letter, put them in the right order, and type the secret word to open the front door.
+    </div>
+    <div class="letters" id="collectedLetters">? ? ? ? ?</div>
+    <div class="answer-row" style="justify-content:center;">
+      <input type="text" id="inputFinal" placeholder="SECRET WORD" style="max-width:220px; text-align:center;">
+      <button class="btn-submit" onclick="checkFinal()">Open the Door 🚪</button>
+    </div>
+    <div class="feedback" id="feedbackFinal"></div>
+  </div>
+
+  <!-- WIN SCREEN -->
+  <div class="card hidden win-screen" id="winScreen">
+    <h2>🎉 You Escaped! 🎉</h2>
+    <p>Congratulations, brave ghost hunters! You solved all the puzzles and escaped Pumpkin Manor.</p>
+    <p>Your time: <b id="finalTime"></b></p>
+    <p>Happy Halloween! 🎃👻🦇</p>
+  </div>
+
+  <footer>Escape Pumpkin Manor · Halloween Escape Room · Have fun and stay spooky! 🕷️</footer>
+</div>
+
+<script>
+  // ---------- Bats background ----------
+  const batsContainer = document.getElementById('bats');
+  for(let i=0;i<6;i++){
+    const b = document.createElement('div');
+    b.className='bat';
+    b.textContent='🦇';
+    b.style.top = (Math.random()*80+5)+'vh';
+    b.style.animationDuration = (12+Math.random()*10)+'s';
+    b.style.animationDelay = (Math.random()*10)+'s';
+    batsContainer.appendChild(b);
+  }
+
+  // ---------- Global timer ----------
+  let totalSeconds = 0;
+  let globalTimerInterval = null;
+  function formatTime(s){
+    const m = Math.floor(s/60).toString().padStart(2,'0');
+    const sec = (s%60).toString().padStart(2,'0');
+    return m+':'+sec;
+  }
+  function startGlobalTimer(){
+    globalTimerInterval = setInterval(()=>{
+      totalSeconds++;
+      document.getElementById('timer').textContent = formatTime(totalSeconds);
+    },1000);
+  }
+
+  // ---------- Progress dots ----------
+  const totalRooms = 5;
+  const dotsContainer = document.getElementById('progressDots');
+  for(let i=1;i<=totalRooms;i++){
+    const d = document.createElement('div');
+    d.className='dot';
+    d.id='dot'+i;
+    dotsContainer.appendChild(d);
+  }
+  function setDot(i, cls){
+    const d = document.getElementById('dot'+i);
+    d.className = 'dot '+cls;
+  }
+
+  // ---------- Puzzle data ----------
+  const answers = {
+    1: ["GHOST"],
+    2: ["HAUNTED"],
+    3: ["O"],
+    4: ["SPIDER"],
+    5: ["TREAT"]
+  };
+  const collectedFromRoom = {1:'G',2:'H',3:'O',4:'S',5:'T'};
+  let collected = ['_','_','_','_','_'];
+  const finalWord = "GHOST";
+
+  // ---------- Per-room hint timers (5 minutes) ----------
+  const HINT_DELAY = 5*60; // seconds
+  const roomTimers = {}; // room -> seconds elapsed since room shown
+
+  function startRoomHintTimer(room){
+    roomTimers[room] = 0;
+    const noteEl = document.getElementById('hintNote'+room);
+    const interval = setInterval(()=>{
+      roomTimers[room]++;
+      const remaining = HINT_DELAY - roomTimers[room];
+      if(remaining <= 0){
+        document.getElementById('hintBtn'+room+'a').disabled = false;
+        document.getElementById('hintBtn'+room+'b').disabled = false;
+        noteEl.textContent = "Hints are unlocked! 💡";
+        clearInterval(interval);
+      } else {
+        const m = Math.floor(remaining/60);
+        const s = (remaining%60).toString().padStart(2,'0');
+        noteEl.textContent = "Hints unlock in "+m+":"+s+" min.";
+      }
+    },1000);
+  }
+
+  function showHint(room, letter){
+    document.getElementById('hintText'+room+letter).classList.add('show');
+  }
+
+  // ---------- Word search grid (Room 4) ----------
+  // 9x9 grid, word SPIDER hidden diagonally (top-left to bottom-right),
+  // starting at row index 1, col index 1, one step down-right per letter.
+  // Decoy Halloween words (BAT, OWL, MOON, CANDY, WITCH) are placed as red herrings.
+  const gridLetters = [
+    ['B','W','N','K','O','J','Z','X','Q'],
+    ['T','S','G','Y','A','R','Q','W','E'],
+    ['M','Q','P','L','D','X','K','T','A'],
+    ['F','N','W','I','X','T','B','O','C'],
+    ['J','K','L','R','D','W','Y','N','G'],
+    ['A','X','T','B','N','E','H','Q','Z'],
+    ['W','O','R','K','J','M','R','M','L'],
+    ['P','Y','C','N','B','G','X','W','D'],
+    ['D','I','S','H','T','Q','K','B','N']
+  ];
+  const gridEl = document.getElementById('wordGrid');
+  gridLetters.forEach(row=>{
+    row.forEach(letter=>{
+      const cell = document.createElement('div');
+      cell.textContent = letter;
+      gridEl.appendChild(cell);
+    });
+  });
+
+  // ---------- Game flow ----------
+  function startGame(){
+    document.getElementById('intro').classList.add('hidden');
+    showRoom(1);
+    startGlobalTimer();
+  }
+
+  function showRoom(n){
+    document.getElementById('room'+n).classList.remove('hidden');
+    setDot(n,'active');
+    startRoomHintTimer(n);
+    document.getElementById('room'+n).scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function normalize(str){
+    return str.trim().toUpperCase();
+  }
+
+  function checkAnswer(room){
+    const val = normalize(document.getElementById('input'+room).value);
+    const fb = document.getElementById('feedback'+room);
+    if(answers[room].includes(val)){
+      fb.textContent = "✔ Correct! Well done, ghost hunter!";
+      fb.className = "feedback ok";
+      collected[room-1] = collectedFromRoom[room];
+      document.getElementById('input'+room).disabled = true;
+      document.querySelectorAll('#room'+room+' .btn-submit')[0].disabled = true;
+      setDot(room,'done');
+      setTimeout(()=>{
+        document.getElementById('room'+room).classList.add('hidden');
+        if(room < totalRooms){
+          showRoom(room+1);
+        } else {
+          showFinalDoor();
+        }
+      }, 1200);
+    } else {
+      fb.textContent = "✘ Not quite. Try again!";
+      fb.className = "feedback bad";
+    }
+  }
+
+  function shuffleArray(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  function showFinalDoor(){
+    document.getElementById('collectedLetters').textContent = shuffleArray(collected).join(' ');
+    document.getElementById('finalDoor').classList.remove('hidden');
+    document.getElementById('finalDoor').scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function checkFinal(){
+    const val = normalize(document.getElementById('inputFinal').value);
+    const fb = document.getElementById('feedbackFinal');
+    if(val === finalWord){
+      clearInterval(globalTimerInterval);
+      document.getElementById('finalDoor').classList.add('hidden');
+      document.getElementById('finalTime').textContent = formatTime(totalSeconds);
+      document.getElementById('winScreen').classList.remove('hidden');
+      document.getElementById('winScreen').scrollIntoView({behavior:'smooth', block:'start'});
+    } else {
+      fb.textContent = "✘ That is not the secret word. Check your letters again!";
+      fb.className = "feedback bad";
+    }
+  }
+</script>
+
+</body>
+</html>

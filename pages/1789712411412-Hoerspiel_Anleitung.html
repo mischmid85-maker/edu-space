@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hörspiel-Werkstatt – Ton in Canva</title>
+<style>
+  :root{
+    --primary:#6a3de8;
+    --primary-dark:#4b26b8;
+    --accent:#ff8a3d;
+    --bg:#f6f4ff;
+    --card:#ffffff;
+    --text:#2b2b3a;
+    --green:#2eaf6e;
+    --gray:#8a8a99;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Segoe UI", Verdana, sans-serif;
+    background:linear-gradient(160deg,#f6f4ff 0%, #eae3ff 100%);
+    color:var(--text);
+    min-height:100vh;
+  }
+  header{
+    background:linear-gradient(120deg,var(--primary),var(--primary-dark));
+    color:#fff;
+    padding:28px 20px 22px;
+    text-align:center;
+    box-shadow:0 4px 14px rgba(0,0,0,0.15);
+  }
+  header h1{
+    margin:0 0 6px;
+    font-size:1.7rem;
+  }
+  header p{
+    margin:0;
+    opacity:0.9;
+    font-size:0.95rem;
+  }
+  .progress-wrap{
+    max-width:900px;
+    margin:18px auto 0;
+    padding:0 20px;
+  }
+  .progress-bar{
+    background:rgba(255,255,255,0.25);
+    border-radius:20px;
+    height:14px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    background:var(--accent);
+    height:100%;
+    width:0%;
+    transition:width 0.4s ease;
+  }
+  .steps-nav{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    flex-wrap:wrap;
+    margin:14px auto 0;
+    max-width:900px;
+    padding:0 20px;
+  }
+  .step-dot{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.25);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.85rem;
+    font-weight:600;
+    cursor:pointer;
+    border:2px solid transparent;
+    transition:0.2s;
+  }
+  .step-dot.active{
+    background:var(--accent);
+    border-color:#fff;
+  }
+  .step-dot.done{
+    background:var(--green);
+  }
+  main{
+    max-width:900px;
+    margin:0 auto;
+    padding:24px 20px 60px;
+  }
+  .card{
+    background:var(--card);
+    border-radius:var(--radius);
+    padding:26px 28px;
+    box-shadow:0 8px 24px rgba(90,60,180,0.12);
+    display:none;
+    animation:fadeIn 0.4s ease;
+  }
+  .card.active{display:block;}
+  @keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .card h2{
+    color:var(--primary-dark);
+    margin-top:0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:1.4rem;
+  }
+  .badge{
+    background:var(--primary);
+    color:#fff;
+    border-radius:50%;
+    width:34px;
+    height:34px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.95rem;
+    flex-shrink:0;
+  }
+  .card h3{
+    color:var(--primary);
+    margin:20px 0 8px;
+  }
+  .card p, .card li{
+    line-height:1.6;
+    font-size:1rem;
+  }
+  .tip{
+    background:#fff4e8;
+    border-left:5px solid var(--accent);
+    padding:12px 16px;
+    border-radius:8px;
+    margin:16px 0;
+  }
+  .tip strong{color:#c8631b;}
+  .note{
+    background:#eef1ff;
+    border-left:5px solid var(--primary);
+    padding:12px 16px;
+    border-radius:8px;
+    margin:16px 0;
+  }
+  ol.tasklist{
+    list-style:none;
+    padding:0;
+    margin:16px 0;
+  }
+  ol.tasklist li{
+    background:#f8f7ff;
+    border:1px solid #e4defc;
+    border-radius:10px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    cursor:pointer;
+    transition:0.2s;
+  }
+  ol.tasklist li:hover{
+    border-color:var(--primary);
+  }
+  ol.tasklist li.checked{
+    background:#eafaf1;
+    border-color:var(--green);
+  }
+  ol.tasklist input[type="checkbox"]{
+    margin-top:3px;
+    width:18px;
+    height:18px;
+    accent-color:var(--green);
+    flex-shrink:0;
+  }
+  .btn-row{
+    display:flex;
+    justify-content:space-between;
+    margin-top:26px;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  button{
+    font-family:inherit;
+    font-size:1rem;
+    padding:12px 22px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    font-weight:600;
+    transition:0.2s;
+  }
+  .btn-primary{
+    background:var(--primary);
+    color:#fff;
+  }
+  .btn-primary:hover{background:var(--primary-dark);}
+  .btn-secondary{
+    background:#e9e5fb;
+    color:var(--primary-dark);
+  }
+  .btn-secondary:hover{background:#d9d2f7;}
+  .btn-primary:disabled, .btn-secondary:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+  }
+  .mini-quiz{
+    background:#fdf7ff;
+    border:2px dashed var(--primary);
+    border-radius:12px;
+    padding:16px 18px;
+    margin-top:20px;
+  }
+  .mini-quiz .options{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:10px;
+  }
+  .mini-quiz button.option{
+    text-align:left;
+    background:#fff;
+    border:1px solid #ddd6f5;
+    color:var(--text);
+    border-radius:10px;
+    padding:10px 14px;
+    font-weight:500;
+  }
+  .mini-quiz button.option.correct{
+    background:#dcf7e6;
+    border-color:var(--green);
+  }
+  .mini-quiz button.option.wrong{
+    background:#fde3e3;
+    border-color:#e05555;
+  }
+  .feedback{
+    margin-top:8px;
+    font-weight:600;
+    display:none;
+  }
+  .checklist-final{
+    columns:2;
+    column-gap:24px;
+  }
+  @media (max-width:600px){
+    .checklist-final{columns:1;}
+    .card{padding:20px 18px;}
+  }
+  .final-box{
+    text-align:center;
+    background:linear-gradient(120deg,#ffe9d6,#fff2e0);
+    border-radius:14px;
+    padding:24px;
+    margin-top:14px;
+  }
+  .final-box h3{color:var(--accent);}
+  .emoji-big{font-size:2.4rem;}
+  .icon-list{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin:14px 0;
+  }
+  .icon-list div{
+    background:#f4f1ff;
+    border-radius:10px;
+    padding:10px 14px;
+    font-size:0.9rem;
+    flex:1 1 140px;
+    text-align:center;
+  }
+  footer{
+    text-align:center;
+    padding:20px;
+    font-size:0.8rem;
+    color:var(--gray);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎙️ Hörspiel-Werkstatt</h1>
+  <p>Schritt für Schritt: Ton aufnehmen &amp; Geräusche in Canva einfügen</p>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+  <div class="steps-nav" id="stepsNav"></div>
+</header>
+
+<main>
+
+  <!-- Schritt 0: Einstieg -->
+  <section class="card" data-step="0">
+    <h2><span class="badge">1</span> Willkommen in der Hörspiel-Werkstatt!</h2>
+    <p>Ein gutes Hörspiel lebt von drei Zutaten: <strong>gesprochenem Text</strong>, <strong>Geräuschen</strong> und manchmal <strong>Musik</strong>. In dieser App lernst du, wie du in Canva</p>
+    <div class="icon-list">
+      <div>🎤<br>deine eigene Stimme aufnimmst</div>
+      <div>🔍<br>Geräusche in der Canva-Bibliothek findest</div>
+      <div>🎬<br>alles zu einem fertigen Hörspiel zusammenfügst</div>
+    </div>
+    <div class="note">
+      <strong>Bevor du startest:</strong> Öffne Canva (canva.com), melde dich an und lege ein neues <em>Video-Design</em> an (z. B. "Video" oder eine beliebige Videogröße). Nur Video-Designs unterstützen Tonspuren und Voiceover-Aufnahmen.
+    </div>
+    <div class="tip">
+      <strong>Tipp:</strong> Schreibt euer Hörspiel-Drehbuch (Text, wer spricht wann, welche Geräusche gebraucht werden) vorher auf Papier oder in einem Dokument – das erleichtert die Aufnahme enorm!
+    </div>
+  </section>
+
+  <!-- Schritt 1: Design vorbereiten -->
+  <section class="card" data-step="1">
+    <h2><span class="badge">2</span> Canva-Design vorbereiten</h2>
+    <p>Damit du Audio aufnehmen und Sounds einfügen kannst, brauchst du ein Design mit Zeitleiste (Timeline) – das gibt es nur bei Videos, nicht bei z. B. Dokumenten oder Whiteboards.</p>
+    <ol class="tasklist" id="tasklist1">
+      <li><input type="checkbox"><span>Canva öffnen und einloggen</span></li>
+      <li><input type="checkbox"><span>Auf "Design erstellen" klicken und "Video" auswählen</span></li>
+      <li><input type="checkbox"><span>So viele Seiten/Szenen anlegen, wie euer Hörspiel Abschnitte hat (z. B. eine Seite pro Szene)</span></li>
+      <li><input type="checkbox"><span>Unten prüfen: Es erscheint eine Zeitleiste (Timeline) am unteren Bildschirmrand</span></li>
+    </ol>
+    <div class="tip"><strong>Hinweis:</strong> Für ein reines Hörspiel braucht ihr keine aufwendigen Bilder – Hintergrundfarben oder einfache Illustrationen reichen. Der Fokus liegt auf dem <strong>Ton</strong>!</div>
+  </section>
+
+  <!-- Schritt 2: Stimme aufnehmen -->
+  <section class="card" data-step="2">
+    <h2><span class="badge">3</span> Eigene Stimme aufnehmen (Voiceover)</h2>
+    <p>So nimmst du direkt in Canva deinen gesprochenen Text auf:</p>
+    <ol class="tasklist" id="tasklist2">
+      <li><input type="checkbox"><span>In der linken Seitenleiste auf <strong>"Audio"</strong> klicken (falls nicht sichtbar, zuerst auf "Apps" klicken)</span></li>
+      <li><input type="checkbox"><span><strong>"Voiceover aufnehmen"</strong> auswählen</span></li>
+      <li><input type="checkbox"><span>Canva Zugriff auf das Mikrofon erlauben (Pop-up bestätigen)</span></li>
+      <li><input type="checkbox"><span>Auf den roten Aufnahme-Button klicken, kurz warten, dann laut und deutlich sprechen</span></li>
+      <li><input type="checkbox"><span>Aufnahme stoppen, anhören ("Preview") – bei Bedarf wiederholen</span></li>
+      <li><input type="checkbox"><span>Aufnahme übernehmen – sie erscheint automatisch als Tonspur auf der Zeitleiste</span></li>
+    </ol>
+    <div class="tip">
+      <strong>Sprich wie ein Profi:</strong> Halte etwas Abstand zum Mikrofon, sprich langsam und deutlich, vermeide Hintergrundgeräusche (Fenster zu, Handy stumm) und mache kurze Pausen zwischen Sätzen.
+    </div>
+    <div class="note">
+      Alternative: Du kannst dich auch per Video aufnehmen lassen ("Nimm dich selbst auf") und danach über <strong>Audio-Werkzeuge → Audio extrahieren</strong> nur den Ton behalten.
+    </div>
+  </section>
+
+  <!-- Schritt 3: Geräusche suchen -->
+  <section class="card" data-step="3">
+    <h2><span class="badge">4</span> Geräusche aus der Canva-Bibliothek suchen</h2>
+    <p>Jetzt wird euer Hörspiel lebendig! Canva hat eine riesige Bibliothek mit Soundeffekten – von Türknarren über Regen bis zu Schritten.</p>
+    <ol class="tasklist" id="tasklist3">
+      <li><input type="checkbox"><span>Klicke in der Seitenleiste auf die Registerkarte <strong>"Audio"</strong></span></li>
+      <li><input type="checkbox"><span>Nutze die <strong>Suchleiste</strong> ganz oben und tippe einen Begriff ein, z. B. "Tür", "Regen", "Applaus", "Schritte"</span></li>
+      <li><input type="checkbox"><span>Höre dir Vorschläge an, indem du mit der Maus über einen Titel fährst und auf das kleine Play-Symbol klickst</span></li>
+      <li><input type="checkbox"><span>Klicke auf den passenden Sound, um ihn direkt in dein Design einzufügen</span></li>
+      <li><input type="checkbox"><span>Wiederhole das für jedes Geräusch, das euer Hörspiel braucht</span></li>
+    </ol>
+    <div class="tip">
+      <strong>Achtung Symbole:</strong> Ein kleines Kronen- oder Währungssymbol bedeutet, dass der Sound kostenpflichtig ist (Canva Pro). Achte für die Schule lieber auf kostenlose Sounds ohne dieses Symbol.
+    </div>
+    <div class="note">
+      Der Sound wird immer dort auf der Zeitleiste eingefügt, wo sich gerade der <strong>Wiedergabekopf</strong> (der senkrechte Strich) befindet. Setze ihn also vorher an die richtige Stelle!
+    </div>
+  </section>
+
+  <!-- Schritt 4: Bearbeiten -->
+  <section class="card" data-step="4">
+    <h2><span class="badge">5</span> Töne anordnen und bearbeiten</h2>
+    <p>Damit Sprache, Geräusche und evtl. Musik nicht durcheinander klingen, müsst ihr die Tonspuren auf der Zeitleiste noch anpassen.</p>
+    <ol class="tasklist" id="tasklist4">
+      <li><input type="checkbox"><span>Auf der Zeitleiste eine Tonspur anklicken und mit gedrückter Maustaste verschieben, um den Zeitpunkt zu ändern</span></li>
+      <li><input type="checkbox"><span>An den Enden der Tonspur ziehen, um sie zu kürzen oder zu verlängern (Trimmen)</span></li>
+      <li><input type="checkbox"><span>Über "Lautstärke" in der Symbolleiste die Lautstärke einer Spur anpassen (z. B. Musik leiser, Sprache lauter)</span></li>
+      <li><input type="checkbox"><span>Mehrere Tonspuren übereinander legen – bis zu 50 Spuren sind pro Design möglich</span></li>
+      <li><input type="checkbox"><span>Mit dem Play-Button das ganze Hörspiel anhören und Feinheiten korrigieren</span></li>
+    </ol>
+    <div class="tip"><strong>Team-Tipp:</strong> Hört euch die Aufnahme gemeinsam als Gruppe an und gebt euch gegenseitig Feedback – klingt alles verständlich? Ist die Musik nicht zu laut?</div>
+  </section>
+
+  <!-- Schritt 5: Fertigstellen -->
+  <section class="card" data-step="5">
+    <h2><span class="badge">6</span> Hörspiel fertigstellen</h2>
+    <p>Fast geschafft! Zum Schluss exportiert ihr euer Hörspiel, damit ihr es abgeben oder vorspielen könnt.</p>
+    <ol class="tasklist" id="tasklist5">
+      <li><input type="checkbox"><span>Rechts oben auf "Teilen" bzw. "Herunterladen" klicken</span></li>
+      <li><input type="checkbox"><span>Als Dateityp <strong>MP4</strong> (Video mit Ton) auswählen</span></li>
+      <li><input type="checkbox"><span>Download starten und Datei an einem gemeinsamen Ort speichern</span></li>
+      <li><input type="checkbox"><span>Hörspiel der Klasse präsentieren oder auf einer Lernplattform hochladen</span></li>
+    </ol>
+    <div class="mini-quiz" id="quiz">
+      <strong>❓ Kurzes Quiz: Wo findest du in Canva die Soundeffekte?</strong>
+      <div class="options">
+        <button class="option" data-correct="false">Unter "Text" in der Seitenleiste</button>
+        <button class="option" data-correct="true">Unter "Audio" in der Seitenleiste</button>
+        <button class="option" data-correct="false">Unter "Fotos" in der Seitenleiste</button>
+      </div>
+      <div class="feedback" id="quizFeedback"></div>
+    </div>
+  </section>
+
+  <!-- Schritt 6: Abschluss-Checkliste -->
+  <section class="card" data-step="6">
+    <h2><span class="badge">✓</span> Geschafft – Checkliste für dein Hörspiel</h2>
+    <div class="final-box">
+      <div class="emoji-big">🎉</div>
+      <h3>Dein Hörspiel ist bereit!</h3>
+      <p>Geh die Checkliste noch einmal durch, bevor du dein Hörspiel abgibst:</p>
+    </div>
+    <ol class="tasklist checklist-final" id="tasklistFinal">
+      <li><input type="checkbox"><span>Drehbuch/Text vollständig eingesprochen</span></li>
+      <li><input type="checkbox"><span>Alle wichtigen Geräusche eingefügt</span></li>
+      <li><input type="checkbox"><span>Lautstärken passend eingestellt</span></li>
+      <li><input type="checkbox"><span>Reihenfolge der Töne stimmt mit der Geschichte überein</span></li>
+      <li><input type="checkbox"><span>Ganzes Hörspiel einmal komplett angehört</span></li>
+      <li><input type="checkbox"><span>Als MP4 heruntergeladen/exportiert</span></li>
+    </ol>
+    <div class="tip"><strong>Weiter geht's:</strong> Ihr könnt auch KI-generierte Soundeffekte in Canva erstellen lassen oder eure eigenen Alltagsgeräusche aufnehmen (z. B. mit dem Handy) und als Datei hochladen!</div>
+  </section>
+
+  <div class="btn-row">
+    <button class="btn-secondary" id="backBtn">⬅ Zurück</button>
+    <button class="btn-primary" id="nextBtn">Weiter ➡</button>
+  </div>
+
+</main>
+
+<footer>Hörspiel-Werkstatt · Lern-App für den Unterricht · basierend auf offiziellen Canva-Funktionen</footer>
+
+<script>
+  const steps = document.querySelectorAll('.card');
+  const totalSteps = steps.length;
+  let current = 0;
+
+  const stepsNav = document.getElementById('stepsNav');
+  for(let i=0;i<totalSteps;i++){
+    const dot = document.createElement('div');
+    dot.className = 'step-dot';
+    dot.textContent = i+1;
+    dot.dataset.index = i;
+    dot.addEventListener('click', ()=> goTo(i));
+    stepsNav.appendChild(dot);
+  }
+
+  function updateUI(){
+    steps.forEach((s,i)=> s.classList.toggle('active', i===current));
+    const dots = document.querySelectorAll('.step-dot');
+    dots.forEach((d,i)=>{
+      d.classList.toggle('active', i===current);
+      d.classList.toggle('done', i<current);
+    });
+    const pct = (current/(totalSteps-1))*100;
+    document.getElementById('progressFill').style.width = pct+'%';
+    document.getElementById('backBtn').disabled = current===0;
+    document.getElementById('nextBtn').textContent = current===totalSteps-1 ? '🎉 Fertig' : 'Weiter ➡';
+  }
+
+  function goTo(i){
+    current = Math.max(0, Math.min(totalSteps-1, i));
+    updateUI();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', ()=>{
+    if(current < totalSteps-1) goTo(current+1);
+  });
+  document.getElementById('backBtn').addEventListener('click', ()=>{
+    if(current > 0) goTo(current-1);
+  });
+
+  // Checkbox interaction
+  document.querySelectorAll('.tasklist li').forEach(li=>{
+    li.addEventListener('click', (e)=>{
+      const cb = li.querySelector('input[type="checkbox"]');
+      if(e.target.tagName.toLowerCase() !== 'input'){
+        cb.checked = !cb.checked;
+      }
+      li.classList.toggle('checked', cb.checked);
+    });
+  });
+
+  // Quiz interaction
+  document.querySelectorAll('.mini-quiz .option').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const correct = btn.dataset.correct === 'true';
+      const feedback = document.getElementById('quizFeedback');
+      document.querySelectorAll('.mini-quiz .option').forEach(b=>{
+        b.classList.remove('correct','wrong');
+        b.disabled = true;
+      });
+      btn.classList.add(correct ? 'correct' : 'wrong');
+      feedback.style.display = 'block';
+      feedback.textContent = correct ? '✅ Richtig! Die Audio-Bibliothek findest du unter "Audio".' : '❌ Nicht ganz – die richtige Antwort ist "Audio" in der Seitenleiste.';
+      if(!correct){
+        document.querySelectorAll('.mini-quiz .option').forEach(b=>{
+          if(b.dataset.correct === 'true') b.classList.add('correct');
+        });
+      }
+    });
+  });
+
+  updateUI();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Time Trip – Past Simple Trainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#152238; --navy-2:#1D2E4A; --panel:#22345470;
+  --gold:#E8A33D; --gold-2:#F4C868; --teal:#3FB6A8; --coral:#EF6F5C;
+  --ink:#F4EFE3; --ink-dim:#B9C2D6;
+  --ok:#4FBE8C; --bad:#E86A6A;
+  padding-top: env(safe-area-inset-top,0px);
+  padding-bottom: env(safe-area-inset-bottom,0px);
+  box-sizing:border-box;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; min-height:100%; background:
+    radial-gradient(circle at 15% -10%, #2A4066 0%, transparent 45%),
+    radial-gradient(circle at 100% 110%, #1a2b4a 0%, transparent 50%),
+    var(--navy);
+  color:var(--ink); font-family:'Work Sans',sans-serif;
+  display:flex; justify-content:center;
+}
+.app{width:100%; max-width:640px; padding:20px 18px 40px; position:relative;}
+h1,h2,h3{font-family:'Baloo 2',sans-serif; margin:0;}
+.brand{display:flex; align-items:center; gap:10px; margin-bottom:22px;}
+.brand-mark{font-size:30px;}
+.brand h1{font-size:22px; color:var(--gold-2); letter-spacing:.3px;}
+.brand p{margin:2px 0 0; font-size:12.5px; color:var(--ink-dim);}
+
+.screen{display:none;}
+.screen.active{display:block; animation:rise .35s ease;}
+@keyframes rise{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+/* --- Level select --- */
+.card{
+  background:linear-gradient(180deg,#25385c,#1c2c4a);
+  border:1px solid #34456b; border-radius:18px; padding:18px;
+  margin-bottom:14px; position:relative; overflow:hidden;
+}
+.level-card{display:flex; gap:14px; align-items:center; cursor:pointer; border:1px solid #34456b;}
+.level-card:active{transform:scale(.98);}
+.level-badge{
+  width:54px; height:54px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+  font-family:'Baloo 2'; font-size:22px; font-weight:800; color:#12203a; flex-shrink:0;
+}
+.lvl-1 .level-badge{background:var(--teal);}
+.lvl-2 .level-badge{background:var(--gold);}
+.lvl-3 .level-badge{background:var(--coral);}
+.level-info{flex:1; min-width:0;}
+.level-info h3{font-size:17px; color:var(--ink);}
+.level-info p{margin:3px 0 6px; font-size:12.5px; color:var(--ink-dim); line-height:1.4;}
+.stars{font-size:15px; letter-spacing:2px;}
+.star-on{color:var(--gold-2);}
+.star-off{color:#3a4a6a;}
+.chev{font-size:20px; color:var(--ink-dim);}
+
+.stats-row{display:flex; gap:10px; margin-bottom:16px;}
+.stat{flex:1; background:var(--panel); border-radius:14px; padding:10px 12px; text-align:center; border:1px solid #34456b;}
+.stat b{display:block; font-family:'Baloo 2'; font-size:19px; color:var(--gold-2);}
+.stat span{font-size:11px; color:var(--ink-dim);}
+
+/* --- Game screen --- */
+.topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; gap:10px;}
+.hearts{font-size:17px; letter-spacing:2px;}
+.back-btn{background:none; border:none; color:var(--ink-dim); font-size:14px; cursor:pointer; padding:6px;}
+.progress-track{height:9px; background:#0f1a2e; border-radius:6px; overflow:hidden; margin-bottom:18px; border:1px solid #2c3c5e;}
+.progress-fill{height:100%; background:linear-gradient(90deg,var(--teal),var(--gold)); border-radius:6px; transition:width .35s ease;}
+
+.q-tag{display:inline-block; font-size:11.5px; padding:4px 10px; border-radius:20px; margin-bottom:10px; font-weight:600;}
+.tag-aff{background:#2f5d47; color:#a9e6c4;}
+.tag-neg{background:#5d2f2f; color:#f0aeae;}
+.tag-q{background:#2f4a5d; color:#a9d7f0;}
+
+.sentence{font-size:20px; line-height:1.55; margin-bottom:6px;}
+.cue{font-size:13.5px; color:var(--ink-dim); margin-bottom:16px;}
+.cue b{color:var(--gold-2); font-style:normal;}
+
+input.answer{
+  width:100%; padding:14px 16px; font-size:17px; border-radius:14px; border:2px solid #3a4b6f;
+  background:#0f1a2e; color:var(--ink); font-family:'Work Sans'; margin-bottom:12px;
+}
+input.answer:focus{outline:none; border-color:var(--gold);}
+input.answer.correct{border-color:var(--ok); background:#12261f;}
+input.answer.wrong{border-color:var(--bad); background:#2a1414;}
+
+.btn{
+  display:block; width:100%; padding:14px; border-radius:14px; border:none; font-family:'Baloo 2';
+  font-size:16px; font-weight:700; cursor:pointer; color:#12203a; background:var(--gold);
+}
+.btn:active{transform:scale(.98);}
+.btn.secondary{background:transparent; color:var(--ink-dim); border:1px solid #3a4b6f; margin-top:10px;}
+.btn.teal{background:var(--teal);}
+
+.feedback{border-radius:14px; padding:12px 14px; margin-bottom:12px; font-size:14.5px; display:none;}
+.feedback.show{display:block; animation:rise .25s ease;}
+.feedback.ok{background:#1c3a2d; border:1px solid var(--ok); color:#c7f0da;}
+.feedback.bad{background:#3a1c1c; border:1px solid var(--bad); color:#f2c9c9;}
+.feedback b{color:var(--ink);}
+
+/* --- Result screen --- */
+.result-stars{text-align:center; font-size:44px; margin:10px 0 4px; letter-spacing:6px;}
+.result-title{text-align:center; font-size:24px; color:var(--gold-2); margin-bottom:4px;}
+.result-sub{text-align:center; color:var(--ink-dim); font-size:14px; margin-bottom:22px;}
+.result-grid{display:flex; gap:10px; margin-bottom:20px;}
+
+footer{text-align:center; font-size:11px; color:#5c6c8c; margin-top:24px;}
+
+/* --- Rank bar --- */
+.rank-card{display:flex; align-items:center; gap:12px;}
+.rank-icon{font-size:34px; flex-shrink:0; animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);} 50%{transform:translateY(-4px);}}
+.rank-body{flex:1; min-width:0;}
+.rank-body h3{font-size:15px; color:var(--gold-2);}
+.rank-body p{margin:2px 0 8px; font-size:11.5px; color:var(--ink-dim);}
+.rank-track{height:8px; background:#0f1a2e; border-radius:6px; overflow:hidden; border:1px solid #2c3c5e;}
+.rank-fill{height:100%; background:linear-gradient(90deg,var(--coral),var(--gold)); border-radius:6px; transition:width .5s ease;}
+
+/* --- Lock --- */
+.level-card.locked{cursor:not-allowed; opacity:.55; filter:grayscale(.4);}
+.level-card.locked .level-badge{background:#2b3852 !important; color:#6b7ba0;}
+.lock-pill{font-size:10.5px; background:#0f1a2e; color:var(--ink-dim); padding:3px 8px; border-radius:20px; display:inline-block; margin-top:2px;}
+
+/* --- Mascot --- */
+.mascot-row{display:flex; align-items:center; gap:12px; margin-bottom:10px;}
+.mascot{font-size:38px; transition:transform .25s ease; transform-origin:center bottom;}
+.mascot.bounce{animation:bounce .5s ease;}
+.mascot.shake{animation:shake .4s ease;}
+@keyframes bounce{0%{transform:scale(1);} 30%{transform:scale(1.3) rotate(-6deg);} 60%{transform:scale(.95) rotate(4deg);} 100%{transform:scale(1);}}
+@keyframes shake{0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px) rotate(-4deg);} 75%{transform:translateX(8px) rotate(4deg);}}
+.mascot-bubble{background:var(--panel); border:1px solid #34456b; border-radius:14px; padding:8px 12px; font-size:13px; color:var(--ink); flex:1;}
+
+/* --- Combo badge --- */
+.combo-badge{
+  position:fixed; top:18%; left:50%; transform:translate(-50%,0) scale(0.5); opacity:0;
+  font-family:'Baloo 2'; font-weight:800; font-size:30px; color:var(--gold-2); text-shadow:0 3px 10px rgba(0,0,0,.5);
+  pointer-events:none; z-index:60;
+}
+.combo-badge.show{animation:comboPop 1s ease forwards;}
+@keyframes comboPop{
+  0%{opacity:0; transform:translate(-50%,10px) scale(.4);}
+  20%{opacity:1; transform:translate(-50%,0) scale(1.15);}
+  35%{transform:translate(-50%,0) scale(1);}
+  80%{opacity:1;}
+  100%{opacity:0; transform:translate(-50%,-20px) scale(1.05);}
+}
+
+/* --- Floating points --- */
+.float-layer{position:fixed; inset:0; pointer-events:none; z-index:55; overflow:hidden;}
+.float-pt{
+  position:absolute; font-family:'Baloo 2'; font-weight:800; font-size:20px; color:var(--gold-2);
+  animation:floatUp 1s ease forwards;
+}
+@keyframes floatUp{0%{opacity:0; transform:translateY(0) scale(.6);} 15%{opacity:1; transform:translateY(-10px) scale(1.1);} 100%{opacity:0; transform:translateY(-70px) scale(1);}}
+
+/* --- Confetti --- */
+.confetti-layer{position:fixed; inset:0; pointer-events:none; z-index:50; overflow:hidden;}
+.confetti-piece{position:absolute; top:-10px; border-radius:2px; animation:confettiFall 1.1s linear forwards;}
+@keyframes confettiFall{0%{transform:translateY(0) rotate(0deg); opacity:1;} 100%{transform:translateY(100vh) rotate(540deg); opacity:0;}}
+
+/* --- Toast --- */
+.toast{
+  position:fixed; left:50%; bottom:26px; transform:translate(-50%,20px); opacity:0;
+  background:linear-gradient(180deg,#2f4260,#20304c); border:1px solid var(--gold); border-radius:16px;
+  padding:12px 18px; display:flex; align-items:center; gap:10px; z-index:70; max-width:90%;
+}
+.toast.show{animation:toastPop 3s ease forwards;}
+@keyframes toastPop{
+  0%{opacity:0; transform:translate(-50%,20px);}
+  10%{opacity:1; transform:translate(-50%,0);}
+  85%{opacity:1; transform:translate(-50%,0);}
+  100%{opacity:0; transform:translate(-50%,-10px);}
+}
+.toast-icon{font-size:26px;}
+.toast-text b{display:block; font-family:'Baloo 2'; color:var(--gold-2); font-size:14px;}
+.toast-text span{font-size:11.5px; color:var(--ink-dim);}
+
+/* --- Screen shake on wrong --- */
+.app.shake-app{animation:appShake .4s ease;}
+@keyframes appShake{0%,100%{transform:translateX(0);} 20%{transform:translateX(-6px);} 40%{transform:translateX(6px);} 60%{transform:translateX(-4px);} 80%{transform:translateX(4px);}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="brand">
+    <div class="brand-mark">🕰️</div>
+    <div>
+      <h1>Time Trip</h1>
+      <p>Reise durch die Zeit – trainiere Past Simple</p>
+    </div>
+  </div>
+
+  <!-- SCREEN: LEVEL SELECT -->
+  <section id="screen-select" class="screen active">
+    <div class="card rank-card">
+      <div class="rank-icon" id="rankIcon">🧭</div>
+      <div class="rank-body">
+        <h3 id="rankName">Zeit-Neuling</h3>
+        <p id="rankSub">0 / 100 Kristalle bis zum nächsten Rang</p>
+        <div class="rank-track"><div class="rank-fill" id="rankFill" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat"><b id="totalXp">0</b><span>Zeit-Kristalle</span></div>
+      <div class="stat"><b id="totalStars">0</b><span>Sterne total</span></div>
+      <div class="stat"><b id="bestStreak">0</b><span>Beste Serie</span></div>
+    </div>
+
+    <div class="card level-card lvl-1" data-level="1">
+      <div class="level-badge">1</div>
+      <div class="level-info">
+        <h3>Dorfleben</h3>
+        <p>Regelmässige Verben. Aussagen, Verneinungen &amp; Fragen im Alltag.</p>
+        <div class="stars" id="stars-1"></div>
+      </div>
+      <div class="chev">›</div>
+    </div>
+
+    <div class="card level-card lvl-2" data-level="2">
+      <div class="level-badge">2</div>
+      <div class="level-info">
+        <h3>Stadtabenteuer</h3>
+        <p>Regelmässige + erste unregelmässige Verben (go, see, have, eat …).</p>
+        <div class="stars" id="stars-2"></div>
+        <div class="lock-pill" id="lock-2" style="display:none;">🔒 Erst 1 Stern in Level 1 nötig</div>
+      </div>
+      <div class="chev">›</div>
+    </div>
+
+    <div class="card level-card lvl-3" data-level="3">
+      <div class="level-badge">3</div>
+      <div class="level-info">
+        <h3>Zeitreise-Meister</h3>
+        <p>Knifflige unregelmässige Verben (buy, take, give, drive, speak …).</p>
+        <div class="stars" id="stars-3"></div>
+        <div class="lock-pill" id="lock-3" style="display:none;">🔒 Erst 1 Stern in Level 2 nötig</div>
+      </div>
+      <div class="chev">›</div>
+    </div>
+
+    <footer>Tipp: Bei Verneinung reicht "didn't" oder "did not".</footer>
+  </div>
+
+  <!-- SCREEN: GAME -->
+  <section id="screen-game" class="screen">
+    <div class="topbar">
+      <button class="back-btn" onclick="goToSelect()">← Levels</button>
+      <div class="hearts" id="hearts"></div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+    <div class="mascot-row">
+      <div class="mascot" id="mascot">🦉</div>
+      <div class="mascot-bubble" id="mascotBubble">Los geht's – reise zurück in die Vergangenheit!</div>
+    </div>
+
+    <div class="card">
+      <span class="q-tag" id="qTag"></span>
+      <div class="sentence" id="sentenceText"></div>
+      <div class="cue" id="cueText"></div>
+      <input type="text" class="answer" id="answerInput" placeholder="Deine Antwort…" autocomplete="off" autocapitalize="off" spellcheck="false">
+      <div class="feedback" id="feedback"></div>
+      <button class="btn" id="actionBtn">Prüfen</button>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><b id="streakDisplay">0</b><span>Serie 🔥</span></div>
+      <div class="stat"><b id="xpDisplay">0</b><span>Kristalle ✦</span></div>
+    </div>
+  </section>
+
+  <!-- SCREEN: RESULT -->
+  <section id="screen-result" class="screen">
+    <div class="card">
+      <div class="result-stars" id="resultStars"></div>
+      <div class="result-title" id="resultTitle"></div>
+      <div class="result-sub" id="resultSub"></div>
+      <div class="result-grid">
+        <div class="stat"><b id="resCorrect">0</b><span>Richtig</span></div>
+        <div class="stat"><b id="resXp">0</b><span>Kristalle</span></div>
+        <div class="stat"><b id="resStreak">0</b><span>Beste Serie</span></div>
+      </div>
+      <button class="btn teal" onclick="startLevel(currentLevel)">Nochmal spielen</button>
+      <button class="btn secondary" onclick="goToSelect()">Zurück zur Übersicht</button>
+    </div>
+  </section>
+
+</div>
+
+<div class="confetti-layer" id="confettiLayer"></div>
+<div class="float-layer" id="floatLayer"></div>
+<div class="combo-badge" id="comboBadge"></div>
+<div class="toast" id="toast"><span class="toast-icon" id="toastIcon">🏅</span><div class="toast-text"><b id="toastTitle"></b><span id="toastSub"></span></div></div>
+
+<script>
+/* ---------- Task pools ---------- */
+const POOLS = {
+1:[
+ {t:"aff", before:"Last weekend, I", after:"my room.", cue:"clean", ans:["cleaned"]},
+ {t:"aff", before:"She", after:"a letter to her friend.", cue:"post", ans:["posted"]},
+ {t:"aff", before:"We", after:"football in the park.", cue:"play", ans:["played"]},
+ {t:"aff", before:"They", after:"a new bike.", cue:"want", ans:["wanted"]},
+ {t:"neg", before:"He", after:"his homework yesterday.", cue:"not / finish", ans:["didn't finish","did not finish"]},
+ {t:"neg", before:"I", after:"the film on Saturday.", cue:"not / watch", ans:["didn't watch","did not watch"]},
+ {t:"neg", before:"My sister", after:"the dishes.", cue:"not / wash", ans:["didn't wash","did not wash"]},
+ {t:"neg", before:"We", after:"the bus this morning.", cue:"not / miss", ans:["didn't miss","did not miss"]},
+ {t:"q",  before:"", after:"your grandparents last Sunday?", cue:"you / visit", ans:["did you visit"]},
+ {t:"q",  before:"", after:"in the garden yesterday?", cue:"she / work", ans:["did she work"]},
+ {t:"q",  before:"", after:"the music loud?", cue:"they / turn", ans:["did they turn"]},
+ {t:"q",  before:"", after:"the front door?", cue:"he / lock", ans:["did he lock"]}
+],
+2:[
+ {t:"aff", before:"On Monday, we", after:"a great film at the cinema.", cue:"see", ans:["saw"]},
+ {t:"aff", before:"I", after:"a big pizza for dinner.", cue:"eat", ans:["ate"]},
+ {t:"aff", before:"She", after:"to Basel by train.", cue:"go", ans:["went"]},
+ {t:"aff", before:"They", after:"a picnic at the lake.", cue:"have", ans:["had"]},
+ {t:"aff", before:"He", after:"a birthday card for his mum.", cue:"make", ans:["made"]},
+ {t:"neg", before:"We", after:"the answer.", cue:"not / know", ans:["didn't know","did not know"]},
+ {t:"neg", before:"I", after:"any snow last winter.", cue:"not / see", ans:["didn't see","did not see"]},
+ {t:"neg", before:"She", after:"time to call back.", cue:"not / have", ans:["didn't have","did not have"]},
+ {t:"neg", before:"They", after:"to the party.", cue:"not / come", ans:["didn't come","did not come"]},
+ {t:"q",  before:"", after:"the message this morning?", cue:"you / get", ans:["did you get"]},
+ {t:"q",  before:"", after:"anything new?", cue:"he / learn", ans:["did he learn"]},
+ {t:"q",  before:"", after:"good marks in the test?", cue:"they / get", ans:["did they get"]}
+],
+3:[
+ {t:"aff", before:"Yesterday I", after:"a new pair of shoes.", cue:"buy", ans:["bought"]},
+ {t:"aff", before:"She", after:"the train to Bern.", cue:"take", ans:["took"]},
+ {t:"aff", before:"We", after:"our teacher a present.", cue:"give", ans:["gave"]},
+ {t:"aff", before:"He", after:"to school on his new bike.", cue:"drive", ans:["drove"]},
+ {t:"aff", before:"They", after:"in the lake all afternoon.", cue:"swim", ans:["swam"]},
+ {t:"aff", before:"I", after:"a strange noise at night.", cue:"hear", ans:["heard"]},
+ {t:"neg", before:"He", after:"a word during the meeting.", cue:"not / speak", ans:["didn't speak","did not speak"]},
+ {t:"neg", before:"We", after:"our keys at home.", cue:"not / leave", ans:["didn't leave","did not leave"]},
+ {t:"neg", before:"She", after:"the truth at first.", cue:"not / know", ans:["didn't know","did not know"]},
+ {t:"neg", before:"They", after:"the book in time.", cue:"not / find", ans:["didn't find","did not find"]},
+ {t:"q",  before:"", after:"the newspaper this morning?", cue:"you / read", ans:["did you read"]},
+ {t:"q",  before:"", after:"anything about the trip?", cue:"she / think", ans:["did she think"]}
+]
+};
+const LEVEL_NAMES = {1:"Dorfleben",2:"Stadtabenteuer",3:"Zeitreise-Meister"};
+const XP_PER_LEVEL = {1:10,2:15,3:20};
+const RANKS = [
+  {min:0,   icon:"🧭", name:"Zeit-Neuling"},
+  {min:60,  icon:"🗺️", name:"Zeit-Entdecker"},
+  {min:150, icon:"⌛", name:"Zeit-Experte"},
+  {min:300, icon:"🔮", name:"Zeit-Jäger"},
+  {min:500, icon:"👑", name:"Zeit-Meister"}
+];
+const MASCOT_OK = ["Super gemacht! 🎉","Genau richtig!","Du bist auf einer Rolle!","Yes! Weiter so!","Top getroffen!"];
+const MASCOT_BAD = ["Kein Problem, nächstes Mal!","Fast! Schau dir die Lösung an.","Nicht aufgeben!","Das üben wir nochmal."];
+
+/* ---------- State ---------- */
+let currentLevel = 1, order = [], idx = 0, hearts = 3, correctCount = 0, streak = 0, bestStreakRun = 0, levelXp = 0, answered = false;
+
+function loadProgress(){
+  return JSON.parse(localStorage.getItem('timetrip_progress') || '{"stars":{"1":0,"2":0,"3":0},"xp":0,"bestStreak":0}');
+}
+function saveProgress(p){ localStorage.setItem('timetrip_progress', JSON.stringify(p)); }
+
+function renderSelect(){
+  const p = loadProgress();
+  document.getElementById('totalXp').textContent = p.xp;
+  document.getElementById('bestStreak').textContent = p.bestStreak;
+  let totalStars = 0;
+  [1,2,3].forEach(l=>{
+    totalStars += p.stars[l];
+    const el = document.getElementById('stars-'+l);
+    el.innerHTML = '★★★'.split('').map((s,i)=> i < p.stars[l] ? '<span class="star-on">★</span>' : '<span class="star-off">★</span>').join('');
+  });
+  document.getElementById('totalStars').textContent = totalStars;
+
+  // Rang
+  let rankIndex = 0;
+  for(let i=0;i<RANKS.length;i++){ if(p.xp >= RANKS[i].min) rankIndex = i; }
+  const rank = RANKS[rankIndex];
+  const next = RANKS[rankIndex+1];
+  document.getElementById('rankIcon').textContent = rank.icon;
+  document.getElementById('rankName').textContent = rank.name;
+  if(next){
+    const span = next.min - rank.min;
+    const have = p.xp - rank.min;
+    document.getElementById('rankFill').style.width = Math.min(100, have/span*100)+'%';
+    document.getElementById('rankSub').textContent = have+' / '+span+' Kristalle bis "'+next.name+'"';
+  } else {
+    document.getElementById('rankFill').style.width = '100%';
+    document.getElementById('rankSub').textContent = 'Höchster Rang erreicht! 👑';
+  }
+
+  // Sperren
+  const lvl2Locked = p.stars[1] < 1;
+  const lvl3Locked = p.stars[2] < 1;
+  document.querySelector('.lvl-2').classList.toggle('locked', lvl2Locked);
+  document.querySelector('.lvl-3').classList.toggle('locked', lvl3Locked);
+  document.getElementById('lock-2').style.display = lvl2Locked ? 'inline-block' : 'none';
+  document.getElementById('lock-3').style.display = lvl3Locked ? 'inline-block' : 'none';
+}
+
+/* ---------- Effekte ---------- */
+function spawnConfetti(){
+  const layer = document.getElementById('confettiLayer');
+  const colors = ['#E8A33D','#F4C868','#3FB6A8','#EF6F5C','#F4EFE3'];
+  for(let i=0;i<24;i++){
+    const p = document.createElement('div');
+    p.className='confetti-piece';
+    p.style.left = (Math.random()*100)+'vw';
+    p.style.width = (5+Math.random()*4)+'px';
+    p.style.height = (8+Math.random()*6)+'px';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDelay = (Math.random()*0.2)+'s';
+    p.style.animationDuration = (0.9+Math.random()*0.6)+'s';
+    layer.appendChild(p);
+    setTimeout(()=>p.remove(), 1700);
+  }
+}
+function spawnFloatPoints(text){
+  const layer = document.getElementById('floatLayer');
+  const el = document.createElement('div');
+  el.className='float-pt';
+  el.textContent = text;
+  el.style.left = (44+Math.random()*12)+'%';
+  el.style.top = '58%';
+  layer.appendChild(el);
+  setTimeout(()=>el.remove(), 1100);
+}
+function showCombo(streakVal){
+  const badge = document.getElementById('comboBadge');
+  const labels = {3:"🔥 3er-Serie!",5:"⚡ 5er-Serie!",8:"🌟 8er-Serie! Wow!",12:"👑 UNAUFHALTSAM!"};
+  if(!labels[streakVal]) return;
+  badge.textContent = labels[streakVal];
+  badge.classList.remove('show'); void badge.offsetWidth;
+  badge.classList.add('show');
+}
+let achievementsShown = JSON.parse(localStorage.getItem('timetrip_achievements')||'{}');
+function showToast(icon, title, sub, key){
+  if(key && achievementsShown[key]) return;
+  if(key){ achievementsShown[key]=true; localStorage.setItem('timetrip_achievements', JSON.stringify(achievementsShown)); }
+  const t = document.getElementById('toast');
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastSub').textContent = sub;
+  t.classList.remove('show'); void t.offsetWidth;
+  t.classList.add('show');
+}
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goToSelect(){ renderSelect(); show('screen-select'); }
+
+function shuffled(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+
+function startLevel(level){
+  currentLevel = level;
+  order = shuffled(POOLS[level]);
+  idx = 0; hearts = 3; correctCount = 0; streak = 0; bestStreakRun = 0; levelXp = 0; answered = false;
+  show('screen-game');
+  renderQuestion();
+}
+
+function renderHearts(){
+  document.getElementById('hearts').innerHTML = '❤️'.repeat(hearts) + '🖤'.repeat(3-hearts);
+}
+
+function renderQuestion(){
+  answered = false;
+  const q = order[idx];
+  const tagEl = document.getElementById('qTag');
+  if(q.t==='aff'){ tagEl.textContent='Aussagesatz'; tagEl.className='q-tag tag-aff'; }
+  if(q.t==='neg'){ tagEl.textContent='Verneinung'; tagEl.className='q-tag tag-neg'; }
+  if(q.t==='q'){ tagEl.textContent='Frage'; tagEl.className='q-tag tag-q'; }
+
+  document.getElementById('sentenceText').textContent = (q.before ? q.before+' ____ ' : '____ ') + q.after;
+  document.getElementById('cueText').innerHTML = 'Verb: <b>('+q.cue+')</b>';
+  const input = document.getElementById('answerInput');
+  input.value=''; input.className='answer'; input.disabled=false;
+  input.focus();
+  document.getElementById('feedback').className='feedback';
+  document.getElementById('actionBtn').textContent='Prüfen';
+  document.getElementById('progressFill').style.width = (idx/order.length*100)+'%';
+  document.getElementById('streakDisplay').textContent = streak;
+  document.getElementById('xpDisplay').textContent = levelXp;
+  renderHearts();
+  const mascot = document.getElementById('mascot');
+  mascot.className='mascot'; mascot.textContent='🦉';
+  document.getElementById('mascotBubble').textContent = 'Runde '+(idx+1)+' von '+order.length+' – du schaffst das!';
+}
+
+function normalize(s){
+  return s.toLowerCase().trim().replace(/\s+/g,' ').replace(/did not/g,"didn't");
+}
+
+function checkAnswer(){
+  if(answered){ nextQuestion(); return; }
+  const q = order[idx];
+  const input = document.getElementById('answerInput');
+  const given = normalize(input.value);
+  const okAnswers = q.ans.map(normalize);
+  const isCorrect = okAnswers.includes(given);
+  const fb = document.getElementById('feedback');
+  answered = true;
+
+  const mascot = document.getElementById('mascot');
+  const bubble = document.getElementById('mascotBubble');
+
+  if(isCorrect){
+    input.className='answer correct';
+    streak++; bestStreakRun = Math.max(bestStreakRun, streak);
+    const bonus = streak>=3 ? 5 : 0;
+    const gained = XP_PER_LEVEL[currentLevel] + bonus;
+    levelXp += gained; correctCount++;
+    fb.className='feedback ok show';
+    fb.innerHTML = '<b>Super! ✅</b> +'+gained+' Kristalle'+(bonus? ' (inkl. Serien-Bonus 🔥)':'');
+    mascot.className='mascot bounce'; mascot.textContent='🦉✨';
+    bubble.textContent = MASCOT_OK[Math.floor(Math.random()*MASCOT_OK.length)];
+    spawnFloatPoints('+'+gained+' ✦');
+    if(streak>=3) spawnConfetti();
+    showCombo(streak);
+    if(correctCount===1) showToast('🎉','Erster Treffer!','Deine Zeitreise hat begonnen.','first_correct');
+  } else {
+    input.className='answer wrong';
+    streak = 0;
+    fb.className='feedback bad show';
+    fb.innerHTML = '<b>Nicht ganz. ❌</b> Richtig wäre: <b>'+q.ans[0]+'</b>';
+    hearts = Math.max(0, hearts-1);
+    renderHearts();
+    mascot.className='mascot shake'; mascot.textContent='🦉💭';
+    bubble.textContent = MASCOT_BAD[Math.floor(Math.random()*MASCOT_BAD.length)];
+    document.querySelector('.app').classList.remove('shake-app'); void document.querySelector('.app').offsetWidth;
+    document.querySelector('.app').classList.add('shake-app');
+  }
+  document.getElementById('streakDisplay').textContent = streak;
+  document.getElementById('xpDisplay').textContent = levelXp;
+  document.getElementById('actionBtn').textContent = (idx+1>=order.length || hearts<=0) ? 'Ergebnis anzeigen' : 'Weiter';
+  input.disabled = true;
+}
+
+function nextQuestion(){
+  idx++;
+  if(hearts<=0 || idx>=order.length){ finishLevel(); return; }
+  renderQuestion();
+}
+
+function finishLevel(){
+  document.getElementById('progressFill').style.width='100%';
+  const accuracy = correctCount / order.length;
+  let starsEarned = 0;
+  if(hearts>0){
+    if(accuracy>=0.9) starsEarned=3; else if(accuracy>=0.7) starsEarned=2; else if(accuracy>=0.4) starsEarned=1;
+  } else { starsEarned = accuracy>=0.5 ? 1 : 0; }
+
+  const p = loadProgress();
+  const rankBefore = RANKS.filter(r=>p.xp>=r.min).length;
+  const wasLvl2Locked = p.stars[1] < 1;
+  const wasLvl3Locked = p.stars[2] < 1;
+  p.stars[currentLevel] = Math.max(p.stars[currentLevel], starsEarned);
+  p.xp += levelXp;
+  p.bestStreak = Math.max(p.bestStreak, bestStreakRun);
+  saveProgress(p);
+  const rankAfter = RANKS.filter(r=>p.xp>=r.min).length;
+
+  if(starsEarned===3) spawnConfetti();
+  if(starsEarned===3) showToast('🏆','Perfekte Runde!','Alle drei Sterne in '+LEVEL_NAMES[currentLevel]+' geholt.','perfect_'+currentLevel);
+  if(currentLevel===1 && wasLvl2Locked && p.stars[1]>=1) showToast('🔓','Level freigeschaltet!','Stadtabenteuer wartet auf dich.');
+  if(currentLevel===2 && wasLvl3Locked && p.stars[2]>=1) showToast('🔓','Level freigeschaltet!','Zeitreise-Meister wartet auf dich.');
+  if(rankAfter>rankBefore) showToast(RANKS[rankAfter-1].icon,'Neuer Rang!','Du bist jetzt "'+RANKS[rankAfter-1].name+'".');
+
+  document.getElementById('resultStars').innerHTML = [1,2,3].map(i => i<=starsEarned ? '<span class="star-on">★</span>' : '<span class="star-off">★</span>').join('');
+  document.getElementById('resultTitle').textContent = hearts<=0 ? 'Zeitmaschine überhitzt!' : (starsEarned===3 ? 'Meisterhaft!' : starsEarned>=1 ? 'Gut gemacht!' : 'Weiter üben!');
+  document.getElementById('resultSub').textContent = LEVEL_NAMES[currentLevel]+' – '+correctCount+' von '+order.length+' richtig';
+  document.getElementById('resCorrect').textContent = correctCount+'/'+order.length;
+  document.getElementById('resXp').textContent = levelXp;
+  document.getElementById('resStreak').textContent = bestStreakRun;
+  show('screen-result');
+}
+
+document.getElementById('actionBtn').addEventListener('click', checkAnswer);
+document.getElementById('answerInput').addEventListener('keydown', e=>{ if(e.key==='Enter') checkAnswer(); });
+document.querySelectorAll('.level-card').forEach(c=>{
+  c.addEventListener('click', ()=>{
+    if(c.classList.contains('locked')){
+      showToast('🔒','Noch gesperrt','Hol dir zuerst mindestens 1 Stern im Level davor.');
+      return;
+    }
+    startLevel(parseInt(c.dataset.level));
+  });
+});
+
+renderSelect();
+</script>
+</body>
+</html>

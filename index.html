@@ -191,7 +191,7 @@ function renderCards(pages){
     body.className = 'card-body';
     const title = document.createElement('span');
     title.className = 'card-title';
-    title.textContent = '📄 ' + page.name;
+    title.textContent = '📄 ' + page.name.replace(/^\d{13}-/, '');
     body.appendChild(title);
 
     if(!addBtn.disabled){

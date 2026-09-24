@@ -93,7 +93,7 @@
 <div class="header">
   <div>
     <h1>✨ Edu Space 🚀</h1>
-    <p class="subtitle" id="subtitle">Wähle ein Fach aus 🎨</p>
+    <p class="subtitle" id="subtitle">Wähle ein Fach aus:</p>
   </div>
   <button id="adminToggle" class="admin-btn">🔐 Admin</button>
 </div>
@@ -204,7 +204,7 @@ function render(){
   if(!subject){
     homeView.style.display = 'block';
     subjectView.style.display = 'none';
-    subtitle.textContent = 'Wähle ein Fach aus 🎨';
+    subtitle.textContent = 'Wähle ein Fach aus:';
     renderSubjectCards();
   } else {
     homeView.style.display = 'none';

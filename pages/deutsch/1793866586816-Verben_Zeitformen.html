@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zeitformen-Trainer</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#1e2433;--mut:#667085;--line:#e4e8f0;--c:#2563eb}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+header{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top{max-width:1000px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:18px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.logo span{background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border-radius:10px;padding:2px 8px}
+.prog{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut)}
+.bar{width:120px;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#16a34a);width:0;transition:width .4s}
+nav{max-width:1000px;margin:0 auto;padding:0 16px 10px;display:flex;gap:8px;overflow-x:auto}
+nav button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:6px 14px;font-size:14px;cursor:pointer;white-space:nowrap;font-weight:600;color:var(--ink);transition:.15s}
+nav button:hover{transform:translateY(-1px)}
+nav button.on{background:var(--c);border-color:var(--c);color:#fff}
+main{max-width:1000px;margin:0 auto;padding:20px 16px 60px}
+.card{background:var(--card);border-radius:20px;box-shadow:0 4px 18px rgba(30,36,51,.07);padding:24px;margin-bottom:18px}
+.hero{background:linear-gradient(135deg,#1e3a8a,#7c3aed);color:#fff;border-radius:24px;padding:34px 28px;margin-bottom:20px}
+.hero h1{margin:0 0 8px;font-size:32px}.hero p{margin:0 0 18px;opacity:.92;max-width:620px}
+.btn{border:0;border-radius:12px;padding:10px 18px;font-size:15px;font-weight:700;cursor:pointer;background:var(--c);color:#fff;transition:.15s}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn[disabled]{opacity:.4;cursor:default;transform:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.tc{background:#fff;border-radius:18px;padding:18px;border-top:6px solid var(--c);box-shadow:0 4px 14px rgba(30,36,51,.07);cursor:pointer;transition:.18s}
+.tc:hover{transform:translateY(-4px);box-shadow:0 10px 24px rgba(30,36,51,.12)}
+.tc h3{margin:0 0 4px;color:var(--c)}.tc .ex{font-style:italic;color:var(--mut);margin:6px 0}.tc small{color:var(--mut)}
+.thead{display:flex;gap:16px;align-items:center;border-left:8px solid var(--c);padding-left:16px;margin-bottom:14px}
+.thead .em{font-size:40px}.thead h2{margin:0;color:var(--c);font-size:28px}.thead p{margin:2px 0 0;color:var(--mut)}
+.formula{background:#fff;border-radius:16px;padding:14px 18px;margin-bottom:16px;box-shadow:0 2px 10px rgba(30,36,51,.06);display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:600}
+.chip{display:inline-block;padding:3px 10px;border-radius:8px;font-weight:700;font-size:.95em}
+.chip.a{background:#dbeafe;color:#1d4ed8}.chip.b{background:#fce7f3;color:#be185d}.chip.g{background:#dcfce7;color:#15803d}.chip.o{background:#ffedd5;color:#c2410c}.chip.n{background:#eef0f4;color:#344054}
+.tabs{display:flex;gap:6px;margin-bottom:16px;background:#e9edf5;border-radius:14px;padding:4px;width:fit-content}
+.tabs button{border:0;background:transparent;padding:8px 20px;border-radius:10px;font-weight:700;cursor:pointer;font-size:15px;color:var(--mut)}
+.tabs button.on{background:#fff;color:var(--c);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.dots{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.dots button{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:#fff;font-weight:700;cursor:pointer;color:var(--mut);font-size:13px}
+.dots button.on{background:var(--c);border-color:var(--c);color:#fff}.dots button.past{border-color:var(--c);color:var(--c)}
+.dots .sep{width:2px;background:var(--line);margin:0 4px}
+.badge{display:inline-block;background:var(--c);color:#fff;border-radius:99px;padding:2px 12px;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.step h3{margin:4px 0 10px;font-size:22px}
+.nav2{display:flex;justify-content:space-between;margin-top:20px;gap:10px}
+.merke{background:#fffbeb;border-left:5px solid #f59e0b;border-radius:10px;padding:10px 14px;margin:14px 0}
+.tip{background:#eff6ff;border-left:5px solid #3b82f6;border-radius:10px;padding:10px 14px;margin:14px 0}
+.ex-s{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;padding:10px 14px;margin:8px 0;font-size:17px}
+table{border-collapse:collapse;width:100%;margin:10px 0}
+th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left}
+th{background:#f1f4fa;font-size:14px}
+td.pn{color:var(--mut);width:110px}
+.vb{border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 14px;margin:0 6px 6px 0;cursor:pointer;font-weight:600}
+.vb.on{background:var(--c);color:#fff;border-color:var(--c)}
+.conj{background:#f8fafc;border-radius:14px;padding:14px;border:1px solid var(--line)}
+.aux{color:#1d4ed8;font-weight:700}.part{color:#be185d;font-weight:700}.m{color:var(--c)}.inf{color:#15803d;font-weight:700}
+.q{border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px;background:#fff;transition:.2s}
+.q.solved{background:#f0fdf4;border-color:#86efac}
+.q .qn{font-weight:800;color:var(--c);margin-right:6px}
+.q .instr{color:var(--mut);font-size:14px;margin-bottom:6px}
+.q .sent{font-size:18px;line-height:2.2}
+input.gap{border:0;border-bottom:3px solid #94a3b8;background:#f1f5f9;border-radius:6px 6px 0 0;padding:2px 6px;font-size:17px;text-align:center;font-family:inherit;outline:none;margin:0 3px}
+input.gap:focus{border-color:var(--c);background:#fff}
+input.gap.ok{border-color:#16a34a;background:#dcfce7}input.gap.bad{border-color:#dc2626;background:#fee2e2}
+input.wide{width:min(100%,520px)!important;text-align:left}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.opt{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px 14px;text-align:left;font-size:16px;cursor:pointer;font-family:inherit;transition:.15s}
+.opt:hover:not([disabled]){border-color:var(--c)}
+.opt.ok{background:#dcfce7;border-color:#16a34a}.opt.bad{background:#fee2e2;border-color:#dc2626;opacity:.8}
+.qa{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
+.qa button{border:0;border-radius:10px;padding:6px 14px;font-weight:700;cursor:pointer;background:var(--c);color:#fff}
+.qa button.s{background:#e9edf5;color:var(--ink)}
+.fb{font-size:15px;margin-top:6px;min-height:20px}.fb.ok{color:#15803d}.fb.bad{color:#b91c1c}.fb.info{color:#475569}
+.score{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.score .pill{background:var(--c);color:#fff;border-radius:99px;padding:4px 14px;font-weight:800}
+.win{background:linear-gradient(135deg,#dcfce7,#dbeafe);border-radius:16px;padding:16px;text-align:center;font-weight:700;font-size:18px;margin-top:10px}
+.tl{display:flex;align-items:stretch;gap:6px;flex-wrap:wrap;margin:10px 0}
+.tl div{flex:1;min-width:110px;text-align:center;border-radius:12px;padding:10px 6px;color:#fff;font-weight:700;font-size:14px}
+.tl small{display:block;font-weight:400;opacity:.9}
+.tl .now{background:#1e2433;box-shadow:0 0 0 4px #cbd5e1}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.ov td:first-child{font-weight:800}
+@media(max-width:600px){.hero h1{font-size:25px}.prog .bar{width:70px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="logo" data-a="view" data-v="home"><span>⏱</span> Zeitformen-Trainer</div>
+    <div class="prog"><span id="ptxt">0 / 0</span><div class="bar"><i id="pbar"></i></div></div>
+  </div>
+  <nav id="nav"></nav>
+</header>
+<main id="app"></main>
+
+<script>
+const $=s=>document.querySelector(s);
+const c=(t,k)=>`<span class="chip ${k}">${t}</span>`;
+const PERS=['ich','du','er/sie/es','wir','ihr','sie'];
+const AUX={
+ haben:{pres:['habe','hast','hat','haben','habt','haben'],prat:['hatte','hattest','hatte','hatten','hattet','hatten']},
+ sein:{pres:['bin','bist','ist','sind','seid','sind'],prat:['war','warst','war','waren','wart','waren']},
+ werden:{pres:['werde','wirst','wird','werden','werdet','werden']}
+};
+const VERBS={
+ suchen:{pres:['suche','suchst','sucht','suchen','sucht','suchen'],prat:['suchte','suchtest','suchte','suchten','suchtet','suchten'],part:'gesucht',aux:'haben',inf:'suchen'},
+ arbeiten:{pres:['arbeite','arbeitest','arbeitet','arbeiten','arbeitet','arbeiten'],prat:['arbeitete','arbeitetest','arbeitete','arbeiteten','arbeitetet','arbeiteten'],part:'gearbeitet',aux:'haben',inf:'arbeiten'},
+ sprechen:{pres:['spreche','sprichst','spricht','sprechen','sprecht','sprechen'],prat:['sprach','sprachst','sprach','sprachen','spracht','sprachen'],part:'gesprochen',aux:'haben',inf:'sprechen'},
+ gehen:{pres:['gehe','gehst','geht','gehen','geht','gehen'],prat:['ging','gingst','ging','gingen','gingt','gingen'],part:'gegangen',aux:'sein',inf:'gehen'},
+ fahren:{pres:['fahre','fährst','fährt','fahren','fahrt','fahren'],prat:['fuhr','fuhrst','fuhr','fuhren','fuhrt','fuhren'],part:'gefahren',aux:'sein',inf:'fahren'}
+};
+function forms(v,t,i){
+ const A=AUX[v.aux];
+ switch(t){
+  case 'praesens':return `<b class="m">${v.pres[i]}</b>`;
+  case 'praeteritum':return `<b class="m">${v.prat[i]}</b>`;
+  case 'perfekt':return `<span class="aux">${A.pres[i]}</span> <span class="part">${v.part}</span>`;
+  case 'plusquam':return `<span class="aux">${A.prat[i]}</span> <span class="part">${v.part}</span>`;
+  case 'futur1':return `<span class="aux">${AUX.werden.pres[i]}</span> <span class="inf">${v.inf}</span>`;
+  case 'futur2':return `<span class="aux">${AUX.werden.pres[i]}</span> <span class="part">${v.part}</span> <span class="inf">${v.aux}</span>`;
+ }
+}
+const CONJ=t=>`<div class="conj" data-t="${t}"></div>`;
+
+/* ---------- Inhalte ---------- */
+/* bsp = Beispielsatz für die Kachel, ex = Übungsliste */
+const T=[
+{id:'praesens',name:'Präsens',em:'🕐',color:'#2563eb',tag:'Die Gegenwart',bsp:'Ich spiele Volleyball.',
+ formula:`${c('Verbstamm','n')} + ${c('Personalendung','a')}`,
+ steps:[
+ {ph:'Bildung',t:'Vom Infinitiv ausgehen',h:`<p>Ausgangspunkt ist immer der <b>Infinitiv</b> (die Grundform). Er endet auf <b>-en</b> oder <b>-n</b>.</p><div class="ex-s">suchen · gehen · sprechen · klettern</div>`},
+ {ph:'Bildung',t:'Die Endung «abschneiden»',h:`<p>Schneide die Endung <b>-en</b> ab. Übrig bleibt der <b>Verbstamm</b>.</p><div class="ex-s">such<b class="m">|en</b> → Stamm: <b>such</b><br>geh<b class="m">|en</b> → Stamm: <b>geh</b></div>`},
+ {ph:'Bildung',t:'Personalendungen anhängen',h:`<p>An den Stamm kommen die Personalendungen:</p><table><tr><th>Person</th><th>Endung</th><th>Beispiel «suchen»</th></tr><tr><td>ich</td><td>-e</td><td>ich such<b>e</b></td></tr><tr><td>du</td><td>-st</td><td>du such<b>st</b></td></tr><tr><td>er/sie/es</td><td>-t</td><td>er such<b>t</b></td></tr><tr><td>wir</td><td>-en</td><td>wir such<b>en</b></td></tr><tr><td>ihr</td><td>-t</td><td>ihr such<b>t</b></td></tr><tr><td>sie</td><td>-en</td><td>sie such<b>en</b></td></tr></table>`},
+ {ph:'Bildung',t:'Achtung: Besonderheiten',h:`<ul><li><b>e-Einschub</b> bei Stamm auf -t/-d: du arbeit<b>e</b>st, er arbeit<b>e</b>t, ihr arbeit<b>e</b>t.</li><li><b>Vokalwechsel</b> bei manchen starken Verben: ich spreche – du <b>spri</b>chst; ich esse – du isst; ich fahre – du f<b>ä</b>hrst.</li><li><b>Unregelmässig:</b> sein (ich bin, du bist, er ist …), haben (du hast, er hat), werden (du wirst, er wird).</li></ul><div class="merke">Bei <b>trennbaren Verben</b> steht der Verbzusatz am Satzende: <i>Du stehst früh auf.</i></div>`},
+ {ph:'Bildung',t:'Probier es selbst!',h:`<p>Wähle ein Verb und schau dir die Präsensformen an:</p>${CONJ('praesens')}`},
+ {ph:'Verwendung',t:'Was gerade jetzt geschieht',h:`<p>Das Präsens drückt aus, was <b>jetzt</b> geschieht.</p><div class="ex-s">Der Mond nimmt zu.</div>`},
+ {ph:'Verwendung',t:'Was «immer» so ist (zeitlos)',h:`<p>Allgemeingültige Aussagen und Tatsachen stehen im Präsens.</p><div class="ex-s">Der Mond nimmt 13-mal im Jahr zu.</div>`},
+ {ph:'Verwendung',t:'Seit früher bis jetzt',h:`<p>Etwas hat früher begonnen und dauert noch an.</p><div class="ex-s">Ich spiele seit zehn Jahren Volleyball.</div>`},
+ {ph:'Verwendung',t:'Zukunft mit Zeitangabe',h:`<p>Mit einer Zeitangabe kann das Präsens auch die <b>Zukunft</b> ausdrücken.</p><div class="ex-s">Ich spiele ab November in der Nati A.</div><div class="merke"><b>Merke:</b> Das Präsens ist die vielseitigste Zeitform: Gegenwart, Zeitloses, Andauerndes und Zukünftiges.</div>`}
+ ],
+ ex:[
+ {q:'Setze das Verb im Präsens ein.',text:'Wir ___ uns in der ersten Stunde in Gruppen. (treffen)',a:[['treffen']]},
+ {q:'Setze das Verb im Präsens ein.',text:'Du ___ jeden Tag einen Apfel. (essen)',a:[['isst']],e:'Vokalwechsel: essen → du isst.'},
+ {q:'Setze das Verb im Präsens ein.',text:'Er ___ morgen 14 Jahre alt. (werden)',a:[['wird']]},
+ {q:'Setze das Verb im Präsens ein.',text:'Ihr ___ eine Pause. (brauchen)',a:[['braucht']]},
+ {q:'Setze das Verb im Präsens ein.',text:'Der Dieb ___ nachts Autos. (stehlen)',a:[['stiehlt']],e:'stehlen → er stiehlt.'},
+ {q:'Trennbares Verb: Setze beide Teile ein.',text:'Du ___ früh ___. (aufstehen)',a:[['stehst'],['auf']]},
+ {mc:1,q:'Welcher Satz drückt die Zukunft aus?',o:['Der Mond nimmt zu.','Ich spiele ab November in der Nati A.','Ich spiele seit zehn Jahren Volleyball.'],c:1,e:'«ab November» ist die Zeitangabe, die auf die Zukunft verweist.'},
+ {mc:1,q:'«Der Mond nimmt 13-mal im Jahr zu.» – Welche Verwendung des Präsens ist das?',o:['Gerade jetzt','Zeitlos / allgemeingültig','Zukunft'],c:1,e:'Es ist eine Tatsache, die immer gilt.'}
+ ]},
+{id:'praeteritum',name:'Präteritum',em:'📖',color:'#ea580c',tag:'Die Erzählform der Vergangenheit',bsp:'Es war einmal eine Prinzessin.',
+ formula:`${c('schwach: Stamm','n')} + ${c('-te','o')} + ${c('Endung','a')} &nbsp;|&nbsp; ${c('stark: neuer Stammvokal','b')} + ${c('Endung','a')}`,
+ steps:[
+ {ph:'Bildung',t:'Zwei Typen von Verben',h:`<p>Verben bilden das Präteritum auf zwei Arten:</p><div class="cols"><div class="q"><b>Schwache Verben</b><br>Stammvokal bleibt<br><i>leben – lebte – gelebt</i><br>Partizip II auf <b>-t</b></div><div class="q"><b>Starke Verben</b><br>Stammvokal ändert sich<br><i>sprechen – sprach – gesprochen</i><br>Partizip II auf <b>-en</b></div></div>`},
+ {ph:'Bildung',t:'Schwache Verben: Stamm + -te',h:`<p>Verbstamm + <b>-te</b> + Personalendung:</p><table><tr><th>Person</th><th>Endung</th><th>suchen</th></tr><tr><td>ich</td><td>-te</td><td>such<b>te</b></td></tr><tr><td>du</td><td>-test</td><td>such<b>test</b></td></tr><tr><td>er/sie/es</td><td>-te</td><td>such<b>te</b></td></tr><tr><td>wir</td><td>-ten</td><td>such<b>ten</b></td></tr><tr><td>ihr</td><td>-tet</td><td>such<b>tet</b></td></tr><tr><td>sie</td><td>-ten</td><td>such<b>ten</b></td></tr></table><div class="tip">Stamm auf -t/-d: e-Einschub → ich arbeit<b>e</b>te.</div>`},
+ {ph:'Bildung',t:'Starke Verben: Vokal ändert sich',h:`<p>Starke Verben bekommen <b>kein -te</b>, sondern verändern den Stammvokal. Die Endungen: ich –, du <b>-st</b>, er/sie/es –, wir <b>-en</b>, ihr <b>-t</b>, sie <b>-en</b>.</p><div class="ex-s">gehen → ich ging, du gingst, er ging, wir gingen<br>sprechen → ich sprach, du sprachst, wir sprachen</div><div class="merke">Ob ein Verb stark ist, muss man lernen: <b>Stammformen</b> auswendig kennen!</div>`},
+ {ph:'Bildung',t:'Die drei Stammformen',h:`<p>Mit den Stammformen bildest du alle Zeitformen:</p><table><tr><th>Infinitiv</th><th>Präteritum</th><th>Partizip II</th></tr><tr><td>fliehen</td><td>floh</td><td>geflohen</td></tr><tr><td>befehlen</td><td>befahl</td><td>befohlen</td></tr><tr><td>nehmen</td><td>nahm</td><td>genommen</td></tr><tr><td>sein</td><td>war</td><td>gewesen</td></tr></table><div class="tip">Manche Verben haben beide Formen mit unterschiedlicher Bedeutung: <i>schaffen – schuf</i> (erschaffen) / <i>schaffte</i> (bewältigen); <i>erschrak</i> / <i>erschreckte</i>.</div>`},
+ {ph:'Bildung',t:'Probier es selbst!',h:`<p>Vergleiche schwache (suchen, arbeiten) und starke Verben (sprechen, gehen, fahren):</p>${CONJ('praeteritum')}`},
+ {ph:'Verwendung',t:'Erzählform für die Vergangenheit',h:`<p>Das Präteritum ist die <b>Erzählform</b> für Vergangenes. Es wird deshalb vor allem <b>geschrieben</b> (Märchen, Geschichten, Berichte).</p><div class="ex-s">Es war einmal eine Prinzessin. Sie küsste ständig Frösche.</div>`},
+ {ph:'Verwendung',t:'Zeitungsbericht & Geschichten',h:`<p>Auch Berichte erzählen im Präteritum:</p><div class="ex-s">Gestern ereignete sich in einer Bank ein Überfall. Ein maskierter Räuber stürmte die Filiale und bedrohte den Kassierer.</div><div class="merke"><b>Merke:</b> Schriftlich erzählen → Präteritum. Mündlich über Vergangenes sprechen → meist Perfekt.</div>`}
+ ],
+ ex:[
+ {q:'Setze ins Präteritum.',text:'Gestern ___ ein Bankräuber die Filiale. (stürmen)',a:[['stürmte']]},
+ {q:'Setze ins Präteritum.',text:'Er ___ den Kassierer mit einer Pistole. (bedrohen)',a:[['bedrohte']]},
+ {q:'Setze ins Präteritum.',text:'Die Wikinger ___ die Flüsse hinauf. (fahren)',a:[['fuhren']]},
+ {q:'Setze ins Präteritum.',text:'Gestern ___ du den Schlüssel nicht. (finden)',a:[['fandest']]},
+ {q:'Setze ins Präteritum.',text:'Es ___ einmal eine Prinzessin. (sein)',a:[['war']]},
+ {q:'Setze ins Präteritum.',text:'Ihr ___ gestern nicht kommen. (können)',a:[['konntet']]},
+ {q:'Setze ins Präteritum.',text:'Der Gefangene ___ aus dem Gefängnis. (fliehen)',a:[['floh']]},
+ {q:'Setze ins Präteritum.',text:'Ich ___ gestern lange. (arbeiten)',a:[['arbeitete']],e:'e-Einschub bei Stamm auf -t.'},
+ {mc:1,q:'Wann verwendet man das Präteritum vor allem?',o:['Beim mündlichen Plaudern','Beim schriftlichen Erzählen','Für Vermutungen'],c:1,e:'Das Präteritum ist die Erzählform für das Schreiben.'}
+ ]},
+{id:'perfekt',name:'Perfekt',em:'✅',color:'#7c3aed',tag:'Die gesprochene Vergangenheit',bsp:'Niemand hat ihm geholfen.',
+ formula:`${c('haben / sein (Präsens)','a')} + ${c('Partizip II','b')}`,
+ steps:[
+ {ph:'Bildung',t:'Zwei Bausteine',h:`<p>Das Perfekt ist <b>zusammengesetzt</b>:</p><div class="ex-s">${c('ich habe','a')} ${c('gesucht','b')}<br>${c('ich bin','a')} ${c('gegangen','b')}</div><p>Hilfsverb <b>haben</b> oder <b>sein</b> im <b>Präsens</b> + <b>Partizip II</b> des Vollverbs.</p>`},
+ {ph:'Bildung',t:'Das Partizip II bilden',h:`<ul><li>schwach: <b>ge-</b> + Stamm + <b>-t</b> → <i>gesucht, gelebt</i></li><li>stark: <b>ge-</b> + (veränderter) Stamm + <b>-en</b> → <i>gegangen, gesprochen</i></li><li>Vorsilbe (be-, ent-, er-, ge-, miss-, ver-, zer-): <b>kein ge-</b> → <i>verkauft, erwartet</i></li><li>trennbar: <b>ge</b> in der Mitte → <i>angekommen, zugehört</i></li></ul>`},
+ {ph:'Bildung',t:'haben oder sein?',h:`<p>Die meisten Verben bilden das Perfekt mit <b>haben</b>.</p><p>Mit <b>sein</b> bilden es Verben der <b>Bewegung</b> und der <b>Zustandsänderung</b>:</p><div class="ex-s">Ich <b>bin</b> gelaufen. · Sie <b>ist</b> eingeschlafen. · Das Pferd <b>ist</b> durchgegangen.<br>Aber: Er <b>hat</b> laut geschimpft. · Sie <b>hat</b> einen Teppich gewebt.</div>`},
+ {ph:'Bildung',t:'Satzbau',h:`<p>Das Hilfsverb steht an zweiter Stelle, das Partizip II am <b>Satzende</b>:</p><div class="ex-s">Ich ${c('habe','a')} heute Morgen eine schwarze Katze ${c('gesehen','b')}.<br>Dann ${c('bin','a')} ich zur Arbeit ${c('gefahren','b')}.</div>`},
+ {ph:'Bildung',t:'Probier es selbst!',h:CONJ('perfekt')},
+ {ph:'Verwendung',t:'Vergangenes, das noch «lebendig» ist',h:`<p>Das Perfekt drückt vergangene Handlungen aus, die in der Gegenwart noch <b>sehr lebendig</b> sind.</p><div class="ex-s">Niemand hat ihm geholfen.<br>Bei einer Explosion sind 13 Menschen umgekommen.</div>`},
+ {ph:'Verwendung',t:'Mündlich, Nachrichten, Fragen',h:`<p>Im Gegensatz zum Präteritum wird das Perfekt vor allem <b>mündlich</b> benutzt. Häufig steht es in kurzen Nachrichten, Fragen und Sätzen mit <i>Sie/du/ihr</i>.</p><div class="ex-s">«Wo seid ihr denn gewesen?»<br>Das Auto ist von der Fahrbahn abgekommen.</div><div class="merke"><b>Merke:</b> Perfekt = mündlich Vergangenes erzählen. Präteritum = schriftlich erzählen.</div>`}
+ ],
+ ex:[
+ {q:'Setze ins Perfekt: Hilfsverb und Partizip II.',text:'Ich ___ ein Stück Schokolade ___. (essen)',a:[['habe'],['gegessen']]},
+ {q:'Setze ins Perfekt.',text:'Wir ___ zur Schule ___. (gehen)',a:[['sind'],['gegangen']]},
+ {q:'Setze ins Perfekt.',text:'Er ___ laut ___. (schimpfen)',a:[['hat'],['geschimpft']]},
+ {q:'Setze ins Perfekt.',text:'Das Pferd ___ ___. (durchgehen)',a:[['ist'],['durchgegangen']]},
+ {q:'Setze ins Perfekt.',text:'Sie ___ den Artikel ___. (übersetzen)',a:[['hat'],['übersetzt']],e:'Vorsilbe «über-» ist hier untrennbar → kein ge-.'},
+ {q:'Setze den ganzen Satz ins Perfekt: «Die Sonne schmilzt das Eis.»',text:'___',a:[['Die Sonne hat das Eis geschmolzen']],wide:1},
+ {q:'Setze den ganzen Satz ins Perfekt: «Man nannte ihn Bobby.»',text:'___',a:[['Man hat ihn Bobby genannt']],wide:1},
+ {mc:1,q:'«Sie ___ im Zimmer herumgetanzt.» Welches Hilfsverb?',o:['hat','ist'],c:1,e:'Bewegung → sein.'},
+ {mc:1,q:'Welches ist das Perfekt von «Ich esse»?',o:['Ich hatte gegessen','Ich habe gegessen','Ich werde gegessen haben'],c:1}
+ ]},
+{id:'plusquam',name:'Plusquamperfekt',em:'⏪',color:'#0d9488',tag:'Die Vorvergangenheit',bsp:'Sie hatte vorher noch nie Frösche geküsst.',
+ formula:`${c('haben / sein (Präteritum)','a')} + ${c('Partizip II','b')}`,
+ steps:[
+ {ph:'Bildung',t:'Aufbau wie das Perfekt – aber früher',h:`<p>Das Plusquamperfekt entsteht aus dem Hilfsverb im <b>Präteritum</b> + Partizip II:</p><div class="ex-s">${c('ich hatte','a')} ${c('gesucht','b')}<br>${c('ich war','a')} ${c('gegangen','b')}</div>`},
+ {ph:'Bildung',t:'Perfekt → Plusquamperfekt',h:`<table><tr><th>Perfekt</th><th>Plusquamperfekt</th></tr><tr><td>ich <b>habe</b> gesucht</td><td>ich <b>hatte</b> gesucht</td></tr><tr><td>ich <b>bin</b> gegangen</td><td>ich <b>war</b> gegangen</td></tr></table><div class="tip">Du tauschst nur das Hilfsverb von Präsens zu Präteritum aus. Partizip II und die Wahl haben/sein bleiben gleich.</div>`},
+ {ph:'Bildung',t:'Probier es selbst!',h:CONJ('plusquam')},
+ {ph:'Verwendung',t:'Was vor der Vergangenheit geschah',h:`<p>Das Plusquamperfekt drückt aus, was <b>vor</b> einer vergangenen Handlung geschehen ist.</p><div class="tl"><div style="background:#0d9488">Plusquamperfekt<small>hatte geküsst</small></div><div style="background:#ea580c">Präteritum<small>war das erste Mal</small></div><div class="now">Jetzt</div></div><div class="ex-s">Sie <b>hatte</b> vorher noch nie Frösche <b>geküsst</b>, das <b>war</b> das erste Mal.</div>`},
+ {ph:'Verwendung',t:'Zusammen mit Präteritum oder Perfekt',h:`<p>Plusquamperfekt-Verben kommen deshalb <b>zusammen</b> mit Verben im Präteritum oder Perfekt vor. Typische Signalwörter: <i>nachdem, bevor, vorher, weil, schon</i>.</p><div class="ex-s">Nachdem sie ihm alles erklärt <b>hatte</b>, <b>konnte</b> er alleine arbeiten.<br>Susi musste einen neuen Krug kaufen, weil sie ihn zerschlagen <b>hatte</b>.</div><div class="merke"><b>Merke:</b> Plusquamperfekt = Vorvergangenheit (früher als das Präteritum).</div>`}
+ ],
+ ex:[
+ {q:'Setze das Verb im Plusquamperfekt ein.',text:'Nachdem er ausgiebig ___ ___, ging er ins Bett. (essen)',a:[['gegessen'],['hatte']]},
+ {q:'Setze das Verb im Plusquamperfekt ein.',text:'Susi musste einen neuen Krug kaufen, weil sie ihn ___ ___. (zerschlagen)',a:[['zerschlagen'],['hatte']]},
+ {q:'Setze das Verb im Plusquamperfekt ein.',text:'Der Zug ___ schon ___, als die Klasse den Bahnhof erreichte. (abfahren)',a:[['war'],['abgefahren']]},
+ {q:'Setze das Verb im Plusquamperfekt ein.',text:'Peter konnte nicht heimfahren, weil er sein Billet ___ ___. (verlieren)',a:[['verloren'],['hatte']]},
+ {q:'Setze das Verb im Plusquamperfekt ein.',text:'Die Katze frass den Schinken, den wir für die Gäste ___ ___. (kaufen)',a:[['gekauft'],['hatten']]},
+ {q:'Setze ins Plusquamperfekt: «Ich bin gelaufen.»',text:'___',a:[['Ich war gelaufen']],wide:1},
+ {mc:1,q:'Was drückt das Plusquamperfekt aus?',o:['Eine Vermutung über die Zukunft','Ein Geschehen vor einer vergangenen Handlung (Vorvergangenheit)','Was gerade jetzt geschieht'],c:1},
+ {mc:1,q:'Welcher Satz steht im Plusquamperfekt?',o:['Sie küsste ständig Frösche.','Sie hatte vorher noch nie Frösche geküsst.','Sie hat Frösche geküsst.'],c:1}
+ ]},
+{id:'futur1',name:'Futur I',em:'🚀',color:'#16a34a',tag:'Die Zukunft',bsp:'Sie wird nächstes Jahr einen Jaguar kaufen.',
+ formula:`${c('werden (Präsens)','a')} + ${c('Infinitiv','g')}`,
+ steps:[
+ {ph:'Bildung',t:'werden + Infinitiv',h:`<p>Das Futur I besteht aus <b>werden</b> im Präsens und dem <b>Infinitiv</b> des Vollverbs:</p><div class="ex-s">${c('ich werde','a')} ${c('suchen','g')}<br>${c('du wirst','a')} ${c('gehen','g')}</div>`},
+ {ph:'Bildung',t:'werden konjugieren',h:`<table><tr><th>Person</th><th>werden</th></tr><tr><td>ich</td><td>werde</td></tr><tr><td>du</td><td>wirst</td></tr><tr><td>er/sie/es</td><td>wird</td></tr><tr><td>wir</td><td>werden</td></tr><tr><td>ihr</td><td>werdet</td></tr><tr><td>sie</td><td>werden</td></tr></table>`},
+ {ph:'Bildung',t:'Satzbau',h:`<p>Der Infinitiv steht am <b>Satzende</b>:</p><div class="ex-s">Am Wochenende ${c('werde','a')} ich im Wald eine Hütte ${c('bauen','g')}.</div><div class="tip">Mit Modalverb: <i>Du wirst dich eincremen <b>müssen</b>.</i> (Infinitiv + Infinitiv)</div>`},
+ {ph:'Bildung',t:'Probier es selbst!',h:CONJ('futur1')},
+ {ph:'Verwendung',t:'Handlung in der Zukunft',h:`<p>Das Futur I drückt einen Vorgang oder eine Handlung in der <b>Zukunft</b> aus.</p><div class="ex-s">Sie wird nächstes Jahr einen Jaguar kaufen.</div>`},
+ {ph:'Verwendung',t:'Vermutung zur Gegenwart',h:`<p>Mit dem Futur I kann man auch eine <b>Vermutung über die Gegenwart</b> äussern (oft mit «wohl», «schon»).</p><div class="ex-s">Sie wird sich das wohl leisten können.<br>Du wirst schon Recht haben.</div>`},
+ {ph:'Verwendung',t:'Zwei Arten, Zukünftiges auszudrücken',h:`<ol><li>Mit dem <b>Futur</b>: <i>ich werde gehen, du wirst sehen</i></li><li>Mit dem <b>Präsens + Zeitangabe</b>: <i>Morgen reisen sie ab. In zwei Wochen treffen wir uns.</i></li></ol><div class="merke"><b>Merke:</b> Im Alltag reicht oft das Präsens mit Zeitangabe.</div>`}
+ ],
+ ex:[
+ {q:'Setze ins Futur I.',text:'Am Wochenende ___ ich im Wald eine Hütte ___. (bauen)',a:[['werde'],['bauen']]},
+ {q:'Setze ins Futur I.',text:'Der Hund ___ zu Hause ___. (bleiben)',a:[['wird'],['bleiben']]},
+ {q:'Setze ins Futur I.',text:'___ ihr uns vom Bahnhof ___? (abholen)',a:[['Werdet'],['abholen']]},
+ {q:'Setze ins Futur I.',text:'Du ___ dir Vanille-Eis ___. (kaufen)',a:[['wirst'],['kaufen']]},
+ {q:'Setze den ganzen Satz ins Futur I: «Wir geniessen das herrliche Badewetter.»',text:'___',a:[['Wir werden das herrliche Badewetter geniessen']],wide:1},
+ {q:'Setze den ganzen Satz ins Futur I: «Ich finde es sehr heiss.»',text:'___',a:[['Ich werde es sehr heiss finden']],wide:1},
+ {mc:1,q:'«Sie wird sich das wohl leisten können.» – Was drückt das Futur I hier aus?',o:['Eine Vermutung zur Gegenwart','Ein Geschehen in der Vergangenheit','Eine zeitlose Tatsache'],c:0},
+ {mc:1,q:'«Morgen reisen sie ab.» – Welche Zeitform?',o:['Futur I','Präsens mit Zeitangabe für die Zukunft','Perfekt'],c:1}
+ ]},
+{id:'futur2',name:'Futur II',em:'🔮',color:'#e11d48',tag:'Vermutung über Abgeschlossenes',bsp:'Hansli wird wohl verschlafen haben.',
+ formula:`${c('werden (Präsens)','a')} + ${c('Partizip II','b')} + ${c('haben / sein (Infinitiv)','g')}`,
+ steps:[
+ {ph:'Bildung',t:'Drei Bausteine',h:`<p>Das Futur II ist die seltenste Zeitform. Sie besteht aus drei Teilen:</p><div class="ex-s">${c('ich werde','a')} ${c('gegangen','b')} ${c('sein','g')}<br>${c('er wird','a')} ${c('getrunken','b')} ${c('haben','g')}</div>`},
+ {ph:'Bildung',t:'haben oder sein am Ende',h:`<p>Welches Hilfsverb am Ende steht, hängt vom Vollverb ab (wie beim Perfekt):</p><div class="ex-s">Sie werden hinaufgeklettert <b>sein</b>. (Bewegung)<br>Du wirst zu wenig geschlafen <b>haben</b>.</div><div class="tip">Eselsbrücke: Futur II = Futur I vom Perfekt. Perfekt: <i>er hat verschlafen</i> → Futur II: <i>er wird verschlafen haben</i>.</div>`},
+ {ph:'Bildung',t:'Probier es selbst!',h:CONJ('futur2')},
+ {ph:'Verwendung',t:'Vermutung über Abgeschlossenes in der Vergangenheit',h:`<p>Man vermutet, dass etwas bereits <b>geschehen ist</b>.</p><div class="ex-s">Hansli wird wohl verschlafen haben.<br>Es werden Diebe gewesen sein.</div>`},
+ {ph:'Verwendung',t:'Abgeschlossenes in der Zukunft',h:`<p>Etwas wird bis zu einem Zeitpunkt in der Zukunft <b>abgeschlossen</b> sein.</p><div class="ex-s">Morgen um diese Zeit werden wir den Test geschrieben haben.</div><div class="merke"><b>Merke:</b> Das Futur II wird selten verwendet, oft zusammen mit «wohl».</div>`}
+ ],
+ ex:[
+ {q:'Setze ins Futur II.',text:'Hansli ___ wohl verschlafen ___. (haben)',a:[['wird'],['haben']]},
+ {q:'Setze ins Futur II.',text:'Morgen um diese Zeit ___ wir den Test geschrieben ___.',a:[['werden'],['haben']]},
+ {q:'Setze ins Futur II.',text:'Es ___ Diebe gewesen ___.',a:[['werden'],['sein']]},
+ {q:'Setze ins Futur II.',text:'Die Diebe ___ auf den Turm hinaufgeklettert ___.',a:[['werden'],['sein']]},
+ {q:'Setze den Satz ins Futur II (Vermutung): «Er ist wohl wieder nicht aus dem Bett gekommen.»',text:'___',a:[['Er wird wohl wieder nicht aus dem Bett gekommen sein']],wide:1},
+ {mc:1,q:'Was drückt das Futur II aus?',o:['Eine Vermutung über etwas Abgeschlossenes','Eine Gewohnheit in der Gegenwart','Nur Vorgänge in der fernen Vergangenheit'],c:0},
+ {mc:1,q:'Welcher Satz steht im Futur II?',o:['Du wirst schon Recht haben.','Du wirst zu wenig geschlafen haben.','Du hast zu wenig geschlafen.'],c:1},
+ {mc:1,q:'«Sie wird wohl zu spät gekommen ___.» Welches Hilfsverb?',o:['haben','sein'],c:1,e:'kommen = Bewegung → sein.'}
+ ]}
+];
+const TM=Object.fromEntries(T.map(t=>[t.id,t]));
+const TN=['Präsens','Präteritum','Perfekt','Plusquamperfekt','Futur I','Futur II'];
+const QZ=[
+ ['Man hat das kranke Tier eingeschläfert.',2],['Du wirst schon Recht haben.',4,'Vermutung zur Gegenwart → Futur I.'],
+ ['Der Chef wird schon wieder ungeduldig.',0,'«werden» ist hier Vollverb → Präsens.'],['Wolltest du nicht eine Pizza essen?',1],
+ ['Du wirst zu wenig geschlafen haben.',5],['Sie hatte vorher noch nie Frösche geküsst.',3],
+ ['Ich spiele seit zehn Jahren Volleyball.',0],['Das Auto ist von der Fahrbahn abgekommen.',2],
+ ['Es war einmal eine Prinzessin.',1],['Morgen um diese Zeit werden wir den Test geschrieben haben.',5]
+].map(x=>({mc:1,q:'Welche Zeitform?<br><b>«'+x[0]+'»</b>',o:TN,c:x[1],e:x[2]}));
+const EX={};T.forEach(t=>EX[t.id]=t.ex);EX.quiz=QZ;
+
+/* ---------- State ---------- */
+const S={view:'home',tab:'learn',step:{},done:{},verb:'suchen'};
+const cnt=k=>Object.keys(S.done[k]||{}).length;
+const total=()=>Object.values(EX).reduce((a,b)=>a+b.length,0);
+const solved=()=>Object.keys(EX).reduce((a,k)=>a+cnt(k),0);
+function norm(s){return s.toLowerCase().replace(/ß/g,'ss').replace(/[«»„“”"'.!?,]/g,'').replace(/\s+/g,' ').trim();}
+
+/* ---------- Views ---------- */
+function renderNav(){
+ const items=[['home','🏠 Start']].concat(T.map(t=>[t.id,t.name+(cnt(t.id)===t.ex.length?' ✓':'')]),[['overview','📋 Übersicht'],['quiz','🎯 Mix-Quiz'+(cnt('quiz')===QZ.length?' ✓':'')]]);
+ $('#nav').innerHTML=items.map(([v,l])=>{const col=TM[v]?TM[v].color:'#1e2433';return `<button class="${S.view===v?'on':''}" style="--c:${col}" data-a="view" data-v="${v}">${l}</button>`}).join('');
+}
+function updateProgress(){
+ $('#ptxt').textContent=solved()+' / '+total()+' Aufgaben';
+ $('#pbar').style.width=(100*solved()/total())+'%';
+ renderNav();
+ document.querySelectorAll('[data-score]').forEach(el=>{const k=el.dataset.score;el.querySelector('.pill').textContent=cnt(k)+' / '+EX[k].length;
+  const w=el.parentElement.querySelector('.win');if(w)w.style.display=cnt(k)===EX[k].length?'block':'none';});
+}
+function home(){
+ return `<div class="hero"><h1>Zeitformen im Deutschen</h1><p>Lerne Schritt für Schritt, wie die sechs Zeitformen gebildet und verwendet werden, und übe mit interaktiven Aufgaben.</p><button class="btn" style="--c:#fff;color:#1e3a8a" data-a="view" data-v="praesens">Los geht's →</button></div>
+ <div class="grid">${T.map(t=>`<div class="tc" style="--c:${t.color}" data-a="view" data-v="${t.id}"><h3>${t.em} ${t.name}</h3><small>${t.tag}</small><div class="ex">«${t.bsp}»</div><small>Aufgaben gelöst: ${cnt(t.id)} / ${t.ex.length}</small></div>`).join('')}</div>
+ <div class="card" style="margin-top:18px"><h3 style="margin-top:0">So funktioniert's</h3><p>1️⃣ <b>Erklärung</b>: Klicke dich Schritt für Schritt durch Bildung und Verwendung.<br>2️⃣ <b>Übungen</b>: Löse die Aufgaben und lass sie prüfen.<br>3️⃣ <b>Mix-Quiz</b>: Bestimme am Schluss gemischte Zeitformen.</p><div class="tl">
+ <div style="background:#0d9488">Plusquamperfekt<small>hatte gemacht</small></div><div style="background:#ea580c">Präteritum<small>machte</small></div><div style="background:#7c3aed">Perfekt<small>hat gemacht</small></div><div class="now">JETZT<small>Präsens: macht</small></div><div style="background:#16a34a">Futur I<small>wird machen</small></div><div style="background:#e11d48">Futur II<small>wird gemacht haben</small></div></div></div>`;
+}
+function overview(){
+ const rows=[['Präsens','praesens','Infinitiv-Stamm + -e, -st, -t, -en, -t, -en','ich suche','Gegenwart, Zeitloses, Andauerndes, Zukunft mit Zeitangabe'],
+ ['Präteritum','praeteritum','schwach: Stamm + -te …; stark: neuer Stammvokal','ich suchte / ich ging','Erzählform, schriftlich'],
+ ['Perfekt','perfekt','haben/sein (Präsens) + Partizip II','ich habe gesucht / ich bin gegangen','Vergangenes mit Gegenwartsbezug, mündlich'],
+ ['Plusquamperfekt','plusquam','haben/sein (Präteritum) + Partizip II','ich hatte gesucht / ich war gegangen','Vorvergangenheit'],
+ ['Futur I','futur1','werden + Infinitiv','ich werde suchen','Zukunft; Vermutung zur Gegenwart'],
+ ['Futur II','futur2','werden + Partizip II + haben/sein','ich werde gesucht haben','Vermutung über Abgeschlossenes']];
+ return `<div class="card"><h2 style="margin-top:0">📋 Übersicht aller Zeitformen</h2><div style="overflow-x:auto"><table class="ov"><tr><th>Zeitform</th><th>Bildung</th><th>Beispiel</th><th>Verwendung</th></tr>${rows.map(r=>`<tr><td style="color:${TM[r[1]].color}">${r[0]}</td><td>${r[2]}</td><td><i>${r[3]}</i></td><td>${r[4]}</td></tr>`).join('')}</table></div>
+ <div class="tl"><div style="background:#0d9488">Plusquamperfekt</div><div style="background:#ea580c">Präteritum</div><div style="background:#7c3aed">Perfekt</div><div class="now">JETZT · Präsens</div><div style="background:#16a34a">Futur I</div><div style="background:#e11d48">Futur II</div></div>
+ <div class="merke"><b>Stammformen</b> (Infinitiv – Präteritum – Partizip II) ermöglichen alle Zeitformen: fliehen – floh – geflohen → ich fliehe, ich floh, ich bin geflohen, ich war geflohen, ich werde fliehen, ich werde geflohen sein.</div></div>`;
+}
+function tensePage(t){
+ let body='';
+ if(S.tab==='learn'){
+  const i=S.step[t.id]||0,st=t.steps[i];
+  const dots=t.steps.map((s,j)=>{const sep=(j>0&&s.ph!==t.steps[j-1].ph)?'<span class="sep"></span>':'';return sep+`<button class="${j===i?'on':j<i?'past':''}" data-a="goto" data-i="${j}" title="${s.t}">${j+1}</button>`}).join('');
+  body=`<div class="dots">${dots}</div><div class="card step"><span class="badge">${st.ph} · Schritt ${i+1}/${t.steps.length}</span><h3>${st.t}</h3>${st.h}
+  <div class="nav2"><button class="btn ghost" data-a="prev" ${i===0?'disabled':''}>← Zurück</button>${i<t.steps.length-1?`<button class="btn" data-a="next">Weiter →</button>`:`<button class="btn" data-a="tab" data-v="practice">Zu den Übungen →</button>`}</div></div>`;
+ } else body=exercises(t.id);
+ return `<div style="--c:${t.color}"><div class="thead"><div class="em">${t.em}</div><div><h2>${t.name}</h2><p>${t.tag}</p></div></div>
+ <div class="formula">Bildung: ${t.formula}</div>
+ <div class="tabs"><button class="${S.tab==='learn'?'on':''}" data-a="tab" data-v="learn">📘 Erklärung</button><button class="${S.tab==='practice'?'on':''}" data-a="tab" data-v="practice">✏️ Übungen (${cnt(t.id)}/${t.ex.length})</button></div>${body}</div>`;
+}
+function exercises(k){
+ const list=EX[k];
+ const items=list.map((it,i)=>{
+  const d=S.done[k]&&S.done[k][i];let inner='';
+  if(it.mc){
+   inner=`<div class="instr">${it.q}</div><div class="opts">${it.o.map((o,j)=>`<button class="opt ${d&&j===it.c?'ok':''}" data-a="mc" data-k="${k}" data-i="${i}" data-j="${j}" ${d?'disabled':''}>${o}</button>`).join('')}</div><div class="fb ${d?'ok':''}">${d?'✔ Richtig! '+(it.e||''):''}</div>`;
+  } else {
+   const parts=it.text.split('___');let n=0;
+   const sent=parts.map((p,j)=>p+(j<parts.length-1?(()=>{const a=it.a[n][0];const h=`<input class="gap ${it.wide?'wide':''} ${d?'ok':''}" data-j="${n}" size="${Math.max(5,a.length+2)}" ${it.wide?'style="width:min(100%,520px)"':''} value="${d?a:''}" ${d?'disabled':''} autocomplete="off" autocapitalize="off" spellcheck="false">`;n++;return h})():'')).join('');
+   inner=`<div class="instr">${it.q}</div><div class="sent">${sent}</div><div class="qa">${d?'':`<button data-a="check" data-k="${k}" data-i="${i}">Prüfen</button><button class="s" data-a="sol" data-k="${k}" data-i="${i}">Lösung</button>`}</div><div class="fb ${d?'ok':''}">${d?'✔ Richtig! '+(it.e||''):''}</div>`;
+  }
+  return `<div class="q ${d?'solved':''}" data-k="${k}" data-i="${i}"><span class="qn">${i+1}.</span>${inner}</div>`;
+ }).join('');
+ return `<div class="score" data-score="${k}"><span>Fortschritt:</span><span class="pill">${cnt(k)} / ${list.length}</span><button class="btn ghost" style="--c:#555" data-a="reset" data-k="${k}">↺ Neu starten</button></div>${items}<div class="win" style="display:${cnt(k)===list.length?'block':'none'}">🎉 Geschafft! Alle Aufgaben gelöst.</div>`;
+}
+function quizPage(){
+ return `<div style="--c:#1e2433"><div class="thead"><div class="em">🎯</div><div><h2>Mix-Quiz</h2><p>Welche Zeitform steht im Satz?</p></div></div>${exercises('quiz')}</div>`;
+}
+
+/* ---------- Render ---------- */
+function render(scroll){
+ renderNav();
+ const v=S.view;
+ $('#app').innerHTML=v==='home'?home():v==='overview'?overview():v==='quiz'?quizPage():tensePage(TM[v]);
+ initConj();updateProgress();
+ if(scroll)window.scrollTo({top:0,behavior:'smooth'});
+}
+function conjHTML(tid){
+ const v=VERBS[S.verb];
+ const b=Object.keys(VERBS).map(k=>`<button class="vb ${k===S.verb?'on':''}" data-a="verb" data-v="${k}">${k}</button>`).join('');
+ const rows=PERS.map((p,i)=>`<tr><td class="pn">${p}</td><td>${forms(v,tid,i)}</td></tr>`).join('');
+ const legend=['perfekt','plusquam','futur1','futur2'].includes(tid)?`<small><span class="aux">Hilfsverb</span> · ${tid==='futur1'?'<span class="inf">Infinitiv</span>':'<span class="part">Partizip II</span>'}${tid==='futur2'?' · <span class="inf">haben/sein</span>':''}</small>`:'';
+ return `<div>${b}</div><table><tr><th>Person</th><th>${TM[tid].name}</th></tr>${rows}</table>${legend}`;
+}
+function initConj(){document.querySelectorAll('.conj').forEach(el=>el.innerHTML=conjHTML(el.dataset.t));}
+
+/* ---------- Events ---------- */
+function markDone(k,i){S.done[k]=S.done[k]||{};S.done[k][i]=1;}
+function fb(card,cls,txt){const f=card.querySelector('.fb');f.className='fb '+cls;f.innerHTML=txt;}
+function checkGap(card){
+ const k=card.dataset.k,i=+card.dataset.i,it=EX[k][i];let all=true;
+ card.querySelectorAll('input.gap').forEach((inp,j)=>{const ok=it.a[j].some(x=>norm(x)===norm(inp.value));inp.classList.toggle('ok',ok);inp.classList.toggle('bad',!ok);if(!ok)all=false;});
+ if(all){markDone(k,i);card.classList.add('solved');card.querySelectorAll('input').forEach(x=>x.disabled=true);card.querySelector('.qa').innerHTML='';fb(card,'ok','✔ Richtig! '+(it.e||''));updateProgress();}
+ else fb(card,'bad','✘ Noch nicht ganz. Schau dir die rot markierten Felder nochmals an.');
+}
+document.addEventListener('click',e=>{
+ const el=e.target.closest('[data-a]');if(!el)return;
+ const a=el.dataset.a;
+ if(a==='view'){S.view=el.dataset.v;S.tab='learn';render(true);}
+ else if(a==='tab'){S.tab=el.dataset.v;render(true);}
+ else if(a==='next'){S.step[S.view]=(S.step[S.view]||0)+1;render(true);}
+ else if(a==='prev'){S.step[S.view]=Math.max(0,(S.step[S.view]||0)-1);render(true);}
+ else if(a==='goto'){S.step[S.view]=+el.dataset.i;render(false);}
+ else if(a==='verb'){S.verb=el.dataset.v;initConj();}
+ else if(a==='check'){checkGap(el.closest('.q'));}
+ else if(a==='sol'){const card=el.closest('.q'),it=EX[el.dataset.k][+el.dataset.i];fb(card,'info','💡 Lösung: <b>'+it.a.map(x=>x[0]).join(' … ')+'</b>'+(it.e?' – '+it.e:''));}
+ else if(a==='mc'){
+  const k=el.dataset.k,i=+el.dataset.i,j=+el.dataset.j,it=EX[k][i],card=el.closest('.q');
+  if(j===it.c){el.classList.add('ok');markDone(k,i);card.classList.add('solved');card.querySelectorAll('.opt').forEach(x=>x.disabled=true);fb(card,'ok','✔ Richtig! '+(it.e||''));updateProgress();}
+  else{el.classList.add('bad');el.disabled=true;fb(card,'bad','✘ Leider nicht. Versuch es nochmals!');}
+ }
+ else if(a==='reset'){delete S.done[el.dataset.k];render(false);}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('gap')){checkGap(e.target.closest('.q'));}});
+render(false);
+</script>
+</body>
+</html>

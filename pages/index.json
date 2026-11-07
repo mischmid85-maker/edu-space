@@ -5,7 +5,12 @@
       "path": "pages/deutsch/1793866586816-Verben_Zeitformen.html"
     }
   ],
-  "englisch": [],
+  "englisch": [
+    {
+      "name": "1794058211948-adverbs_of_frequency.html",
+      "path": "pages/englisch/1794058211948-adverbs_of_frequency.html"
+    }
+  ],
   "franzoesisch": [
     {
       "name": "1789040613802-franzoesisch-trainer_verbes_pronominaux.html",

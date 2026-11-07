@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Past Simple Trainer – Quest Edition</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Verdana, sans-serif;
+    background: linear-gradient(135deg, #74ebd5, #9face6);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+  }
+  .app {
+    background: #fff;
+    max-width: 740px;
+    width: 100%;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  h1 { text-align: center; color: #2d3a8c; margin: 0 0 4px; }
+  .subtitle { text-align: center; color: #555; margin-bottom: 16px; font-size:0.95em;}
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #f2f4ff;
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .rank-badge { font-size: 1.8em; }
+  .rank-info { flex: 1 1 160px; min-width: 140px; }
+  .rank-title { font-weight: bold; color: #2d3a8c; font-size: 0.95em; }
+  .xp-track { background:#dfe3fb; border-radius: 8px; height: 10px; margin-top:4px; overflow:hidden; }
+  .xp-fill { background: linear-gradient(90deg,#5563de,#9face6); height:100%; width:0%; transition: width .5s; }
+  .xp-text { font-size:0.72em; color:#666; margin-top:2px; }
+  .stat-chip {
+    background:#fff; border-radius:20px; padding:6px 12px; font-size:0.9em;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08); display:flex; align-items:center; gap:5px; white-space:nowrap;
+  }
+  .icon-btn {
+    background:#fff; border:none; border-radius:50%; width:38px; height:38px; cursor:pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size:1.1em;
+  }
+  .icon-btn:hover { background:#eef0ff; }
+
+  .levels { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .level-card {
+    flex: 1 1 190px; background: #f2f4ff; border: 2px solid #c3c9f7; border-radius: 14px;
+    padding: 16px; text-align: center; cursor: pointer; transition: 0.2s; position: relative;
+  }
+  .level-card:hover:not(.locked) { transform: translateY(-4px); border-color: #5563de; background: #e6eaff; }
+  .level-card.locked { opacity: 0.55; cursor: not-allowed; }
+  .level-card h3 { margin: 6px 0; color: #2d3a8c; }
+  .level-card p { font-size: 0.82em; color: #666; margin: 0; }
+  .lock-overlay { position:absolute; top:8px; right:10px; font-size:1.2em; }
+  .stars-row { margin-top:8px; font-size:1.1em; letter-spacing:2px; }
+  .star-empty { opacity:0.25; }
+
+  .hidden { display: none !important; }
+
+  .top-bar { display:flex; justify-content: space-between; align-items:center; margin-bottom:8px; }
+  .back-link { color: #5563de; cursor: pointer; font-size: 0.9em; text-decoration: underline; }
+  .level-label { font-weight:bold; color:#2d3a8c; }
+
+  .quiz-meta { display:flex; justify-content: space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:6px; }
+  .hearts { font-size:1.15em; letter-spacing:2px; }
+  .heart.lost { opacity:0.25; }
+  .heart.shake { animation: shake 0.4s; }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-4px);} 75%{transform:translateX(4px);} }
+
+  .streak-chip { font-weight:bold; color:#d9540f; font-size:0.95em; }
+  .streak-chip.hot { animation: pulse 0.6s infinite alternate; }
+  @keyframes pulse { from{transform:scale(1);} to{transform:scale(1.12);} }
+
+  .progress-wrap { background: #e9e9f5; border-radius: 10px; height: 10px; margin: 8px 0; overflow: hidden; }
+  .progress-bar { background: linear-gradient(90deg, #5563de, #9face6); height: 100%; width: 0%; transition: width 0.3s; }
+
+  .timer-wrap { background:#eee; border-radius:8px; height:6px; margin-bottom:10px; overflow:hidden; }
+  .timer-bar { background: linear-gradient(90deg,#3ac97b,#a3e635); height:100%; width:100%; }
+
+  .question-box { background: #f8f9ff; border-radius: 14px; padding: 22px; position: relative; }
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; color: #fff; margin-bottom: 10px; }
+  .tag-Aussage { background: #4a90d9; }
+  .tag-Verneinung { background: #e08a2b; }
+  .tag-Frage { background: #8a4ad9; }
+
+  .instruction { font-size: 0.95em; color: #444; margin-bottom: 10px; }
+  .sentence { font-size: 1.2em; line-height: 1.8; color: #222; margin-bottom: 12px; }
+  .sentence input, .full-input {
+    font-size: 1em; padding: 8px 10px; border: 2px solid #b8c0f0; border-radius: 8px; outline: none; font-family: inherit;
+  }
+  .sentence input { width: 150px; text-align: center; }
+  .full-input { width: 100%; margin-top: 4px; }
+
+  .btn { background: #5563de; color: #fff; border: none; padding: 10px 22px; border-radius: 10px; font-size: 1em; cursor: pointer; margin-top: 16px; transition: 0.2s; position:relative; }
+  .btn:hover { background: #3f4bc7; }
+  .btn.secondary { background: #999; }
+  .btn.secondary:hover { background: #777; }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .feedback { margin-top: 14px; padding: 12px 14px; border-radius: 10px; font-size: 0.95em; }
+  .feedback.correct { background: #d9f7e0; color: #1e6b34; border: 1px solid #8fdba6; }
+  .feedback.wrong { background: #fde0e0; color: #8c1f1f; border: 1px solid #f0a3a3; }
+
+  .float-xp {
+    position:absolute; right: 24px; top: 10px; color:#2d9d4f; font-weight:bold; font-size:1.1em;
+    animation: floatUp 1.1s ease-out forwards; pointer-events:none;
+  }
+  @keyframes floatUp { 0%{opacity:1; transform:translateY(0);} 100%{opacity:0; transform:translateY(-40px);} }
+
+  .result-screen { text-align: center; }
+  .result-screen .big-emoji { font-size: 3em; }
+  .big-stars { font-size: 2.4em; letter-spacing:6px; margin: 8px 0; }
+  .reward-row { display:flex; justify-content:center; gap:18px; margin: 14px 0; flex-wrap:wrap; }
+  .reward-chip { background:#f2f4ff; border-radius:12px; padding:10px 16px; font-weight:bold; color:#2d3a8c; }
+  .unlock-msg { background:#fff6da; border:1px solid #f0d878; border-radius:10px; padding:10px; margin-top:10px; font-size:0.9em; }
+
+  .modal-overlay {
+    position: fixed; inset:0; background: rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:50; padding: 16px;
+  }
+  .modal-box { background:#fff; border-radius:16px; padding:22px; max-width:520px; width:100%; max-height: 80vh; overflow-y:auto; }
+  .modal-box h2 { color:#2d3a8c; margin-top:0; }
+  .badge-grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(140px,1fr)); gap:10px; }
+  .badge-item { background:#f8f9ff; border-radius:10px; padding:10px; text-align:center; font-size:0.85em; border: 2px solid #e0e4ff; }
+  .badge-item.locked { opacity: 0.4; }
+  .badge-emoji { font-size:1.8em; display:block; margin-bottom:4px; }
+  .close-btn { float:right; background:none; border:none; font-size:1.2em; cursor:pointer; color:#888; }
+
+  .toast {
+    position: fixed; top: 16px; right: 16px; background:#2d3a8c; color:#fff; padding: 12px 18px; border-radius: 12px;
+    font-size:0.9em; box-shadow: 0 6px 16px rgba(0,0,0,0.25); z-index: 100; animation: slideIn 0.4s ease-out;
+  }
+  @keyframes slideIn { from{ transform: translateX(120%);} to{ transform: translateX(0);} }
+
+  .confetti-piece {
+    position: fixed; top: -10px; width: 8px; height: 14px; opacity: 0.9; z-index: 60; border-radius:2px;
+    animation: fall linear forwards;
+  }
+  @keyframes fall { to { transform: translateY(105vh) rotate(360deg); opacity: 0.3; } }
+
+  .verbs-toggle { background: none; border: none; color: #5563de; text-decoration: underline; cursor: pointer; font-size: 0.9em; margin-top: 16px; display: block; }
+  table.verbs { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85em; }
+  table.verbs th, table.verbs td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; }
+  table.verbs th { background: #eef0ff; }
+  .reset-link { text-align:center; display:block; margin-top: 18px; font-size:0.75em; color:#aaa; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <h1>⏳ Past Simple Trainer</h1>
+  <p class="subtitle">Sammle XP, Münzen und Abzeichen – meistere Aussage-, Vernein- und Fragesätze!</p>
+
+  <div class="status-bar">
+    <div class="rank-badge" id="rankEmoji">🌱</div>
+    <div class="rank-info">
+      <div class="rank-title" id="rankTitle">Anfänger</div>
+      <div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
+      <div class="xp-text" id="xpText">0 XP</div>
+    </div>
+    <div class="stat-chip">🪙 <span id="coinCount">0</span></div>
+    <div class="stat-chip">🔥 Best <span id="bestStreak">0</span></div>
+    <button class="icon-btn" id="badgesBtn" type="button" title="Abzeichen ansehen">🏅</button>
+  </div>
+
+  <div id="levelSelect">
+    <div class="levels" id="levelCards"></div>
+    <button class="verbs-toggle" id="helpToggleBtn" type="button">📖 Tabelle: unregelmässige Verben anzeigen/verstecken</button>
+    <div id="helpBox" class="hidden"></div>
+    <span class="reset-link" id="resetLink">Fortschritt zurücksetzen</span>
+  </div>
+
+  <div id="quizScreen" class="hidden">
+    <div class="top-bar">
+      <span class="back-link" id="backLink">⟵ Zurück</span>
+      <span class="level-label" id="levelLabel"></span>
+    </div>
+    <div class="quiz-meta">
+      <span class="hearts" id="heartsDisplay"></span>
+      <span class="streak-chip" id="streakDisplay"></span>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="timer-wrap"><div class="timer-bar" id="timerBar"></div></div>
+    <div class="question-box" id="questionBox"></div>
+  </div>
+
+  <div id="resultScreen" class="hidden result-screen"></div>
+
+</div>
+
+<div id="badgeModal" class="hidden"></div>
+
+<script>
+// =========================================================
+//  DATEN: FRAGEN
+// =========================================================
+const levels = {
+  1: { name: "Stufe 1 – Einfach", emoji:"⭐", desc:"Regelmässige Verben, einfache Sätze",
+    questions: [
+      {type:'gap', tag:'Aussage', before:'I ', verb:'walk', after:' to school yesterday.', answer:'walked'},
+      {type:'gap', tag:'Aussage', before:'She ', verb:'watch', after:' a film last night.', answer:'watched'},
+      {type:'gap', tag:'Aussage', before:'We ', verb:'play', after:' volleyball on Sunday.', answer:'played'},
+      {type:'gap', tag:'Aussage', before:'They ', verb:'clean', after:' the kitchen.', answer:'cleaned'},
+      {type:'gap', tag:'Aussage', before:'He ', verb:'listen', after:' to music all evening.', answer:'listened'},
+      {type:'gap', tag:'Aussage', before:'I ', verb:'have', after:' a great weekend.', answer:'had'},
+      {type:'gap', tag:'Aussage', before:'We ', verb:'go', after:' to the swimming pool.', answer:'went'},
+      {type:'gap', tag:'Verneinung', before:'I ', verb:'not watch', after:' TV yesterday.', answer:"didn't watch"},
+      {type:'gap', tag:'Verneinung', before:'She ', verb:'not play', after:' the piano.', answer:"didn't play"},
+      {type:'gap', tag:'Verneinung', before:'We ', verb:'not clean', after:' our rooms.', answer:"didn't clean"},
+      {type:'gap', tag:'Verneinung', before:'They ', verb:'not walk', after:' to the party.', answer:"didn't walk"},
+      {type:'gap', tag:'Verneinung', before:'He ', verb:'not listen', after:' to the radio.', answer:"didn't listen"},
+      {type:'transform', tag:'Frage', instruction:'Bilde die richtige Frage:', original:'(you / play) football yesterday?', answer:'Did you play football yesterday?'},
+      {type:'transform', tag:'Frage', instruction:'Bilde die richtige Frage:', original:'(she / watch) the new film?', answer:'Did she watch the new film?'},
+      {type:'transform', tag:'Frage', instruction:'Bilde die richtige Frage:', original:'(they / clean) the classroom?', answer:'Did they clean the classroom?'},
+      {type:'transform', tag:'Frage', instruction:'Bilde die richtige Frage:', original:'(he / visit) his grandparents?', answer:'Did he visit his grandparents?'},
+      {type:'transform', tag:'Frage', instruction:'Bilde die richtige Frage:', original:'(we / dance) at the party?', answer:'Did we dance at the party?'}
+    ]},
+  2: { name: "Stufe 2 – Mittel", emoji:"⭐⭐", desc:"Regelmässige + einige unregelmässige Verben",
+    questions: [
+      {type:'gap', tag:'Aussage', before:'I ', verb:'go', after:' to the cinema last Friday.', answer:'went'},
+      {type:'gap', tag:'Aussage', before:'She ', verb:'have', after:' a fantastic birthday party.', answer:'had'},
+      {type:'gap', tag:'Aussage', before:'We ', verb:'eat', after:' pizza for dinner.', answer:'ate'},
+      {type:'gap', tag:'Aussage', before:'They ', verb:'see', after:' a great concert.', answer:'saw'},
+      {type:'gap', tag:'Aussage', before:'He ', verb:'make', after:' a delicious cake.', answer:'made'},
+      {type:'gap', tag:'Verneinung', before:'I ', verb:'not go', after:' to school on Monday.', answer:"didn't go"},
+      {type:'gap', tag:'Verneinung', before:'She ', verb:'not have', after:' enough time.', answer:"didn't have"},
+      {type:'gap', tag:'Verneinung', before:'We ', verb:'not eat', after:' breakfast this morning.', answer:"didn't eat"},
+      {type:'gap', tag:'Verneinung', before:'They ', verb:'not see', after:' the accident.', answer:"didn't see"},
+      {type:'gap', tag:'Verneinung', before:'He ', verb:'not take', after:' the bus.', answer:"didn't take"},
+      {type:'transform', tag:'Frage', instruction:'Bilde die richtige Frage:', original:'(you / go) to the party last night?', answer:'Did you go to the party last night?'},
+      {type:'transform', tag:'Frage', instruction:'Bilde die richtige Frage:', original:'(she / have) a good weekend?', answer:'Did she have a good weekend?'},
+      {type:'transform', tag:'Frage', instruction:'Bilde die richtige Frage:', original:'(they / eat) all the chocolate?', answer:'Did they eat all the chocolate?'},
+      {type:'transform', tag:'Frage', instruction:'Bilde die richtige Frage:', original:'(he / see) the new Marvel film?', answer:'Did he see the new Marvel film?'},
+      {type:'transform', tag:'Frage', instruction:'Bilde die richtige Frage:', original:'(we / take) the wrong train?', answer:'Did we take the wrong train?'}
+    ]},
+  3: { name: "Stufe 3 – Schwer", emoji:"⭐⭐⭐", desc:"Unregelmässige Verben + Sätze umformen",
+    questions: [
+      {type:'gap', tag:'Aussage', before:'She ', verb:'write', after:' a postcard to her friend.', answer:'wrote'},
+      {type:'gap', tag:'Aussage', before:'We ', verb:'swim', after:' in the cold lake.', answer:'swam'},
+      {type:'gap', tag:'Aussage', before:'I ', verb:'forget', after:' my gym clothes at home.', answer:'forgot'},
+      {type:'gap', tag:'Aussage', before:'They ', verb:'fly', after:' to London for the holidays.', answer:'flew'},
+      {type:'gap', tag:'Aussage', before:'He ', verb:'break', after:' his arm while skateboarding.', answer:'broke'},
+      {type:'transform', tag:'Verneinung', instruction:'Schreibe den Satz verneint (negativ):', original:'He won the race.', answer:"He didn't win the race."},
+      {type:'transform', tag:'Verneinung', instruction:'Schreibe den Satz verneint (negativ):', original:'They caught the early train.', answer:"They didn't catch the early train."},
+      {type:'transform', tag:'Verneinung', instruction:'Schreibe den Satz verneint (negativ):', original:'She read the whole book in one day.', answer:"She didn't read the whole book in one day."},
+      {type:'transform', tag:'Verneinung', instruction:'Schreibe den Satz verneint (negativ):', original:'We found the treasure.', answer:"We didn't find the treasure."},
+      {type:'transform', tag:'Verneinung', instruction:'Schreibe den Satz verneint (negativ):', original:'I lost my phone at the party.', answer:"I didn't lose my phone at the party."},
+      {type:'transform', tag:'Frage', instruction:'Mache aus dem Satz eine Frage:', original:'We met our friends at the mall.', answer:'Did we meet our friends at the mall?'},
+      {type:'transform', tag:'Frage', instruction:'Mache aus dem Satz eine Frage:', original:'He lost his keys yesterday.', answer:'Did he lose his keys yesterday?'},
+      {type:'transform', tag:'Frage', instruction:'Mache aus dem Satz eine Frage:', original:'She sang a beautiful song.', answer:'Did she sing a beautiful song?'},
+      {type:'transform', tag:'Frage', instruction:'Mache aus dem Satz eine Frage:', original:'They stole a bike from the shop.', answer:'Did they steal a bike from the shop?'},
+      {type:'transform', tag:'Frage', instruction:'Mache aus dem Satz eine Frage:', original:'You wore a costume at the party.', answer:'Did you wear a costume at the party?'}
+    ]}
+};
+
+const irregularVerbs = [
+  ["go","went","gehen"], ["have","had","haben"], ["eat","ate","essen"],
+  ["see","saw","sehen"], ["make","made","machen"], ["take","took","nehmen"],
+  ["write","wrote","schreiben"], ["swim","swam","schwimmen"], ["forget","forgot","vergessen"],
+  ["fly","flew","fliegen"], ["break","broke","brechen"], ["win","won","gewinnen"],
+  ["catch","caught","fangen"], ["read","read","lesen"], ["find","found","finden"],
+  ["lose","lost","verlieren"], ["meet","met","treffen"], ["sing","sang","singen"],
+  ["steal","stole","stehlen"], ["wear","wore","tragen"]
+];
+
+// =========================================================
+//  GAMIFICATION: RÄNGE & ABZEICHEN
+// =========================================================
+const ranks = [
+  {title:'Anfänger', emoji:'🌱', min:0, max:50},
+  {title:'Lernende(r)', emoji:'📘', min:50, max:150},
+  {title:'Fortgeschritten', emoji:'⭐', min:150, max:300},
+  {title:'Profi', emoji:'🏅', min:300, max:500},
+  {title:'Meister', emoji:'🏆', min:500, max:800},
+  {title:'Champion', emoji:'👑', min:800, max:Infinity}
+];
+
+const badgeDefs = [
+  {id:'first_correct', title:'Erster Treffer', emoji:'🎯', desc:'Löse deine erste Aufgabe richtig.'},
+  {id:'streak5', title:'Serientäter', emoji:'🔥', desc:'5 richtige Antworten in Folge.'},
+  {id:'streak10', title:'Unaufhaltbar', emoji:'⚡', desc:'10 richtige Antworten in Folge.'},
+  {id:'perfect', title:'Perfektionist', emoji:'💯', desc:'Erreiche 100% in einem Level.'},
+  {id:'level1_complete', title:'Level 1 gemeistert', emoji:'🥉', desc:'Schliesse Stufe 1 ab.'},
+  {id:'level2_complete', title:'Level 2 gemeistert', emoji:'🥈', desc:'Schliesse Stufe 2 ab.'},
+  {id:'level3_complete', title:'Level 3 gemeistert', emoji:'🥇', desc:'Schliesse Stufe 3 ab.'},
+  {id:'champion', title:'Past-Simple-Champion', emoji:'👑', desc:'Schliesse alle 3 Level ab.'},
+  {id:'speedy', title:'Blitzschnell', emoji:'💨', desc:'5 Speed-Boni in einer Runde.'},
+  {id:'coins50', title:'Sparfuchs', emoji:'💰', desc:'Sammle 50 Münzen.'}
+];
+
+// =========================================================
+//  SPEICHERUNG
+// =========================================================
+const STORAGE_KEY = 'pastSimpleQuestData_v1';
+function loadGameData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { totalXP:0, coins:0, unlockedLevels:[1], levelStars:{1:0,2:0,3:0}, badges:[], bestStreak:0 };
+}
+function saveGameData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(gameData)); }
+function resetProgress() {
+  if (confirm('Möchtest du deinen gesamten Fortschritt (XP, Münzen, Sterne, Abzeichen) wirklich zurücksetzen?')) {
+    localStorage.removeItem(STORAGE_KEY);
+    gameData = loadGameData();
+    renderHeader();
+    renderLevelCards();
+  }
+}
+
+let gameData = loadGameData();
+
+// =========================================================
+//  RUNDEN-STATUS
+// =========================================================
+let currentLevel = null, currentQuestions = [], currentIndex = 0;
+let score = 0, streak = 0, maxStreakRound = 0, heartsLeft = 5, speedBonusCount = 0;
+let questionStartTime = 0, answered = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+// =========================================================
+//  SOUND (Web Audio, ohne externe Dateien)
+// =========================================================
+let audioCtx = null;
+function tone(freq, duration, type='sine', delay=0, gain=0.15) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    g.gain.value = gain;
+    osc.connect(g); g.connect(audioCtx.destination);
+    const t0 = audioCtx.currentTime + delay;
+    osc.start(t0);
+    g.gain.setValueAtTime(gain, t0);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+    osc.stop(t0 + duration + 0.02);
+  } catch(e) {}
+}
+function playCorrect() { tone(660,0.1,'sine',0); tone(880,0.15,'sine',0.1); }
+function playWrong() { tone(180,0.25,'sawtooth',0,0.12); }
+function playLevelUp() { tone(523,0.12,'triangle',0); tone(659,0.12,'triangle',0.12); tone(784,0.2,'triangle',0.24); }
+function playBadge() { tone(784,0.1,'square',0,0.08); tone(988,0.15,'square',0.1,0.08); }
+
+// =========================================================
+//  RANG-BERECHNUNG & HEADER
+// =========================================================
+function getRank(xp) { return ranks.slice().reverse().find(r => xp >= r.min); }
+function renderHeader() {
+  const rank = getRank(gameData.totalXP);
+  document.getElementById('rankEmoji').textContent = rank.emoji;
+  document.getElementById('rankTitle').textContent = rank.title;
+  document.getElementById('coinCount').textContent = gameData.coins;
+  document.getElementById('bestStreak').textContent = gameData.bestStreak;
+  const pct = rank.max === Infinity ? 100 : Math.round(((gameData.totalXP - rank.min) / (rank.max - rank.min)) * 100);
+  document.getElementById('xpFill').style.width = pct + '%';
+  document.getElementById('xpText').textContent = rank.max === Infinity
+    ? `${gameData.totalXP} XP (Maximalrang erreicht!)`
+    : `${gameData.totalXP} / ${rank.max} XP bis zum nächsten Rang`;
+}
+
+// =========================================================
+//  LEVEL-AUSWAHL
+// =========================================================
+function renderLevelCards() {
+  const wrap = document.getElementById('levelCards');
+  wrap.innerHTML = '';
+  [1,2,3].forEach(n => {
+    const locked = !gameData.unlockedLevels.includes(n);
+    const stars = gameData.levelStars[n] || 0;
+    const starsHtml = [1,2,3].map(i => `<span class="${i<=stars ? '' : 'star-empty'}">⭐</span>`).join('');
+    const div = document.createElement('div');
+    div.className = 'level-card' + (locked ? ' locked' : '');
+    div.dataset.level = n;
+    div.dataset.locked = locked ? '1' : '0';
+    div.innerHTML = `
+      ${locked ? '<div class="lock-overlay">🔒</div>' : ''}
+      <h3>${levels[n].emoji} ${levels[n].name}</h3>
+      <p>${levels[n].desc}</p>
+      <div class="stars-row">${starsHtml}</div>
+      ${locked ? '<p style="margin-top:6px;font-size:0.75em;color:#c0392b;">Vorheriges Level mit ≥ 50% abschliessen</p>' : ''}
+    `;
+    wrap.appendChild(div);
+  });
+}
+function shakeCard(el) { el.style.animation = 'shake 0.4s'; setTimeout(()=> el.style.animation='', 400); }
+
+function toggleHelp() {
+  const box = document.getElementById('helpBox');
+  if (box.classList.contains('hidden')) {
+    let html = '<table class="verbs"><tr><th>Infinitiv</th><th>Past Simple</th><th>Deutsch</th></tr>';
+    irregularVerbs.forEach(v => html += `<tr><td>${v[0]}</td><td>${v[1]}</td><td>${v[2]}</td></tr>`);
+    html += '</table>';
+    box.innerHTML = html; box.classList.remove('hidden');
+  } else box.classList.add('hidden');
+}
+
+// =========================================================
+//  BADGES MODAL
+// =========================================================
+function openBadges() {
+  const modal = document.getElementById('badgeModal');
+  const grid = badgeDefs.map(b => {
+    const unlocked = gameData.badges.includes(b.id);
+    return `<div class="badge-item ${unlocked?'':'locked'}">
+      <span class="badge-emoji">${b.emoji}</span>
+      <strong>${b.title}</strong><br>${b.desc}
+    </div>`;
+  }).join('');
+  modal.innerHTML = `
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal-box">
+        <button class="close-btn" id="closeBadgeBtn" type="button">✖</button>
+        <h2>🏅 Deine Abzeichen (${gameData.badges.length}/${badgeDefs.length})</h2>
+        <div class="badge-grid">${grid}</div>
+      </div>
+    </div>`;
+  modal.classList.remove('hidden');
+}
+function closeBadges() { document.getElementById('badgeModal').classList.add('hidden'); document.getElementById('badgeModal').innerHTML=''; }
+
+function awardBadge(id) {
+  if (gameData.badges.includes(id)) return;
+  gameData.badges.push(id);
+  saveGameData();
+  const def = badgeDefs.find(b => b.id === id);
+  showToast(`🏅 Neues Abzeichen: ${def.emoji} ${def.title}!`);
+  playBadge();
+}
+function showToast(text) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = text;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3000);
+}
+
+// =========================================================
+//  KONFETTI
+// =========================================================
+function launchConfetti() {
+  const colors = ['#5563de','#9face6','#3ac97b','#f2c94c','#eb5757'];
+  for (let i=0;i<40;i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random()*100 + 'vw';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDuration = (2 + Math.random()*1.5) + 's';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 3600);
+  }
+}
+
+// =========================================================
+//  LEVEL START
+// =========================================================
+function startLevel(n) {
+  currentLevel = n;
+  currentQuestions = shuffle(levels[n].questions);
+  currentIndex = 0; score = 0; streak = 0; maxStreakRound = 0; heartsLeft = 5; speedBonusCount = 0;
+  document.getElementById('levelSelect').classList.add('hidden');
+  document.getElementById('resultScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  document.getElementById('levelLabel').textContent = levels[n].name;
+  renderQuestion();
+}
+function restartSameLevel() { startLevel(currentLevel); }
+function goHome() {
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultScreen').classList.add('hidden');
+  document.getElementById('levelSelect').classList.remove('hidden');
+  renderHeader(); renderLevelCards();
+}
+
+// =========================================================
+//  FRAGE RENDERN
+// =========================================================
+function normalize(s) {
+  return s.trim().toLowerCase().replace(/[.!?]+$/,'')
+    .replace(/\bdid not\b/g,'didnt').replace(/'/g,'').replace(/\s+/g,' ').trim();
+}
+function renderHearts() {
+  let html = '';
+  for (let i=0;i<5;i++) html += `<span class="heart ${i < heartsLeft ? '' : 'lost'}" id="heart${i}">❤️</span>`;
+  document.getElementById('heartsDisplay').innerHTML = html;
+}
+function renderStreak() {
+  const el = document.getElementById('streakDisplay');
+  if (streak >= 2) { el.textContent = `🔥 ${streak}er-Streak!`; el.classList.add('hot'); }
+  else { el.textContent = streak === 1 ? '🔥 1' : ''; el.classList.remove('hot'); }
+}
+function startTimer() {
+  const bar = document.getElementById('timerBar');
+  bar.style.transition = 'none'; bar.style.background = 'linear-gradient(90deg,#3ac97b,#a3e635)'; bar.style.width = '100%';
+  void bar.offsetWidth;
+  bar.style.transition = 'width 8s linear';
+  bar.style.width = '0%';
+  questionStartTime = Date.now();
+}
+
+function renderQuestion() {
+  answered = false;
+  const total = currentQuestions.length;
+  const q = currentQuestions[currentIndex];
+  document.getElementById('progressBar').style.width = (currentIndex/total*100) + '%';
+  renderHearts(); renderStreak(); startTimer();
+
+  const box = document.getElementById('questionBox');
+  let inner = `<span class="tag tag-${q.tag}">${q.tag}</span> <span style="float:right;font-size:0.85em;color:#888;">Frage ${currentIndex+1}/${total}</span>`;
+  if (q.type === 'gap') {
+    inner += `<div class="sentence">${q.before}<input type="text" id="answerInput" autocomplete="off"> (${q.verb})${q.after}</div>`;
+  } else {
+    inner += `<div class="instruction">${q.instruction}</div>`;
+    inner += `<div class="sentence" style="font-style:italic;">${q.original}</div>`;
+    inner += `<input type="text" class="full-input" id="answerInput" autocomplete="off" placeholder="Schreibe hier deinen ganzen Satz...">`;
+  }
+  inner += `<div id="feedbackArea"></div>`;
+  inner += `<button class="btn" id="actionBtn" type="button">Prüfen</button>`;
+  box.innerHTML = inner;
+
+  const input = document.getElementById('answerInput');
+  input.focus();
+}
+
+// Zentrale Klick-Logik: wird per EINMALIGER Delegation aufgerufen (siehe unten),
+// nicht mehr pro Frage neu ans Button-Element gebunden.
+function onActionButtonClick() {
+  if (!answered) {
+    checkAnswer();
+  } else if (heartsLeft <= 0) {
+    showResult(true);
+  } else {
+    nextQuestion();
+  }
+}
+
+// =========================================================
+//  ANTWORT PRÜFEN
+// =========================================================
+function checkAnswer() {
+  if (answered) return; // Absicherung gegen Doppelauswertung
+  answered = true;
+
+  const btn = document.getElementById('actionBtn');
+  const input = document.getElementById('answerInput');
+  const q = currentQuestions[currentIndex];
+  const isCorrect = normalize(input.value) === normalize(q.answer);
+  const elapsed = Date.now() - questionStartTime;
+  const speedy = elapsed <= 8000;
+
+  // WICHTIG: Button-Zustand SOFORT umschalten, bevor irgendeine
+  // weitere (potenziell fehleranfällige) Logik läuft.
+  input.disabled = true;
+  const isLastQuestion = (currentIndex === currentQuestions.length - 1);
+  if (heartsLeft - (isCorrect ? 0 : 1) <= 0) {
+    btn.textContent = 'Ergebnis anzeigen';
+  } else {
+    btn.textContent = isLastQuestion ? 'Ergebnis anzeigen' : 'Weiter ➜';
+  }
+
+  const feedbackArea = document.getElementById('feedbackArea');
+  const box = document.getElementById('questionBox');
+  let xpGain = 0, coinGain = 0, notes = [];
+
+  if (isCorrect) {
+    playCorrect();
+    score++; streak++; maxStreakRound = Math.max(maxStreakRound, streak);
+    gameData.bestStreak = Math.max(gameData.bestStreak, streak);
+    xpGain = 10 + Math.min(streak * 2, 20);
+    coinGain = 1;
+    if (speedy) { xpGain += 5; coinGain += 1; speedBonusCount++; notes.push('⚡ Speed-Bonus!'); }
+    if (streak >= 2) notes.push(`🔥 Streak-Bonus (+${Math.min(streak*2,20)} XP)`);
+    feedbackArea.innerHTML = `<div class="feedback correct">✅ Richtig! ${notes.join(' ')}</div>`;
+
+    gameData.totalXP += xpGain; gameData.coins += coinGain; saveGameData();
+    const floatEl = document.createElement('div');
+    floatEl.className = 'float-xp';
+    floatEl.textContent = `+${xpGain} XP  🪙+${coinGain}`;
+    box.appendChild(floatEl);
+    setTimeout(() => floatEl.remove(), 1100);
+
+    if (!gameData.badges.includes('first_correct')) awardBadge('first_correct');
+    if (streak === 5) awardBadge('streak5');
+    if (streak === 10) awardBadge('streak10');
+    if (speedBonusCount === 5) awardBadge('speedy');
+    if (gameData.coins >= 50) awardBadge('coins50');
+    renderHeader();
+  } else {
+    playWrong();
+    streak = 0;
+    heartsLeft = Math.max(0, heartsLeft - 1);
+    feedbackArea.innerHTML = `<div class="feedback wrong">❌ Nicht ganz richtig.<br>Richtige Lösung: <strong>${q.answer}</strong></div>`;
+    renderHearts();
+    const shakeEl = document.getElementById(`heart${heartsLeft}`);
+    if (shakeEl) { shakeEl.classList.add('shake'); }
+  }
+
+  renderStreak();
+}
+
+function nextQuestion() {
+  if (heartsLeft <= 0) { showResult(true); return; }
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) showResult(false);
+  else renderQuestion();
+}
+
+// =========================================================
+//  ERGEBNIS
+// =========================================================
+function showResult(outOfHearts) {
+  document.getElementById('quizScreen').classList.add('hidden');
+  const total = currentQuestions.length;
+  const attempted = outOfHearts ? (currentIndex + 1) : total;
+  const percent = Math.round((score / total) * 100);
+
+  let stars = 0;
+  if (percent === 100) stars = 3; else if (percent >= 80) stars = 2; else if (percent >= 50) stars = 1;
+
+  const prevStars = gameData.levelStars[currentLevel] || 0;
+  if (stars > prevStars) gameData.levelStars[currentLevel] = stars;
+
+  let unlockMsg = '';
+  if (percent >= 50 && currentLevel < 3 && !gameData.unlockedLevels.includes(currentLevel + 1)) {
+    gameData.unlockedLevels.push(currentLevel + 1);
+    unlockMsg = `<div class="unlock-msg">🔓 Neues Level freigeschaltet: ${levels[currentLevel+1].emoji} ${levels[currentLevel+1].name}!</div>`;
+  }
+
+  const bonusCoins = percent >= 80 ? 5 : 0;
+  gameData.coins += bonusCoins;
+  saveGameData();
+
+  if (percent === 100) awardBadge('perfect');
+  if (percent >= 50) {
+    const badgeId = `level${currentLevel}_complete`;
+    if (!gameData.badges.includes(badgeId)) awardBadge(badgeId);
+    if ([1,2,3].every(n => gameData.levelStars[n] > 0) && !gameData.badges.includes('champion')) {
+      awardBadge('champion');
+    }
+  }
+
+  let emoji = '🙂', text = 'Gut gemacht!';
+  if (outOfHearts) { emoji = '💔'; text = 'Die Herzen sind aufgebraucht – versuch es nochmal!'; }
+  else if (percent === 100) { emoji = '🏆'; text = 'Perfekt! Du bist ein Past-Simple-Profi!'; playLevelUp(); }
+  else if (percent >= 80) { emoji = '🌟'; text = 'Super Leistung!'; }
+  else if (percent >= 60) { emoji = '👍'; text = 'Gut gemacht, weiter so!'; }
+  else if (percent >= 40) { emoji = '💪'; text = 'Nicht schlecht, übe noch etwas weiter!'; }
+  else { emoji = '📚'; text = 'Übung macht den Meister – versuch es nochmal!'; }
+
+  if (stars === 3) launchConfetti();
+
+  const starsHtml = [1,2,3].map(i => `<span class="${i<=stars?'':'star-empty'}">⭐</span>`).join('');
+
+  document.getElementById('resultScreen').innerHTML = `
+    <div class="big-emoji">${emoji}</div>
+    <h2>${text}</h2>
+    <div class="big-stars">${starsHtml}</div>
+    <p>Du hast ${score} von ${attempted} bearbeiteten Aufgaben richtig gelöst (${percent}%).</p>
+    <div class="reward-row">
+      <div class="reward-chip">🪙 +${(gameData.coins)} Münzen gesamt${bonusCoins?` (Bonus +${bonusCoins})`:''}</div>
+      <div class="reward-chip">🔥 Beste Serie: ${maxStreakRound}</div>
+    </div>
+    ${unlockMsg}
+    <button class="btn" id="retryBtn" type="button">🔁 Nochmal versuchen</button>
+    <button class="btn secondary" id="homeBtn" type="button">⟵ Level wechseln</button>
+  `;
+  document.getElementById('resultScreen').classList.remove('hidden');
+  renderHeader();
+}
+
+// =========================================================
+//  GLOBALE EVENT-DELEGATION (einmalig, verhindert Bind-Probleme)
+// =========================================================
+document.addEventListener('click', (e) => {
+  const t = e.target;
+  if (t.closest('#actionBtn')) { onActionButtonClick(); return; }
+  if (t.id === 'badgesBtn') { openBadges(); return; }
+  if (t.id === 'helpToggleBtn') { toggleHelp(); return; }
+  if (t.id === 'resetLink') { resetProgress(); return; }
+  if (t.id === 'backLink') { goHome(); return; }
+  if (t.id === 'closeBadgeBtn') { closeBadges(); return; }
+  if (t.id === 'modalOverlay') { closeBadges(); return; }
+  if (t.id === 'retryBtn') { restartSameLevel(); return; }
+  if (t.id === 'homeBtn') { goHome(); return; }
+  const levelCard = t.closest('.level-card');
+  if (levelCard) {
+    const locked = levelCard.dataset.locked === '1';
+    const n = parseInt(levelCard.dataset.level, 10);
+    if (locked) shakeCard(levelCard); else startLevel(n);
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.id === 'answerInput') {
+    e.preventDefault();
+    onActionButtonClick();
+  }
+});
+
+// =========================================================
+//  INIT
+// =========================================================
+renderHeader();
+renderLevelCards();
+</script>
+</body>
+</html>

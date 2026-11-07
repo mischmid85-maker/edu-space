@@ -185,8 +185,9 @@ adminToggle.addEventListener('click', async () => {
   } else {
     token = null;
     sessionStorage.removeItem('gh_token');
+    indexPromise = null; // nach dem Abmelden die Liste neu laden
     await updateAdminUI();
-    setStatus('Abgemeldet.');
+    setStatus('Abgemeldet. Neue Apps sind für Schüler:innen nach 1–2 Minuten sichtbar.');
     if(currentSubject) render();
   }
 });
@@ -255,8 +256,9 @@ function loadIndex(){
 }
 
 async function fetchFolderApi(subjectKey){
+  // cache:'no-store' verhindert, dass der Browser eine veraltete Ordnerliste (bis 60 s alt) verwendet
   const res = await fetch(`${API_BASE}/contents/${FOLDER}/${subjectKey}?ref=${BRANCH}`,
-    token ? { headers:{ Authorization:`token ${token}` } } : {});
+    token ? { headers:{ Authorization:`token ${token}` }, cache:'no-store' } : { cache:'no-store' });
   if(res.status === 404) return [];
   if(!res.ok) throw new Error('GitHub-API-Fehler ' + res.status + (res.status === 403 || res.status === 429 ? ' (Limit erreicht)' : ''));
   const files = await res.json();
@@ -370,10 +372,11 @@ async function updateIndexFile(){
     }
     const body = { message:'Update index.json', content: toBase64(JSON.stringify(index, null, 2) + '\n'), branch: BRANCH };
     const headers = { Authorization:`token ${token}`, 'Content-Type':'application/json' };
-    const cur = await fetch(`${API_BASE}/contents/${INDEX_FILE}?ref=${BRANCH}`, { headers });
+    const cur = await fetch(`${API_BASE}/contents/${INDEX_FILE}?ref=${BRANCH}`, { headers, cache:'no-store' });
     if(cur.ok){ body.sha = (await cur.json()).sha; }
     const res = await fetch(`${API_BASE}/contents/${INDEX_FILE}`, { method:'PUT', headers, body: JSON.stringify(body) });
     if(!res.ok) throw new Error(await res.text());
+    indexPromise = null; // beim nächsten Laden die neue Liste holen
   }catch(e){ alert('Achtung: index.json konnte nicht aktualisiert werden. Die Schülerinnen und Schüler sehen die Änderung evtl. nicht.\n\n' + e.message); }
 }
 

@@ -1,5 +1,10 @@
 {
-  "deutsch": [],
+  "deutsch": [
+    {
+      "name": "1794135013130-verben_zeitformen.html",
+      "path": "pages/deutsch/1794135013130-verben_zeitformen.html"
+    }
+  ],
   "englisch": [
     {
       "name": "1794058211948-adverbs_of_frequency.html",

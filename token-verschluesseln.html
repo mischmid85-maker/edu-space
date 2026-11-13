@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Token verschlüsseln – Edu Space</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:640px;margin:2rem auto;padding:0 1rem;color:#333;background:#fdf8f3;}
+  h1{font-size:1.5rem;}
+  label{display:block;font-weight:600;margin-top:1rem;}
+  input,textarea{width:100%;box-sizing:border-box;padding:.6rem;font-size:1rem;border:2px solid #ddd;border-radius:10px;font-family:inherit;}
+  textarea{font-family:monospace;font-size:.85rem;height:7rem;}
+  button{margin-top:1rem;padding:.6rem 1.2rem;border:none;border-radius:50px;background:#3aa9b5;color:#fff;font-weight:700;font-size:1rem;cursor:pointer;}
+  .hint{font-size:.9rem;color:#777;margin:.3rem 0 0;}
+  #msg{margin-top:1rem;font-weight:600;}
+  .box{background:#fff;border-radius:14px;padding:1rem 1.2rem;box-shadow:0 3px 10px rgba(0,0,0,.08);}
+</style>
+</head>
+<body>
+<h1>🔐 GitHub-Token verschlüsseln</h1>
+<div class="box">
+  <p>Diese Seite verschlüsselt deinen Token mit deinem Passwort. Alles passiert nur hier im Browser – es wird nichts gesendet oder gespeichert.</p>
+
+  <label for="tok">GitHub-Token</label>
+  <input type="password" id="tok" autocomplete="off" placeholder="github_pat_…">
+
+  <label for="pw1">Neues Admin-Passwort</label>
+  <input type="password" id="pw1" autocomplete="new-password">
+  <p class="hint">Mindestens 12 Zeichen. Gut: 4–5 zufällige Wörter, z. B. „Velo-Tomate-Gletscher-Kompass“. Nirgends sonst verwenden.</p>
+
+  <label for="pw2">Passwort wiederholen</label>
+  <input type="password" id="pw2" autocomplete="new-password">
+
+  <button id="go">Verschlüsseln</button>
+  <p id="msg"></p>
+
+  <label for="out">Ergebnis – in index.html bei <code>const ENCRYPTED_TOKEN = '…';</code> einfügen</label>
+  <textarea id="out" readonly></textarea>
+  <button id="copy">📋 Kopieren</button>
+</div>
+
+<script>
+const ITERATIONS = 600000;
+const msg = document.getElementById('msg');
+function say(t, ok){ msg.textContent = t; msg.style.color = ok ? '#2a9d5c' : '#e0507a'; }
+function toB64(bytes){ let s = ''; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s); }
+
+document.getElementById('go').addEventListener('click', async () => {
+  const tok = document.getElementById('tok').value.trim();
+  const pw1 = document.getElementById('pw1').value;
+  const pw2 = document.getElementById('pw2').value;
+  document.getElementById('out').value = '';
+  if(!tok){ return say('Bitte den Token eingeben.'); }
+  if(pw1.length < 12){ return say('Das Passwort ist zu kurz (mindestens 12 Zeichen).'); }
+  if(pw1 !== pw2){ return say('Die beiden Passwörter stimmen nicht überein.'); }
+  if(!window.crypto || !crypto.subtle){ return say('Dieser Browser unterstützt die Verschlüsselung hier nicht. Öffne die Seite über deine github.io-Adresse.'); }
+  say('Verschlüssle…', true);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv   = crypto.getRandomValues(new Uint8Array(12));
+  const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw1), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt, iterations:ITERATIONS, hash:'SHA-256' },
+    baseKey, { name:'AES-GCM', length:256 }, false, ['encrypt']);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, new TextEncoder().encode(tok)));
+  document.getElementById('out').value = ['v1', ITERATIONS, toB64(salt), toB64(iv), toB64(ct)].join('.');
+  document.getElementById('tok').value = '';
+  say('Fertig ✅ Text kopieren und in index.html einfügen.', true);
+});
+
+document.getElementById('copy').addEventListener('click', async () => {
+  const out = document.getElementById('out');
+  if(!out.value) return;
+  try{ await navigator.clipboard.writeText(out.value); say('Kopiert ✅', true); }
+  catch(e){ out.select(); document.execCommand('copy'); say('Kopiert ✅', true); }
+});
+</script>
+</body>
+</html>

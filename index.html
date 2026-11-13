@@ -86,6 +86,15 @@
   .remove-btn{background:#fff0f0;color:#e0507a;border:none;border-radius:50%;width:28px;height:28px;font-size:1rem;cursor:pointer;transition:transform .12s ease;}
   .remove-btn:hover{background:#ffd6e0;transform:scale(1.15) rotate(90deg);}
   #empty{color:#999;font-style:italic;font-size:1.1rem;padding:2rem;text-align:center;border:3px dashed #ddd;border-radius:20px;background:rgba(255,255,255,.5);}
+  /* Anmelde-Fenster */
+  #loginDialog{border:none;border-radius:20px;padding:1.5rem 1.6rem;box-shadow:0 16px 40px rgba(0,0,0,.25);font-family:inherit;max-width:340px;width:90%;}
+  #loginDialog::backdrop{background:rgba(0,0,0,.35);}
+  #loginDialog h3{margin:0 0 .8rem;}
+  #loginDialog input{width:100%;box-sizing:border-box;padding:.6rem .8rem;font-size:1rem;border:2px solid #ddd;border-radius:12px;font-family:inherit;}
+  #loginDialog .row{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem;}
+  #loginDialog button{cursor:pointer;padding:.5rem 1rem;border:none;border-radius:50px;font-family:inherit;font-weight:700;}
+  #loginOk{background:linear-gradient(90deg,var(--teal),var(--blue));color:#fff;}
+  #loginMsg{min-height:1.2em;margin:.5rem 0 0;color:#e0507a;font-size:.9rem;}
 </style>
 </head>
 <body>
@@ -117,11 +126,28 @@
   <p id="empty" style="display:none;">🦄 Noch keine Seiten in diesem Fach.</p>
 </div>
 
+<dialog id="loginDialog">
+  <form id="loginForm">
+    <h3>🔐 Admin-Anmeldung</h3>
+    <input type="password" id="loginInput" autocomplete="current-password" placeholder="Passwort">
+    <p id="loginMsg"></p>
+    <div class="row">
+      <button type="button" id="loginCancel">Abbrechen</button>
+      <button type="submit" id="loginOk">Anmelden</button>
+    </div>
+  </form>
+</dialog>
+
 <script>
 /* ====== HIER ANPASSEN: deine GitHub-Daten ====== */
 const OWNER  = 'mischmid85-maker';
 const REPO   = 'edu-space';
 const BRANCH = 'main';
+
+/* Verschlüsselter GitHub-Token (erstellt mit token-verschluesseln.html).
+   Ohne dein Passwort ist dieser Text wertlos.
+   Leer lassen = Anmeldung wie früher direkt mit dem Token. */
+const ENCRYPTED_TOKEN = 'v1.600000.55w4YNYdxuX75oSgsOCyoQ==.05vTZfqbFqGf4ANL.a069o2tA0cdGWIduoQien/svMU7AsGnjVtZGfuzixletGkXZSyRhuAqlTqbamSjF5onaWgVZJELSBI81HPgk3FxK8+/ukMh1EDdh70bqgjkIBsTQ6cHjgIYUATQak1DxTm/ur01U0sU/qlbB/g==';
 const FOLDER = 'pages';
 /* ================================================ */
 
@@ -147,7 +173,10 @@ const fileInput = document.getElementById('fileInput');
 const adminToggle = document.getElementById('adminToggle');
 const statusEl = document.getElementById('status');
 
-let token = sessionStorage.getItem('gh_token') || null;
+/* Der Token wird nur im Arbeitsspeicher gehalten (nicht im Browser gespeichert).
+   Nach dem Neuladen der Seite meldest du dich einfach wieder an. */
+sessionStorage.removeItem('gh_token'); // alten, früher gespeicherten Token entfernen
+let token = null;
 let currentSubject = null;
 
 function setStatus(msg, isError){
@@ -168,29 +197,84 @@ async function updateAdminUI(){
   addBtn.disabled = !ok;
   adminToggle.textContent = ok ? '🔓 Angemeldet' : '🔐 Admin';
   adminToggle.classList.toggle('active', ok);
-  if(!ok && token){ token = null; sessionStorage.removeItem('gh_token'); }
+  if(!ok && token){ token = null; }
 }
 
 adminToggle.addEventListener('click', async () => {
   if(addBtn.disabled && !token){
-    const input = prompt('GitHub Personal Access Token eingeben (nur für dieses Repo, Contents Read & Write):');
-    if(!input) return;
-    token = input.trim();
-    setStatus('Prüfe Token...');
-    const ok = await checkAdmin();
-    if(ok){ sessionStorage.setItem('gh_token', token); setStatus('Angemeldet ✅'); updateIndexFile(); }
-    else{ token = null; setStatus('Token ungültig oder ohne Rechte für dieses Repo.', true); }
+    const t = await askToken();
+    if(!t) return;
+    token = t;
+    setStatus('Angemeldet ✅');
+    updateIndexFile();
     await updateAdminUI();
     if(currentSubject) render();
   } else {
     token = null;
-    sessionStorage.removeItem('gh_token');
     indexPromise = null; // nach dem Abmelden die Liste neu laden
     await updateAdminUI();
     setStatus('Abgemeldet. Neue Apps sind für Schüler:innen nach 1–2 Minuten sichtbar.');
     if(currentSubject) render();
   }
 });
+
+/* ---------- Anmeldung mit Passwort ---------- */
+const loginDialog = document.getElementById('loginDialog');
+const loginForm   = document.getElementById('loginForm');
+const loginInput  = document.getElementById('loginInput');
+const loginMsg    = document.getElementById('loginMsg');
+document.getElementById('loginCancel').addEventListener('click', () => loginDialog.close());
+
+function b64ToBytes(b64){ return Uint8Array.from(atob(b64), c => c.charCodeAt(0)); }
+
+/* Entschlüsselt den Token mit dem Passwort (PBKDF2 + AES-GCM). Falsches Passwort -> Fehler. */
+async function decryptToken(password){
+  const [v, iter, salt, iv, ct] = ENCRYPTED_TOKEN.trim().split('.');
+  if(v !== 'v1') throw new Error('Unbekanntes Format');
+  const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:b64ToBytes(salt), iterations:Number(iter), hash:'SHA-256' },
+    baseKey, { name:'AES-GCM', length:256 }, false, ['decrypt']);
+  const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv:b64ToBytes(iv) }, key, b64ToBytes(ct));
+  return new TextDecoder().decode(plain);
+}
+
+/* Zeigt das Anmelde-Fenster. Gibt den gültigen Token zurück oder null (abgebrochen). */
+function askToken(){
+  const withPassword = !!ENCRYPTED_TOKEN.trim();
+  loginInput.placeholder = withPassword ? 'Passwort' : 'GitHub-Token';
+  loginInput.value = '';
+  loginMsg.textContent = '';
+  return new Promise(resolve => {
+    let done = false;
+    const finish = val => { if(done) return; done = true; loginForm.onsubmit = null; loginDialog.onclose = null; loginDialog.close(); resolve(val); };
+    loginDialog.onclose = () => finish(null);
+    loginForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const input = loginInput.value;
+      if(!input) return;
+      loginMsg.style.color = '#888';
+      loginMsg.textContent = 'Prüfe...';
+      let t = null;
+      try{ t = withPassword ? await decryptToken(input) : input.trim(); }
+      catch(err){ t = null; }
+      if(!t){ loginMsg.style.color = ''; loginMsg.textContent = 'Passwort falsch.'; loginInput.select(); return; }
+      token = t;
+      const ok = await checkAdmin();
+      token = null;
+      if(!ok){
+        loginMsg.style.color = '';
+        loginMsg.textContent = withPassword
+          ? 'Passwort stimmt, aber der Token ist abgelaufen oder ungültig. Bitte neuen Token verschlüsseln.'
+          : 'Token ungültig oder ohne Rechte für dieses Repo.';
+        return;
+      }
+      finish(t);
+    };
+    loginDialog.showModal();
+    loginInput.focus();
+  });
+}
 
 function getHashSubject(){
   const key = location.hash.replace('#','');
@@ -291,6 +375,19 @@ async function loadPages(subject){
   }
 }
 
+/* Für die Vorschau: Ersatz-Speicher, damit Apps mit localStorage in der Sandbox nicht abstürzen. */
+const PREVIEW_SHIM = '<script>(function(){function m(){var d={};return{getItem:function(k){return k in d?d[k]:null},setItem:function(k,v){d[k]=String(v)},removeItem:function(k){delete d[k]},clear:function(){d={}},key:function(i){return Object.keys(d)[i]||null},get length(){return Object.keys(d).length}}}' +
+  'try{Object.defineProperty(window,"localStorage",{value:m(),configurable:true})}catch(e){}' +
+  'try{Object.defineProperty(window,"sessionStorage",{value:m(),configurable:true})}catch(e){}' +
+  'window.alert=window.confirm=window.prompt=function(){};})();<\/script>';
+
+/* Öffnet eine App in einem neuen Tab, ohne Verbindung zur Hauptseite ("noopener").
+   So bleibt der Token geschützt; der Lernfortschritt (localStorage) funktioniert weiterhin. */
+function openApp(page){
+  const url = URL.createObjectURL(new Blob([page.content], { type:'text/html;charset=utf-8' }));
+  window.open(url, '_blank', 'noopener');
+}
+
 function renderCards(pages){
   grid.innerHTML = '';
   emptyMsg.style.display = pages.length ? 'none' : 'block';
@@ -301,12 +398,12 @@ function renderCards(pages){
     const thumb = document.createElement('div');
     thumb.className = 'thumb';
     const iframe = document.createElement('iframe');
-    iframe.srcdoc = page.content;
+    /* Vorschau abgeschottet ("sandbox"): Die App kann nicht auf die Hauptseite
+       (und damit nicht auf den Token) zugreifen. */
+    iframe.sandbox = 'allow-scripts';
+    iframe.srcdoc = PREVIEW_SHIM + page.content;
     thumb.appendChild(iframe);
-    thumb.addEventListener('click', () => {
-      const win = window.open('', '_blank');
-      win.document.open(); win.document.write(page.content); win.document.close();
-    });
+    thumb.addEventListener('click', () => openApp(page));
 
     const body = document.createElement('div');
     body.className = 'card-body';

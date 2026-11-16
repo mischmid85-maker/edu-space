@@ -28,7 +28,12 @@
           "path": "pages/deutsch/1794135013130-verben_zeitformen.html"
         }
       ],
-      "folders": {}
+      "folders": {
+        "Verben": {
+          "files": [],
+          "folders": {}
+        }
+      }
     },
     "englisch": {
       "files": [

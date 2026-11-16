@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Questions & Short Answers – Open World 1, Unit 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --brand:#2f5bea; --brand-soft:#e8eeff;
+    --qw:#7c3aed; --qw-soft:#f1eaff;
+    --aux:#e05a0c; --aux-soft:#fff0e6;
+    --subj:#1d6fd8; --subj-soft:#e6f1ff;
+    --verb:#15803d; --verb-soft:#e3f6e9;
+    --ok:#16a34a; --ok-soft:#e7f8ed; --bad:#dc2626; --bad-soft:#fdecec;
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:'Lexend',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;font-size:17px}
+  button{font-family:inherit;font-size:inherit;cursor:pointer}
+  header{background:linear-gradient(120deg,#2f5bea,#6d4aea);color:#fff;padding:18px 20px 0}
+  .head-inner{max-width:920px;margin:0 auto}
+  header h1{margin:0;font-size:1.35rem;font-weight:700;letter-spacing:.2px}
+  header p{margin:2px 0 12px;opacity:.85;font-size:.92rem}
+  nav{display:flex;gap:6px}
+  nav button{background:rgba(255,255,255,.14);color:#fff;border:0;padding:10px 18px;border-radius:12px 12px 0 0;font-weight:600}
+  nav button.active{background:var(--bg);color:var(--brand)}
+  main{max-width:920px;margin:0 auto;padding:20px 16px 60px}
+  .card{background:var(--card);border-radius:var(--radius);padding:20px 22px;margin-bottom:16px;box-shadow:0 1px 3px rgba(20,30,60,.06),0 4px 16px rgba(20,30,60,.04)}
+  h2{font-size:1.25rem;margin:0 0 10px}
+  h3{font-size:1.05rem;margin:18px 0 8px}
+  .muted{color:var(--muted)}
+  .qw{color:var(--qw);font-weight:700}
+  .aux{color:var(--aux);font-weight:700}
+  .subj{color:var(--subj);font-weight:700}
+  .verb{color:var(--verb);font-weight:700}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+  .legend span{padding:3px 10px;border-radius:999px;font-size:.85rem;font-weight:600}
+  .lg-qw{background:var(--qw-soft);color:var(--qw)} .lg-aux{background:var(--aux-soft);color:var(--aux)}
+  .lg-subj{background:var(--subj-soft);color:var(--subj)} .lg-verb{background:var(--verb-soft);color:var(--verb)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;margin-bottom:6px}
+  .chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:6px 14px;font-size:.88rem;font-weight:500;color:var(--ink)}
+  .chip:hover{border-color:var(--brand);color:var(--brand)}
+  table{border-collapse:collapse;width:100%;margin:8px 0;font-size:.95rem}
+  th,td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#f8fafc;font-weight:600;font-size:.88rem;color:var(--muted)}
+  .formula{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:10px 0}
+  .formula span{padding:6px 12px;border-radius:10px;font-weight:600;font-size:.92rem}
+  .rule{background:var(--brand-soft);border-left:5px solid var(--brand);padding:10px 14px;border-radius:10px;margin:10px 0}
+  .warn{background:var(--bad-soft);border-left:5px solid var(--bad);padding:10px 14px;border-radius:10px;margin:10px 0}
+  .good{background:var(--ok-soft);border-left:5px solid var(--ok);padding:10px 14px;border-radius:10px;margin:10px 0}
+  .ex{margin:4px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .say{border:0;background:#eef2ff;color:var(--brand);border-radius:8px;padding:2px 8px;font-size:.85rem}
+  .flow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+  .flow .start{grid-column:1/3;text-align:center;background:#fff7d6;border:2px solid #f0d36b;border-radius:12px;padding:10px;font-weight:600}
+  .flow .box{border-radius:12px;padding:12px;text-align:center}
+  .flow .box b{display:block;font-size:1.05rem}
+  .mini{border:1.5px dashed var(--line);border-radius:12px;padding:12px 14px;margin-top:14px}
+  .mini .opts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .mini button{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:6px 14px}
+  .mini button.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+  .mini button.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+  .mini .fb{margin-top:6px;font-size:.92rem}
+
+  /* Start & Practice menu */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .mode{border:2px solid var(--line);background:#fff;border-radius:var(--radius);padding:16px;text-align:left;transition:.15s}
+  .mode:hover{border-color:var(--brand);transform:translateY(-2px)}
+  .mode .ic{font-size:1.6rem}
+  .mode b{display:block;margin:4px 0 2px;font-size:1.02rem}
+  .mode small{color:var(--muted);display:block;line-height:1.35}
+  .mode .best{margin-top:8px;font-size:.8rem;color:var(--brand);font-weight:600}
+  .toggle{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:.95rem}
+  .toggle input{width:20px;height:20px;accent-color:var(--brand)}
+  .bigbtn{background:var(--brand);color:#fff;border:0;border-radius:12px;padding:12px 22px;font-weight:600}
+  .bigbtn:hover{filter:brightness(1.08)}
+  .ghost{background:#fff;color:var(--brand);border:2px solid var(--brand);border-radius:12px;padding:10px 20px;font-weight:600}
+
+  /* Exercise */
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  .progress{flex:1;min-width:140px;height:10px;background:#e3e7f1;border-radius:99px;overflow:hidden}
+  .progress div{height:100%;background:linear-gradient(90deg,#2f5bea,#6d4aea);transition:width .3s}
+  .pill{background:#fff;border-radius:999px;padding:4px 12px;font-size:.88rem;font-weight:600}
+  .task{font-size:.9rem;color:var(--muted);font-weight:500;margin-bottom:6px}
+  .q{font-size:1.45rem;font-weight:600;margin:6px 0 14px;line-height:1.4}
+  .q .ans{display:block;font-size:1.05rem;font-weight:400;color:var(--muted);margin-top:4px}
+  .blank{display:inline-block;min-width:70px;border-bottom:3px solid var(--brand);text-align:center;color:var(--brand)}
+  .blank.okf{color:var(--ok);border-color:var(--ok)} .blank.badf{color:var(--bad);border-color:var(--bad)}
+  .opts{display:flex;flex-wrap:wrap;gap:10px}
+  .opt{min-width:92px;border:2px solid var(--line);background:#fff;border-radius:12px;padding:12px 18px;font-weight:600;font-size:1.05rem}
+  .opt:hover:not(:disabled){border-color:var(--brand);color:var(--brand)}
+  .opt.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+  .opt.wrong{background:var(--bad-soft);border-color:var(--bad);color:var(--bad)}
+  .opt:disabled{cursor:default}
+  .yn{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:999px;font-weight:700;font-size:1rem;margin-bottom:10px}
+  .yn.yes{background:var(--ok-soft);color:var(--ok)} .yn.no{background:var(--bad-soft);color:var(--bad)}
+  .inp{width:100%;font-family:inherit;font-size:1.2rem;padding:12px 14px;border:2px solid var(--line);border-radius:12px;outline:none}
+  .inp:focus{border-color:var(--brand)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+  .tiles{display:flex;flex-wrap:wrap;gap:8px;min-height:56px;padding:10px;border-radius:12px}
+  .pool{background:#f3f5fa}
+  .built{border:2px dashed #c7d0e6;background:#fff;margin-bottom:10px}
+  .tile{border:0;background:#fff;box-shadow:0 1px 0 #cfd6e6,0 2px 6px rgba(0,0,0,.06);border-radius:10px;padding:9px 14px;font-weight:600;font-size:1.05rem}
+  .built .tile{background:var(--brand-soft);color:var(--brand)}
+  .feedback{margin-top:16px;border-radius:12px;padding:12px 16px;display:none}
+  .feedback.show{display:block}
+  .feedback.ok{background:var(--ok-soft);border:2px solid #a7e3bb}
+  .feedback.bad{background:var(--bad-soft);border:2px solid #f3b3b3}
+  .feedback b.t{display:block;font-size:1.05rem;margin-bottom:2px}
+  .hintbox{margin-top:10px;background:#fffbea;border:1.5px solid #f3e1a0;border-radius:10px;padding:8px 12px;font-size:.93rem;display:none}
+  .hintbox.show{display:block}
+  .result{text-align:center}
+  .result .big{font-size:3rem;font-weight:700;color:var(--brand);margin:6px 0}
+  .stars{font-size:2rem;letter-spacing:4px}
+  .wronglist{text-align:left;margin-top:14px}
+  .wronglist li{margin-bottom:8px}
+  .lvl{margin-top:6px;font-size:.8rem;color:#b7791f;font-weight:600}
+  .flabel{display:block;font-weight:600;font-size:.92rem;margin:12px 0 4px}
+  .inp.okb{border-color:var(--ok);background:var(--ok-soft)}
+  .inp.badb{border-color:var(--bad)}
+  .inp:disabled{color:var(--ink)}
+  .shake{animation:sh .3s}
+  @keyframes sh{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .dialog{background:#f6f8fc;border-radius:12px;padding:12px 16px;font-size:1.2rem;margin:8px 0}
+  .dialog div{margin:3px 0}
+  .gap{display:inline-block;min-width:200px;border-bottom:3px dotted var(--brand);color:var(--brand);text-align:right}
+  .cue{background:var(--qw-soft);border-radius:10px;padding:8px 12px;margin:8px 0;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  .wrongq{text-decoration:underline wavy var(--bad);text-underline-offset:6px}
+  .feedback.tip{background:#fffbea;border:2px solid #f3e1a0}
+  .feedback .solution{font-size:1.15rem;font-weight:700;margin:6px 0;color:var(--ink)}
+  .feedback .expl{border-top:1px solid #f3b3b3;padding-top:8px;margin-top:6px;font-size:.95rem}
+  .tries{background:#f3f5fa;color:var(--muted)}
+  @media (max-width:560px){
+    body{font-size:16px} .q{font-size:1.2rem} nav button{padding:9px 12px}
+    .flow{grid-template-columns:1fr} .flow .start{grid-column:1}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <h1>Questions & Short Answers</h1>
+    <p>Open World 1 · Unit 2 · W-Fragen, do-Fragen, Fragen mit «to be»</p>
+    <nav>
+      <button data-view="start">Start</button>
+      <button data-view="theorie">📖 Theorie</button>
+      <button data-view="ueben">✏️ Üben</button>
+    </nav>
+  </div>
+</header>
+<main id="app"></main>
+
+<script>
+/* ================= DATEN ================= */
+// Format q: "Fragewort|Hilfsverb|Subjekt|Verb|Rest"  (leere Teile = gibt es nicht)
+// d:1 = Aufgabe mit does (he/she/it)
+
+// W-Fragen schreiben: Antwort + Stichwörter → ganze Frage
+const W_ITEMS = [
+  {a:"I live in St. Gallen.", c:"you / live", q:"where|do|you|live|"},
+  {a:"My birthday is in May.", c:"your birthday", q:"when|is|your birthday||"},
+  {a:"My favourite subject is English.", c:"your favourite subject", q:"what|is|your favourite subject||"},
+  {a:"Because I went to bed very late.", c:"you / tired", q:"why|are|you||tired"},
+  {a:"She's fourteen.", c:"your sister", q:"how old|is|your sister||"},
+  {a:"I go to school by bike.", c:"you / go / to school", q:"how|do|you|go|to school"},
+  {a:"I play football after school.", c:"you / do / after school", q:"what|do|you|do|after school"},
+  {a:"Because it's fun.", c:"you / like / English", q:"why|do|you|like|English"},
+  {a:"I'm fine, thanks.", c:"you", q:"how|are|you||"},
+  {a:"They're in the garden.", c:"your parents", q:"where|are|your parents||"},
+  {a:"We have English on Monday.", c:"we / have / English", q:"when|do|we|have|English"},
+  {a:"Because he missed the bus.", c:"Tom / late", q:"why|is|Tom||late"},
+  {a:"It's under your bed.", c:"my school bag", q:"where|is|my school bag||"},
+  {a:"His name is Max.", c:"your dog's name", q:"what|is|your dog's name||"},
+  {a:"They live in Bern.", c:"your grandparents / live", q:"where|do|your grandparents|live|"},
+  {a:"He works in a bank.", c:"your dad / work", q:"where|does|your dad|work|", d:1},
+  {a:"The film starts at 7 o'clock.", c:"the film / start", q:"when|does|the film|start|", d:1},
+  {a:"She eats cereal for breakfast.", c:"Emma / eat / for breakfast", q:"what|does|Emma|eat|for breakfast", d:1},
+  {a:"He gets to school by bus.", c:"your brother / get / to school", q:"how|does|your brother|get|to school", d:1},
+  {a:"Because she loves animals.", c:"Mia / want / a dog", q:"why|does|Mia|want|a dog", d:1}
+];
+
+// Ja/Nein-Fragen bilden: Aussagesatz → Frage
+const YN_ITEMS = [
+  {st:"You like pizza.", q:"|do|you|like|pizza"},
+  {st:"Tom is from London.", q:"|is|Tom||from London"},
+  {st:"Your friends play basketball.", q:"|do|your friends|play|basketball"},
+  {st:"Lena and Mia are in your class.", q:"|are|Lena and Mia||in your class"},
+  {st:"You are twelve years old.", q:"|are|you||twelve years old"},
+  {st:"It is cold outside.", q:"|is|it||cold outside"},
+  {st:"You have a pet.", q:"|do|you|have|a pet"},
+  {st:"Your cat is black.", q:"|is|your cat||black"},
+  {st:"They go to the park.", q:"|do|they|go|to the park"},
+  {st:"I am late.", q:"|am|I||late"},
+  {st:"We have English today.", q:"|do|we|have|English today"},
+  {st:"The children are at school.", q:"|are|the children||at school"},
+  {st:"Your sister plays the piano.", q:"|does|your sister|play|the piano", d:1},
+  {st:"Noah has a bike.", q:"|does|Noah|have|a bike", d:1},
+  {st:"Your mum works at home.", q:"|does|your mum|work|at home", d:1},
+  {st:"Your dog sleeps a lot.", q:"|does|your dog|sleep|a lot", d:1}
+];
+
+// Short Answers: Frage gegeben → Kurzantwort schreiben (ap = Pronomen in der Antwort)
+const SA_ITEMS = [
+  {q:"|are|you||twelve", ap:"I"},
+  {q:"|is|your brother||at home", ap:"he"},
+  {q:"|is|your mum||a teacher", ap:"she"},
+  {q:"|are|you and your friend||in the same class", ap:"we"},
+  {q:"|are|Lena and Mia||at the cinema", ap:"they"},
+  {q:"|is|it||hot today", ap:"it"},
+  {q:"|am|I||right", ap:"you"},
+  {q:"|is|Tom||your best friend", ap:"he"},
+  {q:"|are|you||hungry", ap:"I"},
+  {q:"|do|you|like|chocolate", ap:"I"},
+  {q:"|do|your friends|watch|YouTube", ap:"they"},
+  {q:"|do|you and your sister|share|a room", ap:"we"},
+  {q:"|do|Ben and Noah|live|in Zurich", ap:"they"},
+  {q:"|do|you|have|a pet", ap:"I"},
+  {q:"|do|your parents|speak|English", ap:"they"},
+  {q:"|does|your sister|like|horses", ap:"she", d:1},
+  {q:"|does|Tom|play|football", ap:"he", d:1},
+  {q:"|does|your dog|sleep|a lot", ap:"it", d:1},
+  {q:"|does|Mr Smith|teach|English", ap:"he", d:1},
+  {q:"|does|your school|have|a library", ap:"it", d:1}
+];
+
+// Frage + Short Answer: Stichwörter → Frage schreiben UND Kurzantwort
+const QSA_ITEMS = [
+  {c:"you / like / chocolate", q:"|do|you|like|chocolate", ap:"I"},
+  {c:"your brother / at home", q:"|is|your brother||at home", ap:"he"},
+  {c:"you / play / an instrument", q:"|do|you|play|an instrument", ap:"I"},
+  {c:"Lena and Mia / at the cinema", q:"|are|Lena and Mia||at the cinema", ap:"they"},
+  {c:"your friends / watch / YouTube", q:"|do|your friends|watch|YouTube", ap:"they"},
+  {c:"you / hungry", q:"|are|you||hungry", ap:"I"},
+  {c:"it / hot today", q:"|is|it||hot today", ap:"it"},
+  {c:"your parents / speak / English", q:"|do|your parents|speak|English", ap:"they"},
+  {c:"Tom / your best friend", q:"|is|Tom||your best friend", ap:"he"},
+  {c:"you and your sister / share / a room", q:"|do|you and your sister|share|a room", ap:"we"},
+  {c:"your mum / a teacher", q:"|is|your mum||a teacher", ap:"she"},
+  {c:"your sister / like / horses", q:"|does|your sister|like|horses", ap:"she", d:1},
+  {c:"Mr Smith / teach / English", q:"|does|Mr Smith|teach|English", ap:"he", d:1},
+  {c:"your school / have / a library", q:"|does|your school|have|a library", ap:"it", d:1},
+  {c:"your dog / sleep / a lot", q:"|does|your dog|sleep|a lot", ap:"it", d:1}
+];
+
+// Fehler korrigieren: falsche Frage → richtige Frage
+const ERR_ITEMS = [
+  {w:"Do you are hungry?", q:"|are|you||hungry"},
+  {w:"You like pizza?", q:"|do|you|like|pizza"},
+  {w:"Where you live?", q:"where|do|you|live|"},
+  {w:"Is your friends at home?", q:"|are|your friends||at home"},
+  {w:"Are Tom from London?", q:"|is|Tom||from London"},
+  {w:"What you do after school?", q:"what|do|you|do|after school"},
+  {w:"When your birthday is?", q:"when|is|your birthday||"},
+  {w:"How old you are?", q:"how old|are|you||"},
+  {w:"Does you have a pet?", q:"|do|you|have|a pet"},
+  {w:"Am you tired?", q:"|are|you||tired"},
+  {w:"Where is you from?", q:"where|are|you||from"},
+  {w:"Do they are at school?", q:"|are|they||at school"},
+  {w:"Does she plays tennis?", q:"|does|she|play|tennis", d:1},
+  {w:"Where lives your aunt?", q:"where|does|your aunt|live|", d:1},
+  {w:"Do your brother play football?", q:"|does|your brother|play|football", d:1},
+  {w:"Why does Mia likes dogs?", q:"why|does|Mia|like|dogs", d:1}
+];
+
+// Satzbau: Wörter ordnen (x = ein Wort zu viel)
+const ORDER_ITEMS = [
+  {q:"where|do|you|live|", x:"are"},
+  {q:"what|is|your favourite subject||", x:"do"},
+  {q:"when|is|your birthday||", x:"does"},
+  {q:"why|are|you||late", x:"do"},
+  {q:"how|do|you|get|to school", x:"are"},
+  {q:"|do|you|like|football", x:"are"},
+  {q:"|are|you||from Switzerland", x:"do"},
+  {q:"|is|your sister||at home", x:"does"},
+  {q:"what|do|you|do|after school", x:"are"},
+  {q:"where|are|my glasses||", x:"do"},
+  {q:"how old|is|your cat||", x:"are"},
+  {q:"why|do|you|like|English", x:"is"},
+  {q:"|are|your friends||at the party", x:"is"},
+  {q:"where|do|your grandparents|live|", x:"does"},
+  {q:"|does|your brother|play|the piano", x:"do", d:1},
+  {q:"when|does|the bus|leave|", x:"is", d:1},
+  {q:"|does|Mia|have|a dog", x:"is", d:1},
+  {q:"what|does|your dad|do|", x:"are", d:1}
+];
+
+const QW_INFO = {
+  what:"<b>what</b> = was → fragt nach einer Sache oder Information.",
+  where:"<b>where</b> = wo → fragt nach einem Ort.",
+  when:"<b>when</b> = wann → fragt nach einer Zeit.",
+  why:"<b>why</b> = warum → fragt nach einem Grund. Die Antwort beginnt oft mit <i>because</i>.",
+  how:"<b>how</b> = wie → fragt nach Art und Weise oder dem Befinden.",
+  "how old":"<b>how old</b> = wie alt → fragt nach dem Alter."
+};
+const QW_TOPIC = {what:"einer Sache oder Information", where:"einem Ort", when:"einer Zeit", why:"einem Grund", how:"der Art und Weise oder dem Befinden", "how old":"dem Alter"};
+
+const MODES = {
+  order:{ic:"🧩", name:"Satzbau", desc:"Wörter ordnen – ein Wort ist zu viel.", lvl:"★☆☆"},
+  short:{ic:"💬", name:"Short Answers", desc:"Kurzantworten auf Fragen schreiben.", lvl:"★★☆"},
+  yn:   {ic:"🔄", name:"Ja/Nein-Fragen bilden", desc:"Aus einem Aussagesatz eine Frage machen.", lvl:"★★☆"},
+  w:    {ic:"✍️", name:"W-Fragen schreiben", desc:"Zur Antwort die passende Frage schreiben.", lvl:"★★★"},
+  qsa:  {ic:"🗣️", name:"Frage + Short Answer", desc:"Frage aus Stichwörtern und Kurzantwort schreiben.", lvl:"★★★"},
+  err:  {ic:"🔍", name:"Fehler korrigieren", desc:"Jede Frage hat einen Fehler – schreib sie richtig.", lvl:"★★★"},
+  mix:  {ic:"🎯", name:"Mix-Test", desc:"Alles gemischt – bist du fit?", lvl:""}
+};
+
+/* ================= HILFSFUNKTIONEN ================= */
+const $app = document.getElementById('app');
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+const norm = s => s.toLowerCase().replace(/[’‘`´]/g,"'").replace(/[.,!?;:]/g," ").replace(/\s+/g," ").trim();
+
+function store(key,val){ try{ if(val===undefined){ return JSON.parse(localStorage.getItem(key)); } localStorage.setItem(key,JSON.stringify(val)); }catch(e){ return null; } }
+let settings = Object.assign({does:true}, store('ow1u2_settings')||{});
+let best = store('ow1u2_best')||{};
+
+let voice = null;
+function speak(text){
+  try{
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/___/g,'blank'));
+    u.lang='en-GB'; u.rate=0.9;
+    if(!voice){ voice = speechSynthesis.getVoices().find(v=>/en-GB/i.test(v.lang)) || speechSynthesis.getVoices().find(v=>/^en/i.test(v.lang)) || null; }
+    if(voice) u.voice=voice;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+const canSpeak = (()=>{ try{ return 'speechSynthesis' in window; }catch(e){ return false; } })();
+const sayBtn = t => canSpeak ? `<button class="say" data-say="${t.replace(/"/g,'&quot;')}" title="Vorlesen">🔊</button>` : '';
+
+function shortAnswer(p, aux, yes){
+  const P = p==='I' ? 'I' : p;
+  if(yes) return {main:`Yes, ${P} ${aux}.`, acc:[`yes ${p} ${aux}`]};
+  const pl = p.toLowerCase();
+  const map = {
+    am:  {main:"No, I'm not.", acc:["no i'm not","no i am not"]},
+    is:  {main:`No, ${P} isn't.`, acc:[`no ${pl} isn't`,`no ${pl}'s not`,`no ${pl} is not`]},
+    are: {main:`No, ${P} aren't.`, acc:[`no ${pl} aren't`,`no ${pl}'re not`,`no ${pl} are not`]},
+    do:  {main:`No, ${P} don't.`, acc:[`no ${pl} don't`,`no ${pl} do not`]},
+    does:{main:`No, ${P} doesn't.`, acc:[`no ${pl} doesn't`,`no ${pl} does not`]}
+  };
+  return map[aux];
+}
+
+/* ================= NAVIGATION ================= */
+let view = 'start';
+function go(v){
+  view = v;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active', b.dataset.view===v));
+  try{ history.replaceState(null,'', v==='start' ? location.pathname : '#'+v); }catch(e){}
+  if(v==='start') renderStart();
+  else if(v==='theorie') renderTheory();
+  else renderMenu();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.view));
+document.addEventListener('click', e=>{
+  const s = e.target.closest('[data-say]'); if(s){ speak(s.dataset.say); }
+});
+
+/* ================= START ================= */
+function renderStart(){
+  $app.innerHTML = `
+  <div class="card">
+    <h2>Hallo! 👋</h2>
+    <p>Mit dieser App lernst du, wie man auf Englisch <b>Fragen stellt</b> und mit <b>Short Answers</b> (Kurzantworten) antwortet.</p>
+    <div class="legend">
+      <span class="lg-qw">Fragewort</span><span class="lg-aux">Hilfsverb</span><span class="lg-subj">Subjekt</span><span class="lg-verb">Verb</span>
+    </div>
+    <p class="ex" style="font-size:1.15rem;margin-top:12px">
+      <span><span class="qw">Where</span> <span class="aux">do</span> <span class="subj">you</span> <span class="verb">live</span>?</span>
+      ${sayBtn('Where do you live?')}
+    </p>
+    <p class="ex" style="font-size:1.15rem">
+      <span><span class="aux">Are</span> <span class="subj">you</span> twelve? – Yes, <span class="subj">I</span> <span class="aux">am</span>.</span>
+      ${sayBtn('Are you twelve? Yes, I am.')}
+    </p>
+  </div>
+  <div class="grid">
+    <button class="mode" onclick="go('theorie')"><div class="ic">📖</div><b>1. Theorie lesen</b><small>Regeln, Tabellen und Beispiele – mit Mini-Checks.</small></button>
+    <button class="mode" onclick="go('ueben')"><div class="ic">✏️</div><b>2. Üben</b><small>Sechs Übungsarten – du schreibst ganze Fragen und Antworten selbst.</small></button>
+  </div>`;
+}
+
+/* ================= THEORIE ================= */
+function mini(id, q, opts, a, expl){
+  return `<div class="mini" data-mini="${id}"><b>Mini-Check:</b> ${q}
+    <div class="opts">${opts.map(o=>`<button data-o="${o}" data-a="${a}">${o}</button>`).join('')}</div>
+    <div class="fb" data-expl="${expl.replace(/"/g,'&quot;')}"></div></div>`;
+}
+function renderTheory(){
+  $app.innerHTML = `
+  <div class="chips">
+    <button class="chip" data-jump="t1">Überblick</button>
+    <button class="chip" data-jump="t2">to be</button>
+    <button class="chip" data-jump="t3">do / does</button>
+    <button class="chip" data-jump="t4">be oder do?</button>
+    <button class="chip" data-jump="t5">Short Answers</button>
+    <button class="chip" data-jump="t6">W-Fragen</button>
+  </div>
+
+  <div class="card" id="t1">
+    <h2>1 · Überblick: Zwei Arten von Fragen</h2>
+    <table>
+      <tr><th>Art</th><th>Beispiel</th><th>Antwort</th></tr>
+      <tr><td><b>Ja/Nein-Fragen</b><br><span class="muted">beginnen mit dem Hilfsverb</span></td>
+          <td><span class="aux">Do</span> <span class="subj">you</span> <span class="verb">like</span> pizza?</td><td>Yes, I do. / No, I don't.</td></tr>
+      <tr><td><b>W-Fragen</b><br><span class="muted">beginnen mit einem Fragewort</span></td>
+          <td><span class="qw">Where</span> <span class="aux">do</span> <span class="subj">you</span> <span class="verb">live</span>?</td><td>In St. Gallen.</td></tr>
+    </table>
+    <div class="rule">💡 <b>Wichtigste Regel:</b> Im Englischen steht in jeder Frage ein <span class="aux">Hilfsverb</span> <b>vor</b> dem <span class="subj">Subjekt</span>. Das Hilfsverb ist entweder eine Form von <b>to be</b> (am, is, are) oder <b>do / does</b>.</div>
+    <div class="legend"><span class="lg-qw">Fragewort</span><span class="lg-aux">Hilfsverb</span><span class="lg-subj">Subjekt</span><span class="lg-verb">Verb</span></div>
+  </div>
+
+  <div class="card" id="t2">
+    <h2>2 · Fragen mit «to be» (am, is, are)</h2>
+    <p>Bei <b>to be</b> ist es ganz einfach: Du tauschst <span class="aux">am/is/are</span> und das <span class="subj">Subjekt</span>. Du brauchst <b>kein</b> do!</p>
+    <div class="formula"><span class="lg-subj">She</span><span class="lg-aux">is</span><span>twelve.</span><span>→</span><span class="lg-aux">Is</span><span class="lg-subj">she</span><span>twelve?</span></div>
+    <table>
+      <tr><th>Subjekt</th><th>Aussage</th><th>Frage</th></tr>
+      <tr><td>I</td><td>I <span class="aux">am</span> late.</td><td><span class="aux">Am</span> <span class="subj">I</span> late? ${sayBtn('Am I late?')}</td></tr>
+      <tr><td>you</td><td>You <span class="aux">are</span> tired.</td><td><span class="aux">Are</span> <span class="subj">you</span> tired? ${sayBtn('Are you tired?')}</td></tr>
+      <tr><td>he / she / it</td><td>Tom <span class="aux">is</span> from London.</td><td><span class="aux">Is</span> <span class="subj">Tom</span> from London? ${sayBtn('Is Tom from London?')}</td></tr>
+      <tr><td>we / you / they</td><td>Lena and Mia <span class="aux">are</span> at home.</td><td><span class="aux">Are</span> <span class="subj">Lena and Mia</span> at home? ${sayBtn('Are Lena and Mia at home?')}</td></tr>
+    </table>
+    ${mini('m2','___ your parents at home?',['Am','Is','Are','Do'],'Are','your parents = they → <b>are</b>. Kein anderes Verb, also kein do.')}
+  </div>
+
+  <div class="card" id="t3">
+    <h2>3 · Fragen mit do / does</h2>
+    <p>Hat der Satz ein <span class="verb">anderes Verb</span> (play, like, live, have, go …), brauchst du für die Frage <span class="aux">do</span>.</p>
+    <div class="formula"><span class="lg-subj">You</span><span class="lg-verb">play</span><span>football.</span><span>→</span><span class="lg-aux">Do</span><span class="lg-subj">you</span><span class="lg-verb">play</span><span>football?</span></div>
+    <table>
+      <tr><th>Subjekt</th><th>Frage</th></tr>
+      <tr><td>I / you / we / they</td><td><span class="aux">Do</span> <span class="subj">you</span> <span class="verb">like</span> chocolate? ${sayBtn('Do you like chocolate?')}<br><span class="aux">Do</span> <span class="subj">your friends</span> <span class="verb">play</span> basketball? ${sayBtn('Do your friends play basketball?')}</td></tr>
+      <tr><td>he / she / it</td><td><span class="aux">Does</span> <span class="subj">your sister</span> <span class="verb">have</span> a pet? ${sayBtn('Does your sister have a pet?')}<br><span class="aux">Does</span> <span class="subj">Noah</span> <span class="verb">play</span> the guitar? ${sayBtn('Does Noah play the guitar?')}</td></tr>
+    </table>
+    <div class="rule">💡 Bei <b>he / she / it</b> heisst es <span class="aux">does</span>. Das <b>-s</b> wandert zu does – das Verb bleibt in der <b>Grundform</b>:<br>
+      She <span class="verb">plays</span> tennis. → <span class="aux">Does</span> she <span class="verb">play</span> tennis?</div>
+    ${mini('m3','___ you live in Wil?',['Are','Do','Does'],'Do','<i>live</i> ist ein Vollverb → do-Frage. you → <b>Do</b>.')}
+  </div>
+
+  <div class="card" id="t4">
+    <h2>4 · be oder do? So entscheidest du</h2>
+    <div class="flow">
+      <div class="start">Gibt es im Satz ein anderes Verb (play, like, live, go …)?</div>
+      <div class="box" style="background:var(--aux-soft)"><span>NEIN</span><b>am / is / are</b><span class="muted">Is your cat black?</span></div>
+      <div class="box" style="background:var(--verb-soft)"><span>JA</span><b>do / does</b><span class="muted">Do you have a cat?</span></div>
+    </div>
+    <div class="rule">💡 Eine Frage hat <b>entweder</b> am/is/are <b>oder</b> do/does – nie beides: <i>Are you twelve?</i> · <i>Do you like pizza?</i></div>
+    ${mini('m4','___ your brother tired?',['Do','Does','Is'],'Is','<i>tired</i> ist ein Adjektiv, kein Verb → <i>to be</i>: your brother = he → <b>Is</b>.')}
+  </div>
+
+  <div class="card" id="t5">
+    <h2>5 · Short Answers (Kurzantworten)</h2>
+    <p>Auf Ja/Nein-Fragen antwortet man im Englischen meist nicht nur mit «Yes» oder «No», sondern mit einer <b>Short Answer</b>:</p>
+    <div class="formula"><span style="background:#f3f5fa">Yes / No</span><span>,</span><span class="lg-subj">Pronomen</span><span class="lg-aux">Hilfsverb aus der Frage</span><span>(+ n't)</span></div>
+    <table>
+      <tr><th>Frage</th><th>✅ Yes</th><th>❌ No</th></tr>
+      <tr><td>Am I right?</td><td>Yes, you are.</td><td>No, you aren't.</td></tr>
+      <tr><td>Are you twelve?</td><td>Yes, I am.</td><td>No, I'm not.</td></tr>
+      <tr><td>Is Tom at home?</td><td>Yes, he is.</td><td>No, he isn't.</td></tr>
+      <tr><td>Is your mum a teacher?</td><td>Yes, she is.</td><td>No, she isn't.</td></tr>
+      <tr><td>Is it cold?</td><td>Yes, it is.</td><td>No, it isn't.</td></tr>
+      <tr><td>Are your friends here?</td><td>Yes, they are.</td><td>No, they aren't.</td></tr>
+      <tr><td>Do you like pizza?</td><td>Yes, I do.</td><td>No, I don't.</td></tr>
+      <tr><td>Do they play tennis?</td><td>Yes, they do.</td><td>No, they don't.</td></tr>
+      <tr><td>Does Mia have a dog?</td><td>Yes, she does.</td><td>No, she doesn't.</td></tr>
+    </table>
+    <div class="good">✅ <b>So geht's:</b><br>
+      1. Schau, welches <span class="aux">Hilfsverb</span> in der Frage steht – genau dieses wiederholst du.<br>
+      2. Ersetze Namen durch ein <span class="subj">Pronomen</span>: Is <i>Tom</i> …? → Yes, <b>he</b> is.<br>
+      3. Achtung bei <b>you</b>: Are <i>you</i> …? → Yes, <b>I</b> am.</div>
+    <div class="rule">💡 Bei <b>Yes</b> schreibst du immer die <b>lange Form</b>: <i>Yes, I am.</i> · <i>Yes, he is.</i> · <i>Yes, they are.</i><br>Nur bei <b>No</b> wird verkürzt: <i>No, I'm not.</i> · <i>No, he isn't.</i></div>
+    ${mini('m5','Does your dad cook? – No, …',["he isn't.","he doesn't.","he does."],"he doesn't.",'Frage mit <b>does</b> → Antwort mit <b>doesn\'t</b>. your dad = he.')}
+  </div>
+
+  <div class="card" id="t6">
+    <h2>6 · W-Fragen (what, where, when, why, how)</h2>
+    <table>
+      <tr><th>Fragewort</th><th>Deutsch</th><th>fragt nach …</th><th>Beispiel</th></tr>
+      <tr><td class="qw">what</td><td>was</td><td>Sache, Information</td><td>What is your name? ${sayBtn('What is your name?')}</td></tr>
+      <tr><td class="qw">where</td><td>wo</td><td>Ort</td><td>Where do you live? ${sayBtn('Where do you live?')}</td></tr>
+      <tr><td class="qw">when</td><td>wann</td><td>Zeit</td><td>When is your birthday? ${sayBtn('When is your birthday?')}</td></tr>
+      <tr><td class="qw">why</td><td>warum</td><td>Grund → Antwort mit <i>because</i></td><td>Why are you late? – Because I missed the bus. ${sayBtn('Why are you late? Because I missed the bus.')}</td></tr>
+      <tr><td class="qw">how</td><td>wie</td><td>Art und Weise, Befinden</td><td>How are you? / How old are you? ${sayBtn('How are you? How old are you?')}</td></tr>
+    </table>
+    <h3>Satzbau</h3>
+    <p>Das Fragewort kommt an den Anfang. Danach geht es genau gleich weiter wie bei der Ja/Nein-Frage:</p>
+    <div class="formula"><span class="lg-qw">Fragewort</span><span>+</span><span class="lg-aux">Hilfsverb</span><span>+</span><span class="lg-subj">Subjekt</span><span>+</span><span class="lg-verb">Verb</span><span>+ Rest ?</span></div>
+    <table>
+      <tr><th>mit to be</th><th>mit do / does</th></tr>
+      <tr>
+        <td><span class="qw">Where</span> <span class="aux">is</span> <span class="subj">my bag</span>?<br><span class="qw">How old</span> <span class="aux">are</span> <span class="subj">you</span>?<br><span class="qw">Why</span> <span class="aux">are</span> <span class="subj">you</span> sad?</td>
+        <td><span class="qw">Where</span> <span class="aux">do</span> <span class="subj">you</span> <span class="verb">live</span>?<br><span class="qw">What</span> <span class="aux">do</span> <span class="subj">you</span> <span class="verb">do</span> after school?<br><span class="qw">When</span> <span class="aux">does</span> <span class="subj">the film</span> <span class="verb">start</span>?</td>
+      </tr>
+    </table>
+    <div class="rule">💡 Auf W-Fragen antwortet man <b>nicht</b> mit Yes oder No, sondern mit einer Information: <i>Where do you live? – In Gossau.</i></div>
+    ${mini('m6','___ do you go to school? – By bus.',['What','Where','How','Why'],'How','<b>How</b> = wie → fragt nach der Art und Weise (mit dem Bus).')}
+  </div>
+
+  <div class="card" style="text-align:center"><button class="bigbtn" onclick="go('ueben')">Jetzt üben ✏️</button></div>`;
+
+  $app.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{ document.getElementById(b.dataset.jump).scrollIntoView({behavior:'smooth',block:'start'}); });
+  $app.querySelectorAll('.mini').forEach(m=>{
+    m.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+      const ok = b.dataset.o===b.dataset.a;
+      m.querySelectorAll('button').forEach(x=>{ x.disabled=true; if(x.dataset.o===x.dataset.a) x.classList.add('right'); });
+      if(!ok) b.classList.add('wrong');
+      const fb = m.querySelector('.fb');
+      fb.innerHTML = (ok?'✅ Richtig! ':'❌ Nicht ganz. ')+fb.dataset.expl;
+    });
+  });
+}
+
+/* ================= ANALYSE (Tipps ohne Lösung) ================= */
+const AUXES = ['am','is','are','do','does'];
+const BE = ['am','is','are'];
+const QWS = ['what','where','when','why','how','who','which'];
+const PRONS = ['i','you','he','she','it','we','they'];
+
+function parts(q){ const [qw,aux,subj,verb,rest] = q.split('|'); return {qw,aux,subj,verb,rest}; }
+function fullQ(q){ const p=parts(q); return cap([p.qw,p.aux,p.subj,p.verb,p.rest].filter(Boolean).join(' '))+'?'; }
+function expand(s){
+  return s.replace(/\b(what|where|when|how|who)'s\b/g,'$1 is').replace(/\bi'm\b/g,'i am').replace(/\b(you|we|they)'re\b/g,'$1 are');
+}
+const tok = s => { const n = expand(norm(s)); return n ? n.split(' ') : []; };
+const noApos = a => a.join(' ').replace(/'/g,'');
+function lev(a,b){
+  const m=a.length,n=b.length; if(!m) return n; if(!n) return m;
+  let prev=[...Array(n+1).keys()];
+  for(let i=1;i<=m;i++){ const cur=[i]; for(let j=1;j<=n;j++){ cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); } prev=cur; }
+  return prev[n];
+}
+function subjPron(subj){
+  const s = subj.toLowerCase();
+  if(PRONS.includes(s)) return s==='i'?'I':s;
+  if(s.includes(' and ')) return 'they';
+  const he=['tom','noah','ben','your brother','your dad','mr smith'];
+  const she=['mia','emma','lena','your sister','your mum','your aunt'];
+  const they=['your friends','your parents','your grandparents','the children','my glasses'];
+  if(he.includes(s)) return 'he'; if(she.includes(s)) return 'she'; if(they.includes(s)) return 'they';
+  return 'it';
+}
+
+// Prüft eine geschriebene Frage. Gibt {ok, note, tip} zurück – der Tipp verrät die Lösung nicht.
+function checkQuestion(input, q, original){
+  const p = parts(q);
+  const T = tok(fullQ(q)), I = tok(input);
+  const note = /\?\s*$/.test(input.trim()) ? '' : 'Denk beim nächsten Mal an das Fragezeichen (?).';
+  if(I.join(' ')===T.join(' ')) return {ok:true, note};
+  if(noApos(I)===noApos(T)) return {ok:true, note:'Achte auf den Apostroph (\').'+(note?' '+note:'')};
+  if(!I.length) return {ok:false, tip:'Schreib zuerst eine Frage.'};
+  if(original && I.join(' ')===tok(original).join(' ')) return {ok:false, tip:'Du hast die Frage noch nicht verändert. Suche den Fehler: Stimmt das Hilfsverb? Stimmt die Reihenfolge?'};
+  if([...I].sort().join(' ')===[...T].sort().join(' ')) return {ok:false, tip:'Alle Wörter stimmen – aber die <b>Reihenfolge</b> nicht. Denk an den Bauplan: (Fragewort) + Hilfsverb + Subjekt + (Verb) + Rest.'};
+  const Ibe = I.some(w=>BE.includes(w)), Ido = I.some(w=>w==='do'||w==='does');
+  const Tbe = T.some(w=>BE.includes(w)), Tdo = T.some(w=>w==='do'||w==='does');
+  if(Ibe && Ido && !(Tbe && Tdo)) return {ok:false, tip:'In deiner Frage stehen <b>do/does</b> und <b>am/is/are</b> zusammen. Das geht nie! Entscheide dich: Gibt es ein Vollverb oder nicht?'};
+
+  const QW = p.qw ? p.qw.split(' ') : [];
+  if(QW.length){
+    if(I.slice(0,QW.length).join(' ')!==QW.join(' ')){
+      if(p.qw==='how old' && I[0]==='how') return {ok:false, tip:'Gute Idee mit <b>how</b>! Gefragt wird aber nach dem <b>Alter</b> – da fehlt noch ein Wort nach how.'};
+      if(QWS.includes(I[0])) return {ok:false, tip:`Das <b>Fragewort</b> passt nicht zur Antwort. Lies die Antwort nochmals: Gefragt wird nach ${QW_TOPIC[p.qw]}.`};
+      if(I.some(w=>QWS.includes(w))) return {ok:false, tip:'Das <b>Fragewort</b> gehört ganz an den Anfang der Frage.'};
+      return {ok:false, tip:'Eine W-Frage beginnt mit einem <b>Fragewort</b>. Lies die Antwort: Wonach wird gefragt?'};
+    }
+  } else if(QWS.includes(I[0])) return {ok:false, tip:'Hier ist eine <b>Ja/Nein-Frage</b> gefragt – sie beginnt ohne Fragewort.'};
+
+  const pos = QW.length, ia = I[pos];
+  if(ia!==p.aux){
+    if(!AUXES.includes(ia)){
+      if(ia && I[pos+1]===tok(p.subj)[0] && AUXES.some(a=>lev(a,ia)<=2)) return {ok:false, tip:'Prüfe die <b>Rechtschreibung</b> des Hilfsverbs.'};
+      if(I.slice(pos).some(w=>AUXES.includes(w))) return {ok:false, tip:`Das <b>Hilfsverb</b> steht an der falschen Stelle. Es kommt ${QW.length?'direkt nach dem Fragewort':'ganz an den Anfang'}.`};
+      return {ok:false, tip:`Es fehlt ein <b>Hilfsverb</b>${QW.length?' nach dem Fragewort':' am Anfang'} (am / is / are oder do / does).`};
+    }
+    if(BE.includes(p.aux) && !BE.includes(ia)) return {ok:false, tip:'Gibt es in dieser Frage ein <b>Vollverb</b> (play, like, live …)? Nein! Welches Hilfsverb brauchst du dann?'};
+    if(!BE.includes(p.aux) && BE.includes(ia)) return {ok:false, tip:'In dieser Frage gibt es ein <b>Vollverb</b>. Welches Hilfsverb brauchst du dann?'};
+    if(BE.includes(p.aux)) return {ok:false, tip:`Welche Form von <b>to be</b> passt zum Subjekt «${p.subj}»? Ersetze es in Gedanken durch ein Pronomen (I, he, she, it, we, they …).`};
+    return {ok:false, tip:`Prüfe das Subjekt «${p.subj}»: Ist es he / she / it oder nicht? Danach richtet sich das Hilfsverb.`};
+  }
+  const S = tok(p.subj), sEnd = pos+1+S.length;
+  if(I.slice(pos+1,sEnd).join(' ')!==S.join(' ')){
+    if(lev(I.slice(pos+1,sEnd).join(' '),S.join(' '))<=2) return {ok:false, tip:'Prüfe die <b>Rechtschreibung</b> des Subjekts.'};
+    return {ok:false, tip:'Nach dem Hilfsverb kommt das <b>Subjekt</b> (wer oder was?). Prüfe, ob es richtig ist und an der richtigen Stelle steht.'};
+  }
+  let after = sEnd;
+  if(p.verb){
+    const iv = I[sEnd], v = p.verb;
+    if(iv!==v){
+      if(iv===v+'s'||iv===v+'es'||(v==='have'&&iv==='has')) return {ok:false, tip:`Nach <b>${p.aux}</b> steht das Verb in der <b>Grundform</b> – ohne -s.`};
+      if(!iv) return {ok:false, tip:'Es fehlt noch das <b>Verb</b> nach dem Subjekt.'};
+      if(lev(iv,v)<=2 && v.length>3) return {ok:false, tip:'Prüfe die <b>Rechtschreibung</b> des Verbs.'};
+      return {ok:false, tip:'Prüfe das <b>Verb</b> nach dem Subjekt. Hast du die Stichwörter genau übernommen?'};
+    }
+    after++;
+  } else if(I[sEnd] && !tok(p.rest).length && I.length>sEnd){
+    return {ok:false, tip:'Der Anfang stimmt! Aber am Ende ist etwas zu viel.'};
+  }
+  const rT = T.slice(after), rI = I.slice(after);
+  if(lev(rI.join(' '),rT.join(' '))<=2) return {ok:false, tip:'Fast! Prüfe die <b>Rechtschreibung</b> am Ende der Frage.'};
+  if(rI.length<rT.length) return {ok:false, tip:'Der Anfang stimmt! Am Ende <b>fehlt</b> noch etwas.'};
+  if(rI.length>rT.length) return {ok:false, tip:'Der Anfang stimmt! Am Ende ist etwas <b>zu viel</b>.'};
+  return {ok:false, tip:'Der Anfang stimmt! Prüfe den <b>Rest</b> der Frage.'};
+}
+
+// Prüft eine Short Answer
+function checkShort(input, q, ap, yes){
+  const p = parts(q);
+  const sa = shortAnswer(ap, ansAux(ap,p.aux), yes);
+  const v = norm(input);
+  const acc = sa.acc.map(norm);
+  if(acc.includes(v)) return {ok:true};
+  if(acc.map(a=>a.replace(/'/g,'')).includes(v.replace(/'/g,''))) return {ok:true, note:'Achte auf den Apostroph (\'), z.B. don\'t, isn\'t.'};
+  const w = v.split(' ');
+  if(!v) return {ok:false, tip:'Schreib zuerst eine Antwort.'};
+  if((yes && w[0]!=='yes') || (!yes && w[0]!=='no')) return {ok:false, tip:`Achte auf das Zeichen: Die Antwort ist hier <b>${yes?'Yes':'No'}</b>.`};
+  if(w.length<2) return {ok:false, tip:'Nur «Yes» oder «No» ist zu kurz. Eine Short Answer hat drei Teile: Yes/No + <b>Pronomen</b> + <b>Hilfsverb</b>.'};
+  if(yes && v.includes("'")) return {ok:false, tip:'Bei <b>Yes</b> wird nie verkürzt!'};
+  const pw = w[1].replace(/'.*/,'');
+  if(!PRONS.includes(pw)) return {ok:false, tip:'Verwende ein <b>Pronomen</b> (I, you, he, she, it, we, they) statt eines Namens oder Nomens.'};
+  if(pw!==ap.toLowerCase()){
+    if(pw==='you' && ap==='I') return {ok:false, tip:'Die Frage richtet sich an <b>dich</b> («you»). Mit welchem Pronomen sprichst du von dir selbst?'};
+    if(ap==='we') return {ok:false, tip:'Prüfe das Pronomen: Gefragt wird nach <b>dir und einer anderen Person</b>.'};
+    return {ok:false, tip:'Prüfe das <b>Pronomen</b>: Wer ist gemeint? (he, she, it, they …)'};
+  }
+  if(p.verb && w.slice(2).some(x=>x===p.verb || x===p.verb+'s')) return {ok:false, tip:'In der Short Answer wiederholst du nicht das Verb, sondern das <b>Hilfsverb</b> aus der Frage.'};
+  if(!yes && !/n't|not/.test(v)) return {ok:false, tip:'Bei <b>No</b> braucht es die verneinte Form (mit <i>not</i> bzw. <i>n\'t</i>).'};
+  if(w.length>4 || (yes && w.length>3)) return {ok:false, tip:'Eine Short Answer ist kurz: nur Yes/No + Pronomen + Hilfsverb. Lass den Rest weg.'};
+  return {ok:false, tip:`Wiederhole das <b>Hilfsverb</b> aus der Frage – in der passenden Form zum Pronomen.`};
+}
+
+// Erklärungen (erst nach dem 2. Fehlversuch sichtbar)
+function explainQ(q){
+  const p = parts(q), pr = subjPron(p.subj);
+  const lines = [];
+  if(p.qw) lines.push(QW_INFO[p.qw]);
+  const sub = p.subj.toLowerCase()===pr.toLowerCase() ? `<span class="subj">${p.subj}</span>` : `<span class="subj">${p.subj}</span> = ${pr}`;
+  if(p.verb){
+    lines.push(`«<span class="verb">${p.verb}</span>» ist ein Vollverb → Frage mit do/does. ${sub} → <span class="aux">${p.aux}</span>.`);
+    if(p.aux==='does') lines.push(`Nach <b>does</b> steht das Verb in der Grundform: <span class="verb">${p.verb}</span> (ohne -s).`);
+  } else {
+    lines.push(`Kein Vollverb → Frage mit <i>to be</i>. ${sub} → <span class="aux">${p.aux}</span>.`);
+  }
+  lines.push('Bauplan: <span class="qw">(Fragewort)</span> + <span class="aux">Hilfsverb</span> + <span class="subj">Subjekt</span> + <span class="verb">(Verb)</span> + Rest?');
+  return lines.join('<br>');
+}
+function ansAux(ap, aux){
+  if(BE.includes(aux)) return ap==='I' ? 'am' : ['he','she','it'].includes(ap) ? 'is' : 'are';
+  return aux;
+}
+function explainShort(q, ap, yes){
+  const p = parts(q), aa = ansAux(ap, p.aux);
+  const neg = {am:"'m not",is:"isn't",are:"aren't",do:"don't",does:"doesn't"}[aa];
+  const youQ = /^you\b/i.test(p.subj);
+  return `Frage mit <span class="aux">${cap(p.aux)}</span> → Short Answer mit <span class="aux">${yes?aa:neg}</span>. `
+    + (youQ ? `Gefragt wird «${p.subj}» → du antwortest mit <span class="subj">${ap}</span>.` : `«${p.subj}» → Pronomen <span class="subj">${ap}</span>.`)
+    + (yes ? ' Bei Yes wird nie verkürzt.' : '');
+}
+
+/* ================= ÜBEN: MENÜ ================= */
+function renderMenu(){
+  $app.innerHTML = `
+  <div class="card">
+    <h2>Wähle eine Übung</h2>
+    <p class="muted" style="margin-top:-4px">Bei einem Fehler bekommst du einen Tipp und einen zweiten Versuch. Erst nach dem zweiten Fehler siehst du die Lösung.<br>
+    Punkte: 1. Versuch richtig = 2 Punkte · 2. Versuch richtig = 1 Punkt.</p>
+    <div class="grid">
+      ${Object.entries(MODES).map(([k,m])=>`
+        <button class="mode" data-mode="${k}">
+          <div class="ic">${m.ic}</div><b>${m.name}</b><small>${m.desc}</small>
+          ${m.lvl?`<div class="lvl">Schwierigkeit ${m.lvl}</div>`:''}
+          ${best[k]!=null?`<div class="best">Bestes Resultat: ${best[k]} %</div>`:''}
+        </button>`).join('')}
+    </div>
+    <label class="toggle"><input type="checkbox" id="doesT" ${settings.does?'checked':''}> Fragen mit <b>does</b> (he / she / it) einbeziehen</label>
+  </div>`;
+  $app.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>startRound(b.dataset.mode));
+  document.getElementById('doesT').onchange = e => { settings.does = e.target.checked; store('ow1u2_settings',settings); };
+}
+
+/* ================= ÜBEN: RUNDE ================= */
+let R = null;
+const ROUND = 10;
+const BANK = {w:W_ITEMS, yn:YN_ITEMS, short:SA_ITEMS, qsa:QSA_ITEMS, err:ERR_ITEMS, order:ORDER_ITEMS};
+
+function pool(mode){
+  return BANK[mode].filter(i=>settings.does || !i.d).map(i=>({...i, m:mode, yes:Math.random()<0.5}));
+}
+function startRound(mode, items){
+  let list;
+  if(items) list = shuffle(items.map(i=>({...i, yes:Math.random()<0.5})));
+  else if(mode==='mix') list = shuffle(['order','short','yn','w','qsa','err'].flatMap(m=>shuffle(pool(m)).slice(0,2)));
+  else list = shuffle(pool(mode)).slice(0,ROUND);
+  R = {mode, list, i:0, points:0, log:[], retry:!!items};
+  renderItem();
+}
+
+function shell(inner){
+  const it = R.list[R.i];
+  $app.innerHTML = `
+  <div class="topbar">
+    <button class="ghost" style="padding:6px 14px" onclick="go('ueben')">← Menü</button>
+    <div class="progress"><div style="width:${(R.i/R.list.length)*100}%"></div></div>
+    <span class="pill">${R.i+1} / ${R.list.length}</span>
+    <span class="pill">⭐ ${R.points}</span>
+  </div>
+  <div class="card">
+    <div class="task">${MODES[it.m].ic} ${MODES[it.m].name}</div>
+    ${inner}
+    <div class="row" id="btnRow"><button class="bigbtn" id="chk">Prüfen</button><span class="pill tries" id="tries">Versuch 1 von 2</span></div>
+    <div class="feedback" id="fb"></div>
+    <div class="row" id="nextRow" style="display:none"><button class="bigbtn" id="nextBtn">Weiter →</button></div>
+  </div>`;
+  document.getElementById('nextBtn').onclick = next;
+}
+
+function field(id, label, ph){
+  return `<label class="flabel" for="${id}">${label}</label><input class="inp" id="${id}" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${ph}">`;
+}
+
+function renderItem(){
+  const it = R.list[R.i];
+  it.attempt = 0; it.done = false;
+  const p = parts(it.q);
+  let html = '', fields = [];
+  if(it.m==='w'){
+    html = `<div class="muted">Schreib die passende <b>W-Frage</b> zur Antwort. Verwende die Stichwörter.</div>
+      <div class="dialog"><div><b>A:</b> <span class="gap">?</span></div><div><b>B:</b> ${it.a} ${sayBtn(it.a)}</div></div>
+      <div class="cue">Stichwörter: <b>${it.c}</b></div>${field('f1','Deine Frage:','Write the question …')}`;
+    fields = [{id:'f1', check:v=>checkQuestion(v,it.q), sol:fullQ(it.q)}];
+  } else if(it.m==='yn'){
+    html = `<div class="muted">Mach aus dem Aussagesatz eine <b>Ja/Nein-Frage</b>.</div>
+      <div class="q">${it.st} ${sayBtn(it.st)}</div>${field('f1','Deine Frage:','Write the question …')}`;
+    fields = [{id:'f1', check:v=>checkQuestion(v,it.q), sol:fullQ(it.q)}];
+  } else if(it.m==='err'){
+    html = `<div class="muted">Diese Frage enthält einen <b>Fehler</b>. Schreib die ganze Frage richtig.</div>
+      <div class="q"><span class="wrongq">${it.w}</span></div>${field('f1','Richtige Frage:','Write the correct question …')}`;
+    fields = [{id:'f1', check:v=>checkQuestion(v,it.q,it.w), sol:fullQ(it.q)}];
+  } else if(it.m==='short'){
+    const fq = fullQ(it.q);
+    html = `<div class="muted">Schreib die passende <b>Short Answer</b>.</div>
+      <div class="q">${fq} ${sayBtn(fq)}</div>
+      <div class="yn ${it.yes?'yes':'no'}">${it.yes?'✅ Yes':'❌ No'}</div>${field('f1','Short Answer:',it.yes?'Yes, …':'No, …')}`;
+    fields = [{id:'f1', check:v=>checkShort(v,it.q,it.ap,it.yes), sol:shortAnswer(it.ap,ansAux(it.ap,p.aux),it.yes).main}];
+  } else if(it.m==='qsa'){
+    html = `<div class="muted">Schreib mit den Stichwörtern eine <b>Ja/Nein-Frage</b> und danach die <b>Short Answer</b>.</div>
+      <div class="cue">Stichwörter: <b>${it.c}</b> &nbsp; <span class="yn ${it.yes?'yes':'no'}" style="margin:0">${it.yes?'✅ Yes':'❌ No'}</span></div>
+      ${field('f1','A: Frage','Write the question …')}${field('f2','B: Short Answer',it.yes?'Yes, …':'No, …')}`;
+    fields = [{id:'f1', check:v=>checkQuestion(v,it.q), sol:fullQ(it.q)},
+              {id:'f2', check:v=>checkShort(v,it.q,it.ap,it.yes), sol:shortAnswer(it.ap,ansAux(it.ap,p.aux),it.yes).main}];
+  } else if(it.m==='order'){ return renderOrder(it); }
+
+  shell(html);
+  const inputs = fields.map(f=>document.getElementById(f.id));
+  setTimeout(()=>inputs[0].focus(),50);
+  const check = ()=>{
+    if(it.done) return;
+    if(inputs.some(i=>!i.disabled && !i.value.trim())){ const e=inputs.find(i=>!i.disabled && !i.value.trim()); e.focus(); e.classList.add('shake'); setTimeout(()=>e.classList.remove('shake'),400); return; }
+    const res = fields.map((f,k)=> inputs[k].disabled ? {ok:true, locked:true} : f.check(inputs[k].value));
+    res.forEach((r,k)=>{ if(r.ok && !r.locked){ inputs[k].disabled=true; inputs[k].classList.add('okb'); } else if(!r.ok){ inputs[k].classList.add('badb'); } });
+    const allOk = res.every(r=>r.ok);
+    const notes = res.filter(r=>r.note).map(r=>r.note);
+    if(allOk) return solved(it, notes, fields.map(f=>f.sol), fields.map((f,k)=>inputs[k].value));
+    it.attempt++;
+    const tips = res.map((r,k)=>!r.ok ? (fields.length>1?`<b>${k===0?'Frage':'Short Answer'}:</b> `:'')+r.tip : null).filter(Boolean);
+    if(it.attempt<2){
+      showTip(tips);
+      const firstBad = inputs[res.findIndex(r=>!r.ok)];
+      firstBad.focus(); firstBad.select();
+      inputs.forEach(i=>i.addEventListener('input',()=>i.classList.remove('badb'),{once:true}));
+    } else {
+      inputs.forEach(i=>i.disabled=true);
+      failed(it, fields.map(f=>f.sol), fields.map((f,k)=>inputs[k].value), res);
+    }
+  };
+  document.getElementById('chk').onclick = check;
+  inputs.forEach((inp,k)=>inp.addEventListener('keydown', e=>{
+    if(e.key!=='Enter') return; e.preventDefault();
+    if(it.done) return next();
+    const nextEmpty = inputs.slice(k+1).find(i=>!i.disabled && !i.value.trim());
+    if(nextEmpty) nextEmpty.focus(); else check();
+  }));
+}
+
+function renderOrder(it){
+  const p = parts(it.q);
+  const words = [p.qw,p.aux,p.subj,p.verb,p.rest].filter(Boolean).join(' ').split(' ');
+  let tiles = shuffle([...words, it.x]).map((w,k)=>({w,k}));
+  let built = [];
+  shell(`<div class="muted">Bilde die Frage. Tippe die Wörter in der richtigen Reihenfolge an. <b>Achtung:</b> Ein Wort ist zu viel!</div>
+    <div class="tiles built" id="built"></div>
+    <div class="tiles pool" id="pool"></div>
+    <div class="row" style="margin-top:0"><button class="ghost" id="clr">↺ Zurücksetzen</button></div>`);
+  const draw = ()=>{
+    const b = document.getElementById('built'), pl = document.getElementById('pool');
+    b.innerHTML = built.length ? built.map((t,n)=>`<button class="tile" data-b="${n}">${n===0?cap(t.w):t.w}</button>`).join('') + '<span style="align-self:center;font-size:1.3rem;font-weight:700">?</span>' : '<span class="muted" style="align-self:center">Deine Frage …</span>';
+    pl.innerHTML = tiles.filter(t=>!built.includes(t)).map(t=>`<button class="tile" data-k="${t.k}">${t.w}</button>`).join('');
+    if(it.done) return;
+    b.querySelectorAll('[data-b]').forEach(x=>x.onclick=()=>{ built.splice(+x.dataset.b,1); draw(); });
+    pl.querySelectorAll('[data-k]').forEach(x=>x.onclick=()=>{ built.push(tiles.find(t=>t.k==x.dataset.k)); draw(); });
+  };
+  draw();
+  document.getElementById('clr').onclick = ()=>{ if(!it.done){ built=[]; draw(); } };
+  document.getElementById('chk').onclick = ()=>{
+    if(it.done || !built.length) return;
+    const ans = cap(built.map(t=>t.w).join(' '))+'?';
+    const r = checkQuestion(ans, it.q);
+    if(r.ok){ solved(it, [], [fullQ(it.q)], [ans]); draw(); return; }
+    it.attempt++;
+    let tip = r.tip;
+    if(built.some(t=>t.w===it.x) && !tok(fullQ(it.q)).includes(it.x)) tip = 'Du hast ein Wort verwendet, das nicht in diese Frage gehört. Welches ist zu viel? ' ;
+    if(it.attempt<2) showTip([tip]);
+    else { failed(it, [fullQ(it.q)], [ans], [{ok:false}]); draw(); }
+  };
+}
+
+function showTip(tips){
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback show tip';
+  fb.innerHTML = `<b class="t">💡 Noch nicht ganz – hier ein Tipp:</b>${tips.map(t=>`<div>${t}</div>`).join('')}<div class="muted" style="margin-top:6px;font-size:.9rem">Verbessere deine Antwort und prüfe nochmals.</div>`;
+  document.getElementById('tries').textContent = 'Versuch 2 von 2';
+  document.getElementById('chk').textContent = 'Nochmals prüfen';
+}
+
+function explainItem(it){
+  if(it.m==='short') return explainShort(it.q, it.ap, it.yes);
+  if(it.m==='qsa') return explainQ(it.q)+'<br>'+explainShort(it.q, it.ap, it.yes);
+  return explainQ(it.q);
+}
+
+function solved(it, notes, sols, given){
+  it.done = true;
+  const pts = it.attempt===0 ? 2 : 1;
+  R.points += pts;
+  R.log.push({it, status: it.attempt===0?'first':'second', sols, given});
+  const fb = document.getElementById('fb');
+  const praise = it.attempt===0 ? ['Super!','Genau!','Perfekt!','Stark!','Richtig!'] : ['Jetzt stimmt es!','Gut verbessert!','Geschafft!'];
+  fb.className = 'feedback show ok';
+  fb.innerHTML = `<b class="t">✅ ${praise[Math.floor(Math.random()*praise.length)]} (+${pts})</b>${notes.length?`<div>${notes.join(' ')}</div>`:''}<div>${sols.join(' – ')} ${sayBtn(sols.join(' '))}</div>`;
+  endItem();
+}
+function failed(it, sols, given){
+  it.done = true;
+  R.log.push({it, status:'fail', sols, given});
+  const fb = document.getElementById('fb');
+  fb.className = 'feedback show bad';
+  fb.innerHTML = `<b class="t">❌ Leider wieder falsch. Hier ist die Lösung:</b>
+    <div class="solution">${sols.join('<br>')} ${sayBtn(sols.join(' '))}</div>
+    <div class="expl">${explainItem(it)}</div>`;
+  endItem();
+}
+function endItem(){
+  document.getElementById('btnRow').style.display='none';
+  const nr = document.getElementById('nextRow'); nr.style.display='flex';
+  const nb = document.getElementById('nextBtn'); nb.textContent = R.i+1<R.list.length ? 'Weiter →' : 'Resultat anzeigen';
+  nb.focus();
+}
+
+function next(){
+  const it = R.list[R.i];
+  if(!it.done) return;
+  R.i++;
+  if(R.i < R.list.length) renderItem(); else renderResult();
+}
+
+function renderResult(){
+  const max = R.list.length*2;
+  const pct = Math.round(R.points/max*100);
+  if(!R.retry && (best[R.mode]==null || pct>best[R.mode])){ best[R.mode]=pct; store('ow1u2_best',best); }
+  const stars = pct>=90?'⭐⭐⭐':pct>=70?'⭐⭐☆':pct>=50?'⭐☆☆':'☆☆☆';
+  const msg = pct===100?'Fantastisch – alles im ersten Versuch richtig! 🎉':pct>=80?'Sehr gut gemacht!':pct>=60?'Gut! Mit etwas Übung wird es noch besser.':'Lies die Theorie nochmals und versuche es dann erneut.';
+  const first = R.log.filter(l=>l.status==='first').length, second = R.log.filter(l=>l.status==='second').length, fail = R.log.filter(l=>l.status==='fail').length;
+  const toRetry = R.log.filter(l=>l.status!=='first');
+  const esc = s => s.replace(/</g,'&lt;');
+  $app.innerHTML = `
+  <div class="card result">
+    <h2>${MODES[R.mode].ic} ${MODES[R.mode].name}${R.retry?' – Fehler-Training':''}</h2>
+    <div class="stars">${stars}</div>
+    <div class="big">${R.points} / ${max}</div>
+    <p>${msg}</p>
+    <p class="muted">✅ im 1. Versuch: ${first} &nbsp;·&nbsp; 🔁 im 2. Versuch: ${second} &nbsp;·&nbsp; ❌ nicht gelöst: ${fail}</p>
+    <div class="row" style="justify-content:center">
+      ${toRetry.length?`<button class="bigbtn" id="retry">Diese Aufgaben nochmals üben (${toRetry.length})</button>`:''}
+      <button class="${toRetry.length?'ghost':'bigbtn'}" id="again">Neue Runde</button>
+      <button class="ghost" onclick="go('ueben')">Menü</button>
+      ${pct<60?`<button class="ghost" onclick="go('theorie')">📖 Theorie</button>`:''}
+    </div>
+    ${toRetry.length?`<div class="wronglist"><h3>Das solltest du dir nochmals anschauen:</h3><ul>
+      ${toRetry.map(l=>`<li>${l.status==='fail'?'❌':'🔁'} ${l.status==='fail'&&l.given.some(Boolean)?`<span style="color:var(--bad)"><s>${esc(l.given.filter(Boolean).join(' – '))}</s></span> → `:''}<b>${l.sols.join(' – ')}</b></li>`).join('')}
+    </ul></div>`:''}
+  </div>`;
+  const items = toRetry.map(l=>{ const c={...l.it}; delete c.done; delete c.attempt; return c; });
+  const mode = R.mode;
+  if(toRetry.length) document.getElementById('retry').onclick = ()=>startRound(mode, items);
+  document.getElementById('again').onclick = ()=>startRound(mode);
+}
+
+/* ================= START ================= */
+const h = (location.hash||'').slice(1);
+go(['theorie','ueben'].includes(h) ? h : 'start');
+
+</script>
+</body>
+</html>

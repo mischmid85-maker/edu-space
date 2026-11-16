@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edu Space 🚀</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{ --pink:#ff6b9d; --purple:#a78bfa; --yellow:#ffd166; --teal:#4ecdc4; --blue:#4d96ff; }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Baloo 2', sans-serif; margin:0; padding:2rem; min-height:100vh;
+    background:linear-gradient(135deg,#ffe6f2 0%,#e6f2ff 50%,#fff9e6 100%);
+    background-attachment:fixed; color:#333;
+  }
+  .header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;}
+  h1{
+    margin:0; font-weight:800; font-size:2.6rem;
+    background:linear-gradient(90deg,var(--pink),var(--purple),var(--blue));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    display:inline-block; transform:rotate(-1deg); animation:float 3.5s ease-in-out infinite;
+  }
+  @keyframes float{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-4px) rotate(-1deg);}}
+  .subtitle{margin-top:0.2rem;margin-bottom:0;color:#777;font-size:1.05rem;}
+  .admin-btn{
+    cursor:pointer;padding:0.5rem 1rem;border:none;border-radius:50px;
+    background:#fff;color:#666;font-family:inherit;font-weight:700;font-size:0.9rem;
+    box-shadow:0 3px 8px rgba(0,0,0,.1);
+  }
+  .admin-btn.active{background:linear-gradient(90deg,var(--teal),var(--blue));color:#fff;}
+  #status{margin-top:0.6rem;font-size:0.9rem;color:#888;min-height:1.3em;}
+
+  /* Fächer auf der Startseite */
+  #subjectGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.6rem;margin-top:1.4rem;}
+  .subject-card{
+    position:relative;cursor:pointer;border:none;border-radius:20px;padding:2rem 1rem;
+    display:flex;flex-direction:column;align-items:center;gap:0.6rem;
+    color:#fff;font-family:inherit;font-weight:700;font-size:1.2rem;text-align:center;
+    box-shadow:0 6px 0 rgba(0,0,0,.1), 0 10px 20px rgba(0,0,0,.1);
+    transition:transform .15s ease;
+  }
+  .subject-card:hover{ transform:translateY(-6px) rotate(-1deg); }
+  .subject-card .emoji{font-size:2.6rem;}
+  .subject-card .count{font-size:0.85rem;font-weight:500;opacity:0.9;}
+  .subject-card.new{background:rgba(255,255,255,.6);color:#888;border:3px dashed #ccc;box-shadow:none;}
+  .subject-card .corner-x{position:absolute;top:8px;right:8px;}
+
+  .back-btn{
+    cursor:pointer;padding:0.5rem 1.1rem;border:none;border-radius:50px;
+    background:#fff;color:#555;font-family:inherit;font-weight:700;font-size:0.9rem;
+    box-shadow:0 3px 8px rgba(0,0,0,.1);margin-bottom:1rem;
+  }
+  .subject-heading{display:flex;align-items:center;gap:0.6rem;margin:0.5rem 0 1rem;flex-wrap:wrap;}
+  .subject-heading .emoji{font-size:2rem;}
+  .subject-heading h2{margin:0;font-size:1.8rem;font-weight:800;color:#444;}
+  .crumb{cursor:pointer;color:#888;}
+  .crumb:hover{text-decoration:underline;}
+  .crumb-sep{color:#bbb;margin:0 .3rem;}
+
+  .toolbar{margin:0.5rem 0 1.8rem;display:flex;gap:.8rem;flex-wrap:wrap;}
+  .toolbar button{
+    cursor:pointer;padding:0.9rem 1.6rem;border:none;border-radius:50px;color:#fff;
+    font-family:inherit;font-weight:700;font-size:1.05rem;
+    transition:transform .12s ease;
+  }
+  .toolbar button:hover{transform:translateY(-2px) scale(1.03) rotate(-1deg);}
+  #addBtn{background:linear-gradient(90deg,var(--pink),var(--purple));box-shadow:0 6px 0 #c94f81, 0 8px 14px rgba(0,0,0,.15);}
+  #newFolderBtn{background:linear-gradient(90deg,var(--yellow),#ffb347);color:#6b4b00 !important;box-shadow:0 6px 0 #d9a23a, 0 8px 14px rgba(0,0,0,.15);}
+
+  #grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.6rem;}
+  .card{
+    background:#fff;border-radius:18px;
+    box-shadow:0 6px 0 rgba(0,0,0,.06), 0 10px 20px rgba(0,0,0,.08);
+    overflow:hidden;display:flex;flex-direction:column;border:3px solid #fff;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .card:nth-child(5n+1){border-color:var(--pink);}
+  .card:nth-child(5n+2){border-color:var(--purple);}
+  .card:nth-child(5n+3){border-color:var(--teal);}
+  .card:nth-child(5n+4){border-color:var(--yellow);}
+  .card:nth-child(5n+5){border-color:var(--blue);}
+  .card:hover{transform:translateY(-6px) rotate(-1deg);box-shadow:0 10px 0 rgba(0,0,0,.06), 0 16px 26px rgba(0,0,0,.14);}
+  .thumb{
+    position:relative;width:100%;height:150px;overflow:hidden;border-bottom:2px dashed #eee;
+    background:repeating-linear-gradient(45deg,#fafafa,#fafafa 10px,#fff 10px,#fff 20px);cursor:pointer;
+  }
+  .thumb iframe{position:absolute;top:0;left:0;width:800px;height:600px;border:none;transform:scale(0.275);transform-origin:top left;pointer-events:none;background:#fff;}
+  .card.folder .thumb{display:flex;align-items:center;justify-content:center;flex-direction:column;background:linear-gradient(135deg,#fff6d6,#ffe9a8);}
+  .card.folder .thumb .big{font-size:4rem;line-height:1;}
+  .card.folder .thumb .count{color:#8a6a10;font-size:.9rem;font-weight:600;}
+  .card-body{padding:0.8rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:0.5rem;background:#fffefc;}
+  .card-title{font-size:0.92rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .remove-btn{flex-shrink:0;background:#fff0f0;color:#e0507a;border:none;border-radius:50%;width:28px;height:28px;font-size:1rem;cursor:pointer;transition:transform .12s ease;}
+  .remove-btn:hover{background:#ffd6e0;transform:scale(1.15) rotate(90deg);}
+  #empty{color:#999;font-style:italic;font-size:1.1rem;padding:2rem;text-align:center;border:3px dashed #ddd;border-radius:20px;background:rgba(255,255,255,.5);}
+
+  /* Dialog-Fenster (Anmeldung, neuer Ordner, neuer Bereich) */
+  dialog{border:none;border-radius:20px;padding:1.5rem 1.6rem;box-shadow:0 16px 40px rgba(0,0,0,.25);font-family:inherit;max-width:360px;width:90%;}
+  dialog::backdrop{background:rgba(0,0,0,.35);}
+  dialog h3{margin:0 0 .8rem;}
+  dialog label{display:block;font-weight:600;font-size:.9rem;margin:.6rem 0 .2rem;color:#555;}
+  dialog input{width:100%;box-sizing:border-box;padding:.6rem .8rem;font-size:1rem;border:2px solid #ddd;border-radius:12px;font-family:inherit;}
+  dialog .row{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem;}
+  dialog button{cursor:pointer;padding:.5rem 1rem;border:none;border-radius:50px;font-family:inherit;font-weight:700;}
+  dialog button[type=submit]{background:linear-gradient(90deg,var(--teal),var(--blue));color:#fff;}
+  dialog .msg{min-height:1.2em;margin:.5rem 0 0;color:#e0507a;font-size:.9rem;}
+  dialog .hint{font-size:.8rem;color:#999;margin:.2rem 0 0;}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>✨ Edu Space 🚀</h1>
+    <p class="subtitle" id="subtitle">Wähle ein Fach aus:</p>
+  </div>
+  <button id="adminToggle" class="admin-btn">🔐 Admin</button>
+</div>
+<div id="status"></div>
+
+<div id="homeView">
+  <div id="subjectGrid"></div>
+</div>
+
+<div id="subjectView" style="display:none;">
+  <button class="back-btn" id="backBtn">⬅ Zurück</button>
+  <div class="subject-heading" id="heading"></div>
+  <div class="toolbar" id="toolbar" style="display:none;">
+    <button id="addBtn">➕ HTML-Seite hinzufügen</button>
+    <button id="newFolderBtn">📁 Neuer Ordner</button>
+    <input type="file" id="fileInput" accept=".html,.htm" multiple hidden>
+  </div>
+  <div id="grid"></div>
+  <p id="empty" style="display:none;">🦄 Noch keine Seiten in diesem Ordner.</p>
+</div>
+
+<dialog id="loginDialog">
+  <form id="loginForm">
+    <h3>🔐 Admin-Anmeldung</h3>
+    <input type="password" id="loginInput" autocomplete="current-password" placeholder="Passwort">
+    <p class="msg" id="loginMsg"></p>
+    <div class="row">
+      <button type="button" id="loginCancel">Abbrechen</button>
+      <button type="submit">Anmelden</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="formDialog">
+  <form id="formForm">
+    <h3 id="formTitle"></h3>
+    <div id="formFields"></div>
+    <p class="msg" id="formMsg"></p>
+    <div class="row">
+      <button type="button" id="formCancel">Abbrechen</button>
+      <button type="submit" id="formOk">Erstellen</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+/* ====== HIER ANPASSEN: deine GitHub-Daten ====== */
+const OWNER  = 'mischmid85-maker';
+const REPO   = 'edu-space';
+const BRANCH = 'main';
+/* Verschlüsselter GitHub-Token (erstellt mit token-verschluesseln.html).
+   Ohne dein Passwort ist dieser Text wertlos.
+   Leer lassen = Anmeldung direkt mit dem Token. */
+const ENCRYPTED_TOKEN = 'v1.600000.55w4YNYdxuX75oSgsOCyoQ==.05vTZfqbFqGf4ANL.a069o2tA0cdGWIduoQien/svMU7AsGnjVtZGfuzixletGkXZSyRhuAqlTqbamSjF5onaWgVZJELSBI81HPgk3FxK8+/ukMh1EDdh70bqgjkIBsTQ6cHjgIYUATQak1DxTm/ur01U0sU/qlbB/g==';
+const FOLDER = 'pages';
+/* ================================================ */
+
+/* Diese Fächer gelten, solange noch keine pages/subjects.json existiert.
+   Neue Bereiche werden im Admin-Modus erstellt und in pages/subjects.json gespeichert. */
+const DEFAULT_SUBJECTS = [
+  { key:'deutsch',      label:'Deutsch',     emoji:'🥨', color:0 },
+  { key:'englisch',     label:'Englisch',    emoji:'🫅', color:1 },
+  { key:'franzoesisch', label:'Französisch', emoji:'🥐', color:2 }
+];
+/* Farben für die Fach-Kacheln (neue Bereiche bekommen automatisch die nächste freie Farbe) */
+const PALETTE = [
+  ['#ff6b9d','#ff9bc0'], ['#4d96ff','#8ec6ff'], ['#a78bfa','#c9b6ff'], ['#4ecdc4','#8ee6df'],
+  ['#ffb347','#ffd166'], ['#2ec27e','#7ee0a8'], ['#f0626b','#ff9a8b'], ['#6c7bd8','#a3adf0']
+];
+
+const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}`;
+const INDEX_FILE    = `${FOLDER}/index.json`;
+const SUBJECTS_FILE = `${FOLDER}/subjects.json`;
+
+const $ = id => document.getElementById(id);
+const homeView = $('homeView'), subjectView = $('subjectView'), subjectGrid = $('subjectGrid');
+const subtitle = $('subtitle'), heading = $('heading'), backBtn = $('backBtn');
+const grid = $('grid'), emptyMsg = $('empty'), toolbar = $('toolbar');
+const addBtn = $('addBtn'), newFolderBtn = $('newFolderBtn'), fileInput = $('fileInput');
+const adminToggle = $('adminToggle'), statusEl = $('status');
+
+/* Der Token wird nur im Arbeitsspeicher gehalten (nicht im Browser gespeichert).
+   Nach dem Neuladen der Seite meldest du dich einfach wieder an. */
+sessionStorage.removeItem('gh_token');
+let token = null;
+function isAdmin(){ return !!token; }
+
+function setStatus(msg, isError){
+  statusEl.textContent = msg || '';
+  statusEl.style.color = isError ? '#e0507a' : '#888';
+}
+
+/* ---------- Hilfsfunktionen für Pfade ---------- */
+// Jeden Pfadteil einzeln kodieren (wichtig für Leerzeichen, Umlaute, "+" usw.)
+function encPath(path){ return path.split('/').map(encodeURIComponent).join('/'); }
+function toBase64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function fromBase64(b64){ return decodeURIComponent(escape(atob(b64.replace(/\s/g,'')))); }
+function displayName(fileName){ return fileName.replace(/^\d{13}-/, ''); }
+
+// Aus "M+I" wird "m-i", aus "Französisch" wird "franzoesisch" (für den Ordnernamen eines Bereichs)
+function slugify(text){
+  return text.toLowerCase()
+    .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'bereich';
+}
+// Unterordner behalten ihren Namen, nur problematische Zeichen werden entfernt
+function cleanFolderName(name){
+  return name.replace(/[\/\\:*?"<>|#%]/g,'').replace(/\s+/g,' ').trim().replace(/^\.+/,'').slice(0,60);
+}
+
+function emptyNode(){ return { files:[], folders:{} }; }
+function countFiles(node){
+  if(!node) return 0;
+  return node.files.length + Object.values(node.folders).reduce((n, f) => n + countFiles(f), 0);
+}
+function isEmptyNode(node){ return node && node.files.length === 0 && Object.keys(node.folders).length === 0; }
+
+/* ---------- Daten laden ----------
+   Schülerinnen und Schüler: lesen nur pages/index.json von GitHub Pages
+   (zählt NICHT gegen das GitHub-API-Limit von 60 Anfragen/Stunde).
+   Admin (mit Token): liest den aktuellen Stand direkt über die GitHub-API. */
+let indexPromise = null;   // Daten für Schüler:innen
+let adminPromise = null;   // Daten für Admin
+let lastTreeSha  = null;   // Stand nach der letzten eigenen Änderung (sofort aktuell)
+let lastCommitSha = null;
+function readRef(){ return lastCommitSha || BRANCH; }
+
+function loadIndex(){
+  if(!indexPromise){
+    const t = Math.floor(Date.now() / 300000); // Cache-Buster pro 5 Minuten
+    indexPromise = fetch(`${INDEX_FILE}?t=${t}`)
+      .then(res => { if(!res.ok) throw new Error('index.json nicht gefunden (' + res.status + ')'); return res.json(); })
+      .then(normalizeIndex)
+      .catch(e => { indexPromise = null; throw e; });
+  }
+  return indexPromise;
+}
+
+// Unterstützt auch das alte Format von index.json ({ "deutsch":[...], ... })
+function normalizeIndex(data){
+  if(data && data.version === 2) return data;
+  const subjects = DEFAULT_SUBJECTS;
+  const tree = {};
+  for(const s of subjects){ tree[s.key] = { files:(data[s.key] || []), folders:{} }; }
+  return { version:2, subjects, tree };
+}
+
+function apiHeaders(extra){ return Object.assign({ Authorization:`token ${token}` }, extra || {}); }
+
+async function apiGetFile(path){
+  // Liefert { text, sha } oder null, wenn die Datei nicht existiert
+  const res = await fetch(`${API_BASE}/contents/${encPath(path)}?ref=${readRef()}`, { headers:apiHeaders(), cache:'no-store' });
+  if(res.status === 404) return null;
+  if(!res.ok) throw new Error('GitHub-API-Fehler ' + res.status);
+  const j = await res.json();
+  return { text: fromBase64(j.content || ''), sha: j.sha };
+}
+
+async function apiWrite(method, path, body){
+  const res = await fetch(`${API_BASE}/contents/${encPath(path)}`, {
+    method, headers:apiHeaders({ 'Content-Type':'application/json' }),
+    body: JSON.stringify(Object.assign({ branch:BRANCH }, body))
+  });
+  if(!res.ok) throw new Error(await res.text());
+  const j = await res.json();
+  if(j.commit){ lastCommitSha = j.commit.sha; if(j.commit.tree) lastTreeSha = j.commit.tree.sha; }
+  adminPromise = null;
+  return j;
+}
+
+function loadAdminData(){
+  if(!adminPromise){
+    adminPromise = (async () => {
+      const subjFile = await apiGetFile(SUBJECTS_FILE);
+      let subjects = DEFAULT_SUBJECTS;
+      if(subjFile){ try{ subjects = JSON.parse(subjFile.text); }catch(e){} }
+
+      const ref = lastTreeSha || BRANCH;
+      const res = await fetch(`${API_BASE}/git/trees/${ref}?recursive=1`, { headers:apiHeaders(), cache:'no-store' });
+      if(!res.ok) throw new Error('GitHub-API-Fehler ' + res.status);
+      const { tree:entries } = await res.json();
+
+      const tree = {};
+      for(const s of subjects) tree[s.key] = emptyNode();
+      for(const e of entries){
+        const parts = e.path.split('/');
+        if(parts[0] !== FOLDER || parts.length < 3) continue;
+        const subjKey = parts[1];
+        if(!tree[subjKey]) tree[subjKey] = emptyNode();
+        let node = tree[subjKey];
+        const dirParts = e.type === 'tree' ? parts.slice(2) : parts.slice(2, -1);
+        for(const d of dirParts){ node = node.folders[d] || (node.folders[d] = emptyNode()); }
+        if(e.type !== 'blob') continue;
+        const fileName = parts[parts.length - 1];
+        if(fileName === '.gitkeep') node.keepSha = e.sha;
+        else if(/\.html?$/i.test(fileName)) node.files.push({ name:fileName, path:e.path, sha:e.sha });
+      }
+      return { version:2, subjects, tree };
+    })().catch(e => { adminPromise = null; throw e; });
+  }
+  return adminPromise;
+}
+
+function getData(){ return isAdmin() ? loadAdminData() : loadIndex(); }
+
+/* Schreibt pages/index.json neu (nur Admin). Diese Datei lesen die Schülerinnen und Schüler. */
+async function updateIndexFile(){
+  if(!token) return;
+  try{
+    const data = await loadAdminData();
+    const strip = node => ({
+      files: node.files.map(f => ({ name:f.name, path:f.path })),
+      folders: Object.fromEntries(Object.entries(node.folders)
+        .sort((a, b) => a[0].localeCompare(b[0], 'de')).map(([k, v]) => [k, strip(v)]))
+    });
+    const out = { version:2, subjects:data.subjects, tree:{} };
+    for(const s of data.subjects) out.tree[s.key] = strip(data.tree[s.key] || emptyNode());
+    const text = JSON.stringify(out, null, 2) + '\n';
+    const cur = await apiGetFile(INDEX_FILE);
+    if(cur && cur.text === text) return; // nichts geändert -> kein unnötiger Commit
+    const body = { message:'Update index.json', content:toBase64(text) };
+    if(cur) body.sha = cur.sha;
+    await apiWrite('PUT', INDEX_FILE, body);
+    indexPromise = null;
+  }catch(e){ alert('Achtung: index.json konnte nicht aktualisiert werden. Die Schülerinnen und Schüler sehen die Änderung evtl. nicht.\n\n' + e.message); }
+}
+
+async function saveSubjects(subjects){
+  const cur = await apiGetFile(SUBJECTS_FILE);
+  const body = { message:'Update subjects.json', content:toBase64(JSON.stringify(subjects, null, 2) + '\n') };
+  if(cur) body.sha = cur.sha;
+  await apiWrite('PUT', SUBJECTS_FILE, body);
+}
+
+/* ---------- Navigation (#deutsch/Verben) ---------- */
+function getHashPath(){
+  const h = location.hash.replace(/^#/, '');
+  return h ? h.split('/').map(decodeURIComponent) : [];
+}
+function goTo(parts){ location.hash = parts.map(encodeURIComponent).join('/'); }
+window.addEventListener('hashchange', render);
+backBtn.addEventListener('click', () => goTo(getHashPath().slice(0, -1)));
+
+let renderId = 0;
+async function render(){
+  const myId = ++renderId;
+  const path = getHashPath();
+  toolbar.style.display = (isAdmin() && path.length) ? 'flex' : 'none';
+  let data;
+  try{ data = await getData(); }
+  catch(e){ if(myId === renderId) setStatus('Daten konnten nicht geladen werden: ' + e.message, true); return; }
+  if(myId !== renderId) return;
+
+  if(!path.length){
+    homeView.style.display = 'block';
+    subjectView.style.display = 'none';
+    subtitle.textContent = 'Wähle ein Fach aus:';
+    renderSubjectCards(data);
+    return;
+  }
+
+  const subject = data.subjects.find(s => s.key === path[0]);
+  let node = subject ? data.tree[subject.key] || emptyNode() : null;
+  for(const f of path.slice(1)){ node = node && node.folders[f]; }
+  if(!subject || !node){ goTo([]); return; }
+
+  homeView.style.display = 'none';
+  subjectView.style.display = 'block';
+  subtitle.textContent = `Sammlung: ${subject.label}`;
+  backBtn.textContent = path.length > 2 ? `⬅ Zurück zu ${path[path.length - 2]}`
+                      : path.length === 2 ? `⬅ Zurück zu ${subject.label}` : '⬅ Zurück zur Fächerübersicht';
+  renderHeading(subject, path);
+  await renderFolder(node, path, myId);
+}
+
+function renderHeading(subject, path){
+  heading.innerHTML = '';
+  const emoji = document.createElement('span');
+  emoji.className = 'emoji'; emoji.textContent = subject.emoji;
+  const h2 = document.createElement('h2');
+  const parts = [subject.label, ...path.slice(1)];
+  parts.forEach((p, i) => {
+    if(i > 0){ const sep = document.createElement('span'); sep.className = 'crumb-sep'; sep.textContent = '›'; h2.appendChild(sep); }
+    const span = document.createElement('span');
+    span.textContent = p;
+    if(i < parts.length - 1){ span.className = 'crumb'; span.addEventListener('click', () => goTo(path.slice(0, i + 1))); }
+    h2.appendChild(span);
+  });
+  heading.append(emoji, h2);
+}
+
+function renderSubjectCards(data){
+  subjectGrid.innerHTML = '';
+  data.subjects.forEach((subject, i) => {
+    const node = data.tree[subject.key] || emptyNode();
+    const n = countFiles(node);
+    const [c1, c2] = PALETTE[(subject.color ?? i) % PALETTE.length];
+    const card = document.createElement('div');
+    card.className = 'subject-card';
+    card.style.background = `linear-gradient(135deg,${c1},${c2})`;
+    card.innerHTML = '<span class="emoji"></span><span class="label"></span><span class="count"></span>';
+    card.querySelector('.emoji').textContent = subject.emoji;
+    card.querySelector('.label').textContent = subject.label;
+    card.querySelector('.count').textContent = `${n} Seite${n === 1 ? '' : 'n'}`;
+    card.addEventListener('click', () => goTo([subject.key]));
+    if(isAdmin() && isEmptyNode(node)){
+      card.appendChild(removeButton(`Bereich "${subject.label}" löschen`, () => deleteSubject(subject), 'corner-x'));
+    }
+    subjectGrid.appendChild(card);
+  });
+  if(isAdmin()){
+    const card = document.createElement('div');
+    card.className = 'subject-card new';
+    card.innerHTML = '<span class="emoji">➕</span><span>Neuer Bereich</span>';
+    card.addEventListener('click', createSubject);
+    subjectGrid.appendChild(card);
+  }
+}
+
+function removeButton(title, onClick, extraClass){
+  const btn = document.createElement('button');
+  btn.className = 'remove-btn' + (extraClass ? ' ' + extraClass : '');
+  btn.textContent = '✕';
+  btn.title = title;
+  btn.addEventListener('click', e => { e.stopPropagation(); onClick(); });
+  return btn;
+}
+
+async function renderFolder(node, path, myId){
+  grid.innerHTML = '';
+  emptyMsg.style.display = 'none';
+  const folderNames = Object.keys(node.folders).sort((a, b) => a.localeCompare(b, 'de'));
+
+  // Ordner-Kacheln
+  for(const name of folderNames){
+    const sub = node.folders[name];
+    const n = countFiles(sub);
+    const card = document.createElement('div');
+    card.className = 'card folder';
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    thumb.innerHTML = '<span class="big">📁</span><span class="count"></span>';
+    thumb.querySelector('.count').textContent = `${n} Seite${n === 1 ? '' : 'n'}`;
+    thumb.addEventListener('click', () => goTo([...path, name]));
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    const title = document.createElement('span');
+    title.className = 'card-title';
+    title.textContent = name;
+    body.appendChild(title);
+    if(isAdmin()){
+      body.appendChild(removeButton('Ordner löschen', () => deleteFolder(sub, path, name)));
+    }
+    card.append(thumb, body);
+    grid.appendChild(card);
+  }
+
+  if(!node.files.length){
+    if(!folderNames.length) emptyMsg.style.display = 'block';
+    return;
+  }
+
+  // App-Kacheln
+  setStatus('Lade Seiten...');
+  try{
+    const pages = await Promise.all(node.files.map(async f => {
+      const raw = isAdmin()
+        ? await fetch(`${API_BASE}/contents/${encPath(f.path)}?ref=${readRef()}`,
+            { headers:apiHeaders({ Accept:'application/vnd.github.raw' }), cache:'no-store' })
+        : await fetch(encPath(f.path));
+      if(!raw.ok) throw new Error(displayName(f.name) + ' (' + raw.status + ')');
+      return { name:f.name, path:f.path, sha:f.sha, content: await raw.text() };
+    }));
+    if(myId !== renderId) return;
+    pages.sort((a, b) => displayName(a.name).localeCompare(displayName(b.name), 'de'));
+    pages.forEach(page => grid.appendChild(appCard(page)));
+    setStatus('');
+  }catch(e){
+    if(myId === renderId) setStatus('Seiten konnten nicht geladen werden: ' + e.message, true);
+  }
+}
+
+/* Für die Vorschau: Ersatz-Speicher, damit Apps mit localStorage in der Sandbox nicht abstürzen. */
+const PREVIEW_SHIM = '<script>(function(){function m(){var d={};return{getItem:function(k){return k in d?d[k]:null},setItem:function(k,v){d[k]=String(v)},removeItem:function(k){delete d[k]},clear:function(){d={}},key:function(i){return Object.keys(d)[i]||null},get length(){return Object.keys(d).length}}}' +
+  'try{Object.defineProperty(window,"localStorage",{value:m(),configurable:true})}catch(e){}' +
+  'try{Object.defineProperty(window,"sessionStorage",{value:m(),configurable:true})}catch(e){}' +
+  'window.alert=window.confirm=window.prompt=function(){};})();<\/script>';
+
+/* Öffnet eine App in einem neuen Tab, ohne Verbindung zur Hauptseite ("noopener").
+   So bleibt der Token geschützt; der Lernfortschritt (localStorage) funktioniert weiterhin. */
+function openApp(page){
+  const url = URL.createObjectURL(new Blob([page.content], { type:'text/html;charset=utf-8' }));
+  window.open(url, '_blank', 'noopener');
+}
+
+function appCard(page){
+  const card = document.createElement('div');
+  card.className = 'card';
+  const thumb = document.createElement('div');
+  thumb.className = 'thumb';
+  const iframe = document.createElement('iframe');
+  /* Vorschau abgeschottet ("sandbox"): Die App kann nicht auf die Hauptseite
+     (und damit nicht auf den Token) zugreifen. */
+  iframe.sandbox = 'allow-scripts';
+  iframe.srcdoc = PREVIEW_SHIM + page.content;
+  thumb.appendChild(iframe);
+  thumb.addEventListener('click', () => openApp(page));
+
+  const body = document.createElement('div');
+  body.className = 'card-body';
+  const title = document.createElement('span');
+  title.className = 'card-title';
+  title.textContent = '📄 ' + displayName(page.name);
+  body.appendChild(title);
+  if(isAdmin()){
+    body.appendChild(removeButton('Löschen', async () => {
+      if(!confirm(`"${displayName(page.name)}" wirklich löschen?`)) return;
+      await deleteFile(page);
+    }));
+  }
+  card.append(thumb, body);
+  return card;
+}
+
+/* ---------- Admin-Aktionen ---------- */
+async function runAction(startMsg, doneMsg, fn){
+  setStatus(startMsg);
+  try{
+    await fn();
+    await updateIndexFile();
+    setStatus(doneMsg);
+  }catch(e){ setStatus('Fehler: ' + e.message, true); }
+  render();
+}
+
+function deleteFile(page){
+  return runAction('Lösche ' + displayName(page.name) + '...', 'Gelöscht ✅', () =>
+    apiWrite('DELETE', page.path, { message:`Remove ${page.name}`, sha:page.sha }));
+}
+
+addBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files);
+  fileInput.value = '';
+  if(!files.length) return;
+  const dir = [FOLDER, ...getHashPath()].join('/');
+  await runAction('Lade hoch...', 'Hochgeladen ✅', async () => {
+    for(const file of files){
+      setStatus('Lade hoch: ' + file.name + '...');
+      const content = await file.text();
+      const safeName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+      await apiWrite('PUT', `${dir}/${safeName}`, { message:`Add ${safeName}`, content:toBase64(content) });
+    }
+  });
+});
+
+newFolderBtn.addEventListener('click', async () => {
+  const path = getHashPath();
+  const data = await loadAdminData();
+  let node = data.tree[path[0]];
+  for(const f of path.slice(1)) node = node.folders[f];
+  const values = await askForm('📁 Neuer Ordner', [
+    { id:'name', label:'Name des Ordners', placeholder:'z. B. Verben' }
+  ], v => {
+    const name = cleanFolderName(v.name);
+    if(!name) return 'Bitte einen Namen eingeben.';
+    if(Object.keys(node.folders).some(f => f.toLowerCase() === name.toLowerCase())) return 'Diesen Ordner gibt es schon.';
+  });
+  if(!values) return;
+  const name = cleanFolderName(values.name);
+  const dir = [FOLDER, ...path, name].join('/');
+  // GitHub kennt keine leeren Ordner, darum legen wir eine leere Platzhalter-Datei (.gitkeep) an
+  runAction('Erstelle Ordner...', `Ordner "${name}" erstellt ✅`, () =>
+    apiWrite('PUT', `${dir}/.gitkeep`, { message:`Create folder ${name}`, content:'' }));
+});
+
+function deleteFolder(node, path, name){
+  if(!isEmptyNode(node)){ alert(`Der Ordner "${name}" ist nicht leer.\nBitte zuerst alle Seiten und Unterordner darin löschen.`); return; }
+  if(!confirm(`Ordner "${name}" wirklich löschen?`)) return;
+  const dir = [FOLDER, ...path, name].join('/');
+  runAction('Lösche Ordner...', 'Ordner gelöscht ✅', () =>
+    apiWrite('DELETE', `${dir}/.gitkeep`, { message:`Remove folder ${name}`, sha:node.keepSha }));
+}
+
+async function createSubject(){
+  const data = await loadAdminData();
+  const values = await askForm('➕ Neuer Bereich', [
+    { id:'label', label:'Name des Bereichs', placeholder:'z. B. M+I' },
+    { id:'emoji', label:'Emoji', placeholder:'z. B. 💻', value:'📚', hint:'Tipp: Windows-Taste + Punkt (Mac: Ctrl + Cmd + Leertaste) öffnet die Emoji-Auswahl.' }
+  ], v => {
+    if(!v.label.trim()) return 'Bitte einen Namen eingeben.';
+    if(data.subjects.some(s => s.label.toLowerCase() === v.label.trim().toLowerCase())) return 'Diesen Bereich gibt es schon.';
+  });
+  if(!values) return;
+  const label = values.label.trim().slice(0, 40);
+  let key = slugify(label), n = 2;
+  while(data.subjects.some(s => s.key === key) || (data.tree[key] && !isEmptyNode(data.tree[key]))) key = slugify(label) + '-' + n++;
+  const used = data.subjects.map(s => s.color);
+  let color = 0;
+  while(used.includes(color) && color < PALETTE.length) color++;
+  if(color >= PALETTE.length) color = data.subjects.length % PALETTE.length;
+  const subject = { key, label, emoji: values.emoji.trim() || '📚', color };
+  runAction('Erstelle Bereich...', `Bereich "${label}" erstellt ✅`, async () => {
+    await apiWrite('PUT', `${FOLDER}/${key}/.gitkeep`, { message:`Create subject ${label}`, content:'' });
+    await saveSubjects([...data.subjects, subject]);
+  });
+}
+
+async function deleteSubject(subject){
+  const data = await loadAdminData();
+  const node = data.tree[subject.key];
+  if(node && !isEmptyNode(node)){ alert('Dieser Bereich ist nicht leer.'); return; }
+  if(!confirm(`Bereich "${subject.label}" wirklich löschen?`)) return;
+  runAction('Lösche Bereich...', 'Bereich gelöscht ✅', async () => {
+    if(node && node.keepSha) await apiWrite('DELETE', `${FOLDER}/${subject.key}/.gitkeep`, { message:`Remove subject ${subject.label}`, sha:node.keepSha });
+    await saveSubjects(data.subjects.filter(s => s.key !== subject.key));
+  });
+}
+
+/* ---------- Eingabefenster für "Neuer Ordner" / "Neuer Bereich" ---------- */
+const formDialog = $('formDialog'), formForm = $('formForm'), formFields = $('formFields'), formMsg = $('formMsg');
+$('formCancel').addEventListener('click', () => formDialog.close());
+
+function askForm(title, fields, validate){
+  $('formTitle').textContent = title;
+  formFields.innerHTML = '';
+  formMsg.textContent = '';
+  for(const f of fields){
+    const label = document.createElement('label');
+    label.textContent = f.label; label.htmlFor = 'f_' + f.id;
+    const input = document.createElement('input');
+    input.id = 'f_' + f.id; input.placeholder = f.placeholder || ''; input.value = f.value || '';
+    input.autocomplete = 'off';
+    formFields.append(label, input);
+    if(f.hint){ const p = document.createElement('p'); p.className = 'hint'; p.textContent = f.hint; formFields.appendChild(p); }
+  }
+  return new Promise(resolve => {
+    let done = false;
+    const finish = val => { if(done) return; done = true; formForm.onsubmit = null; formDialog.onclose = null; formDialog.close(); resolve(val); };
+    formDialog.onclose = () => finish(null);
+    formForm.onsubmit = e => {
+      e.preventDefault();
+      const values = {};
+      for(const f of fields) values[f.id] = $('f_' + f.id).value;
+      const err = validate && validate(values);
+      if(err){ formMsg.textContent = err; return; }
+      finish(values);
+    };
+    formDialog.showModal();
+    formFields.querySelector('input').focus();
+  });
+}
+
+/* ---------- Anmeldung mit Passwort ---------- */
+const loginDialog = $('loginDialog'), loginForm = $('loginForm'), loginInput = $('loginInput'), loginMsg = $('loginMsg');
+$('loginCancel').addEventListener('click', () => loginDialog.close());
+
+function b64ToBytes(b64){ return Uint8Array.from(atob(b64), c => c.charCodeAt(0)); }
+
+/* Entschlüsselt den Token mit dem Passwort (PBKDF2 + AES-GCM). Falsches Passwort -> Fehler. */
+async function decryptToken(password){
+  const [v, iter, salt, iv, ct] = ENCRYPTED_TOKEN.trim().split('.');
+  if(v !== 'v1') throw new Error('Unbekanntes Format');
+  const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:b64ToBytes(salt), iterations:Number(iter), hash:'SHA-256' },
+    baseKey, { name:'AES-GCM', length:256 }, false, ['decrypt']);
+  const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv:b64ToBytes(iv) }, key, b64ToBytes(ct));
+  return new TextDecoder().decode(plain);
+}
+
+async function tokenWorks(t){
+  try{
+    const res = await fetch(API_BASE, { headers:{ Authorization:`token ${t}` } });
+    return res.ok;
+  }catch(e){ return false; }
+}
+
+/* Zeigt das Anmelde-Fenster. Gibt den gültigen Token zurück oder null (abgebrochen). */
+function askToken(){
+  const withPassword = !!ENCRYPTED_TOKEN.trim();
+  loginInput.placeholder = withPassword ? 'Passwort' : 'GitHub-Token';
+  loginInput.value = '';
+  loginMsg.textContent = '';
+  return new Promise(resolve => {
+    let done = false;
+    const finish = val => { if(done) return; done = true; loginForm.onsubmit = null; loginDialog.onclose = null; loginDialog.close(); resolve(val); };
+    loginDialog.onclose = () => finish(null);
+    loginForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const input = loginInput.value;
+      if(!input) return;
+      loginMsg.style.color = '#888';
+      loginMsg.textContent = 'Prüfe...';
+      let t = null;
+      try{ t = withPassword ? await decryptToken(input) : input.trim(); }
+      catch(err){ t = null; }
+      if(!t){ loginMsg.style.color = ''; loginMsg.textContent = 'Passwort falsch.'; loginInput.select(); return; }
+      if(!(await tokenWorks(t))){
+        loginMsg.style.color = '';
+        loginMsg.textContent = withPassword
+          ? 'Passwort stimmt, aber der Token ist abgelaufen oder ungültig. Bitte neuen Token verschlüsseln.'
+          : 'Token ungültig oder ohne Rechte für dieses Repo.';
+        return;
+      }
+      finish(t);
+    };
+    loginDialog.showModal();
+    loginInput.focus();
+  });
+}
+
+adminToggle.addEventListener('click', async () => {
+  if(!isAdmin()){
+    const t = await askToken();
+    if(!t) return;
+    token = t;
+    lastTreeSha = null;
+    lastCommitSha = null;
+    adminPromise = null;
+    updateAdminUI();
+    setStatus('Angemeldet ✅');
+    updateIndexFile();
+  } else {
+    token = null;
+    adminPromise = null;
+    indexPromise = null; // nach dem Abmelden die Liste neu laden
+    updateAdminUI();
+    setStatus('Abgemeldet. Änderungen sind für Schüler:innen nach 1–2 Minuten sichtbar.');
+  }
+  render();
+});
+
+function updateAdminUI(){
+  adminToggle.textContent = isAdmin() ? '🔓 Angemeldet' : '🔐 Admin';
+  adminToggle.classList.toggle('active', isAdmin());
+}
+
+updateAdminUI();
+render();
+</script>
+</body>
+</html>

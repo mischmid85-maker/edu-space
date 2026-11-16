@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edu Space</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  /* ====== Farben: hier lässt sich die Akzentfarbe ändern ====== */
+  :root{ --accent:#ff5f1f; --hover:#b3261e; --ink:#111; --muted:#555; --line:#e3e3e3; --paper:#f1f0ee; --edge:#d9d7d2; --title:#104E8B; }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:#fff;color:var(--ink);font-family:'Inter Tight',system-ui,sans-serif}
+  button{font-family:inherit}
+  .wrap{max-width:1240px;margin:0 auto;padding:40px 40px 96px;display:flex;flex-direction:column;gap:48px}
+
+  /* Kopfzeile */
+  .top{display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:14px;border-bottom:1px solid var(--ink);padding-bottom:16px}
+  .brand-line{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px 12px;color:var(--muted)}
+  .brand{font-weight:600;color:var(--ink);cursor:pointer}
+  .sep{color:#bbb}
+  .link-btn{min-height:44px;padding:0;background:none;border:none;cursor:pointer;font-size:14px;font-weight:600;color:var(--ink)}
+  .link-btn:hover{color:var(--accent)}
+  .link-btn.active{color:var(--accent)}
+
+  /* Grosser Titel (nur Startseite) */
+  .hero{display:flex;flex-wrap:wrap;gap:40px;align-items:flex-end;justify-content:space-between}
+  h1{margin:0;font-size:clamp(56px,9vw,112px);font-weight:800;line-height:.9;letter-spacing:-.03em;text-transform:uppercase;color:var(--title);flex:1 1 560px}
+  .intro{flex:0 1 340px;margin:0;font-size:19px;line-height:1.6;color:#333}
+
+  /* Leiste mit Navigation und Admin-Aktionen */
+  .bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 28px;border-top:1px solid var(--ink);border-bottom:1px solid var(--line);padding:8px 0}
+  .bar-left,.bar-right{display:flex;flex-wrap:wrap;align-items:center;gap:8px 28px}
+  .bar-label{min-height:44px;display:inline-flex;align-items:center;font-size:15px;font-weight:600}
+  .nav-link{min-height:44px;padding:0;background:none;border:none;cursor:pointer;font-size:15px;font-weight:600;color:var(--ink)}
+  .nav-link:hover{color:var(--accent)}
+  .nav-link.soft{font-weight:400;color:var(--muted)}
+  #status{font-size:14px;color:var(--muted);min-height:1.3em;margin-top:-36px}
+
+  /* Kopf einer Fach- oder Ordnerseite */
+  .d-head{display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--ink);padding-bottom:28px}
+  .d-emoji{font-size:clamp(40px,5vw,56px);line-height:1}
+  .d-head h2{margin:0;font-size:clamp(40px,6vw,72px);font-weight:300;letter-spacing:-.03em;line-height:1.05}
+  .crumb{cursor:pointer;color:#999}
+  .crumb:hover{color:var(--accent)}
+  .crumb-sep{color:var(--accent);margin:0 .25em}
+  .d-sub{font-size:15px;color:var(--muted)}
+
+  /* Karten (Fächer, Ordner, Apps) */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:56px 40px;padding:12px 8px}
+  .card{position:relative;background:#fff;border:1px solid var(--edge);padding:18px;display:flex;flex-direction:column;gap:14px;
+        box-shadow:0 1px 2px rgba(0,0,0,.06),0 12px 28px rgba(0,0,0,.08);transition:transform .2s;cursor:pointer}
+  .card:hover{transform:rotate(0) translateY(-3px)!important}
+  .card:focus-visible{outline:2px solid var(--hover);outline-offset:4px}
+  .tape{position:absolute;top:-12px;left:50%;width:96px;height:24px;margin-left:-48px;background:rgba(255,95,31,.82);transform:rotate(-3deg)}
+  .photo{position:relative;aspect-ratio:4/3;background:var(--paper);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .photo .big{font-size:84px;line-height:1;filter:grayscale(1);transition:filter .3s}
+  .photo iframe{position:absolute;top:0;left:0;width:800px;height:600px;border:none;transform-origin:top left;pointer-events:none;background:#fff;filter:grayscale(1);transition:filter .3s}
+  .card:hover .big,.card:hover iframe,.card:focus-within .big,.card:focus-within iframe{filter:grayscale(0)}
+  .meta{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .nr{font-size:32px;font-weight:300;line-height:1;color:var(--accent)}
+  .sub{font-size:13px;color:var(--muted);text-align:right}
+  .card h3{margin:0;font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.15;overflow-wrap:anywhere}
+  .more{font-size:14px;font-weight:600;margin-top:auto}
+  .card:hover .more{color:var(--hover)}
+  .admin{display:flex;flex-wrap:wrap;gap:16px;border-top:1px dashed var(--edge);padding-top:6px}
+  .admin button{min-height:32px;background:none;border:none;padding:0;cursor:pointer;font-size:13px;color:var(--muted);text-decoration:underline;text-underline-offset:4px}
+  .admin button:hover{color:var(--hover)}
+  .card.new{border:1px dashed #bbb;box-shadow:none;background:transparent;justify-content:center;align-items:center;min-height:200px;color:var(--muted);font-weight:600}
+  .card.new .plus{font-size:48px;font-weight:300;color:var(--accent);line-height:1}
+  .card.new:hover{color:var(--ink)}
+  .empty{color:var(--muted);font-size:17px;padding:32px 0}
+
+  footer{border-top:1px solid var(--ink);padding-top:20px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;font-size:14px;color:var(--muted)}
+
+  /* Dialog-Fenster (Anmeldung, neuer Ordner, neuer Bereich ...) */
+  dialog{border:1px solid var(--ink);border-radius:0;padding:28px;box-shadow:0 12px 28px rgba(0,0,0,.18);max-width:400px;width:90%;font-family:inherit}
+  dialog::backdrop{background:rgba(255,255,255,.75)}
+  dialog h3{margin:0 0 16px;font-size:22px;font-weight:600;letter-spacing:-.02em}
+  dialog label{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px}
+  dialog input,dialog select{width:100%;min-height:44px;padding:0 12px;font:400 16px 'Inter Tight',sans-serif;border:1px solid var(--ink);border-radius:0;background:#fff}
+  dialog input:focus,dialog select:focus{outline:2px solid var(--accent);outline-offset:1px}
+  dialog .row{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;font:600 15px 'Inter Tight',sans-serif;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:#fff}
+  .btn:hover{background:var(--hover);border-color:var(--hover)}
+  .btn.ghost{background:#fff;color:var(--ink)}
+  .btn.ghost:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+  dialog .msg{min-height:1.2em;margin:12px 0 0;color:var(--hover);font-size:14px}
+  dialog .hint{font-size:12px;color:#888;margin:6px 0 0}
+
+  @media (max-width:640px){
+    .wrap{padding:24px 20px 64px;gap:40px}
+    .sep{display:none}
+    .brand-line{flex-direction:column;align-items:flex-start;gap:2px}
+    #status{margin-top:-28px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <span class="brand-line">
+      <span class="brand" id="brand">OSC</span><span class="sep" aria-hidden="true">|</span><span id="subtitle">© Michael Schmid</span>
+    </span>
+    <button id="adminToggle" class="link-btn">Admin</button>
+  </div>
+
+  <header class="hero" id="hero">
+    <h1>Edu Space</h1>
+    <p class="intro">Lern-Apps zum Üben und Wiederholen. Wähle ein Fach aus und leg los.</p>
+  </header>
+
+  <div class="bar">
+    <div class="bar-left">
+      <span class="bar-label" id="homeLabel">Fächer</span>
+      <button class="nav-link" id="backBtn" style="display:none;">← Zurück</button>
+      <button class="nav-link soft" id="homeBtn" style="display:none;">Startseite</button>
+    </div>
+    <div class="bar-right" id="toolbar" style="display:none;">
+      <button class="nav-link" id="addBtn">+ HTML-Seite hinzufügen</button>
+      <button class="nav-link" id="newFolderBtn">+ Neuer Ordner</button>
+      <input type="file" id="fileInput" accept=".html,.htm" multiple hidden>
+    </div>
+  </div>
+  <div id="status"></div>
+
+  <main>
+    <section id="homeView">
+      <div class="grid" id="subjectGrid"></div>
+    </section>
+
+    <section id="subjectView" style="display:none;">
+      <div class="d-head" id="heading"></div>
+      <div class="grid" id="grid" style="margin-top:48px"></div>
+      <p class="empty" id="empty" style="display:none;">Noch keine Seiten in diesem Ordner.</p>
+    </section>
+  </main>
+
+  <footer><span>Oberstufe Centrum St. Gallen</span><span>Lern-Apps für den Unterricht</span></footer>
+</div>
+
+<dialog id="loginDialog">
+  <form id="loginForm">
+    <h3>Admin-Anmeldung</h3>
+    <input type="password" id="loginInput" autocomplete="current-password" placeholder="Passwort">
+    <p class="msg" id="loginMsg"></p>
+    <div class="row">
+      <button type="button" class="btn ghost" id="loginCancel">Abbrechen</button>
+      <button type="submit" class="btn">Anmelden</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="formDialog">
+  <form id="formForm">
+    <h3 id="formTitle"></h3>
+    <div id="formFields"></div>
+    <p class="msg" id="formMsg"></p>
+    <div class="row">
+      <button type="button" class="btn ghost" id="formCancel">Abbrechen</button>
+      <button type="submit" class="btn" id="formOk">Erstellen</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+/* ====== HIER ANPASSEN: deine GitHub-Daten ====== */
+const OWNER  = 'mischmid85-maker';
+const REPO   = 'edu-space';
+const BRANCH = 'main';
+/* Verschlüsselter GitHub-Token (erstellt mit token-verschluesseln.html).
+   Ohne dein Passwort ist dieser Text wertlos.
+   Leer lassen = Anmeldung direkt mit dem Token. */
+const ENCRYPTED_TOKEN = 'v1.600000.55w4YNYdxuX75oSgsOCyoQ==.05vTZfqbFqGf4ANL.a069o2tA0cdGWIduoQien/svMU7AsGnjVtZGfuzixletGkXZSyRhuAqlTqbamSjF5onaWgVZJELSBI81HPgk3FxK8+/ukMh1EDdh70bqgjkIBsTQ6cHjgIYUATQak1DxTm/ur01U0sU/qlbB/g==';
+const FOLDER = 'pages';
+/* ================================================ */
+
+/* Diese Fächer gelten, solange noch keine pages/subjects.json existiert.
+   Neue Bereiche werden im Admin-Modus erstellt und in pages/subjects.json gespeichert. */
+const DEFAULT_SUBJECTS = [
+  { key:'deutsch',      label:'Deutsch',     emoji:'🥨', color:0 },
+  { key:'englisch',     label:'Englisch',    emoji:'🫅', color:1 },
+  { key:'franzoesisch', label:'Französisch', emoji:'🥐', color:2 }
+];
+/* Farben für die Fach-Kacheln (neue Bereiche bekommen automatisch die nächste freie Farbe) */
+const PALETTE = [
+  ['#ff6b9d','#ff9bc0'], ['#4d96ff','#8ec6ff'], ['#a78bfa','#c9b6ff'], ['#4ecdc4','#8ee6df'],
+  ['#ffb347','#ffd166'], ['#2ec27e','#7ee0a8'], ['#f0626b','#ff9a8b'], ['#6c7bd8','#a3adf0']
+];
+
+const API_BASE = `https://api.github.com/repos/${OWNER}/${REPO}`;
+const INDEX_FILE    = `${FOLDER}/index.json`;
+const SUBJECTS_FILE = `${FOLDER}/subjects.json`;
+
+const $ = id => document.getElementById(id);
+const homeView = $('homeView'), subjectView = $('subjectView'), subjectGrid = $('subjectGrid');
+const subtitle = $('subtitle'), heading = $('heading'), backBtn = $('backBtn'), homeBtn = $('homeBtn');
+const hero = $('hero'), homeLabel = $('homeLabel');
+const grid = $('grid'), emptyMsg = $('empty'), toolbar = $('toolbar');
+const addBtn = $('addBtn'), newFolderBtn = $('newFolderBtn'), fileInput = $('fileInput');
+const adminToggle = $('adminToggle'), statusEl = $('status');
+
+/* Der Token wird nur im Arbeitsspeicher gehalten (nicht im Browser gespeichert).
+   Nach dem Neuladen der Seite meldest du dich einfach wieder an. */
+sessionStorage.removeItem('gh_token');
+let token = null;
+function isAdmin(){ return !!token; }
+
+function setStatus(msg, isError){
+  statusEl.textContent = msg || '';
+  statusEl.style.color = isError ? '#e0507a' : '#888';
+}
+
+/* ---------- Hilfsfunktionen für Pfade ---------- */
+// Jeden Pfadteil einzeln kodieren (wichtig für Leerzeichen, Umlaute, "+" usw.)
+function encPath(path){ return path.split('/').map(encodeURIComponent).join('/'); }
+function toBase64(str){ return btoa(unescape(encodeURIComponent(str))); }
+function fromBase64(b64){ return decodeURIComponent(escape(atob(b64.replace(/\s/g,'')))); }
+function displayName(fileName){ return fileName.replace(/^\d{13}-/, ''); }
+
+// Aus "M+I" wird "m-i", aus "Französisch" wird "franzoesisch" (für den Ordnernamen eines Bereichs)
+function slugify(text){
+  return text.toLowerCase()
+    .replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss')
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') || 'bereich';
+}
+// Unterordner behalten ihren Namen, nur problematische Zeichen werden entfernt
+function cleanFolderName(name){
+  return name.replace(/[\/\\:*?"<>|#%]/g,'').replace(/\s+/g,' ').trim().replace(/^\.+/,'').slice(0,60);
+}
+
+function emptyNode(){ return { files:[], folders:{} }; }
+function countFiles(node){
+  if(!node) return 0;
+  return node.files.length + Object.values(node.folders).reduce((n, f) => n + countFiles(f), 0);
+}
+function isEmptyNode(node){ return node && node.files.length === 0 && Object.keys(node.folders).length === 0; }
+
+/* ---------- Daten laden ----------
+   Schülerinnen und Schüler: lesen nur pages/index.json von GitHub Pages
+   (zählt NICHT gegen das GitHub-API-Limit von 60 Anfragen/Stunde).
+   Admin (mit Token): liest den aktuellen Stand direkt über die GitHub-API. */
+let indexPromise = null;   // Daten für Schüler:innen
+let adminPromise = null;   // Daten für Admin
+let lastTreeSha  = null;   // Stand nach der letzten eigenen Änderung (sofort aktuell)
+let lastCommitSha = null;
+function readRef(){ return lastCommitSha || BRANCH; }
+
+function loadIndex(){
+  if(!indexPromise){
+    const t = Math.floor(Date.now() / 300000); // Cache-Buster pro 5 Minuten
+    indexPromise = fetch(`${INDEX_FILE}?t=${t}`)
+      .then(res => { if(!res.ok) throw new Error('index.json nicht gefunden (' + res.status + ')'); return res.json(); })
+      .then(normalizeIndex)
+      .catch(e => { indexPromise = null; throw e; });
+  }
+  return indexPromise;
+}
+
+// Unterstützt auch das alte Format von index.json ({ "deutsch":[...], ... })
+function normalizeIndex(data){
+  if(data && data.version === 2) return data;
+  const subjects = DEFAULT_SUBJECTS;
+  const tree = {};
+  for(const s of subjects){ tree[s.key] = { files:(data[s.key] || []), folders:{} }; }
+  return { version:2, subjects, tree };
+}
+
+function apiHeaders(extra){ return Object.assign({ Authorization:`token ${token}` }, extra || {}); }
+
+async function apiGetFile(path){
+  // Liefert { text, sha } oder null, wenn die Datei nicht existiert
+  const res = await fetch(`${API_BASE}/contents/${encPath(path)}?ref=${readRef()}`, { headers:apiHeaders(), cache:'no-store' });
+  if(res.status === 404) return null;
+  if(!res.ok) throw new Error('GitHub-API-Fehler ' + res.status);
+  const j = await res.json();
+  return { text: fromBase64(j.content || ''), sha: j.sha };
+}
+
+async function apiWrite(method, path, body){
+  const res = await fetch(`${API_BASE}/contents/${encPath(path)}`, {
+    method, headers:apiHeaders({ 'Content-Type':'application/json' }),
+    body: JSON.stringify(Object.assign({ branch:BRANCH }, body))
+  });
+  if(!res.ok) throw new Error(await res.text());
+  const j = await res.json();
+  if(j.commit){ lastCommitSha = j.commit.sha; if(j.commit.tree) lastTreeSha = j.commit.tree.sha; }
+  adminPromise = null;
+  return j;
+}
+
+/* Mehrere Änderungen in EINEM Schritt speichern (Git-Daten-API).
+   changes: [{ path, sha, mode }] – sha = null bedeutet "Datei entfernen".
+   Damit lassen sich Dateien verschieben, ohne sie neu hochzuladen. */
+async function commitChanges(message, changes, retry){
+  const get = async url => {
+    const r = await fetch(`${API_BASE}${url}`, { headers:apiHeaders(), cache:'no-store' });
+    if(!r.ok) throw new Error('GitHub-API-Fehler ' + r.status);
+    return r.json();
+  };
+  const post = async (url, body, method) => {
+    const r = await fetch(`${API_BASE}${url}`, { method:method || 'POST', headers:apiHeaders({ 'Content-Type':'application/json' }), body:JSON.stringify(body) });
+    if(!r.ok) throw new Error(await r.text());
+    return r.json();
+  };
+  let headSha = lastCommitSha, baseTree = lastTreeSha;
+  if(!headSha || !baseTree){
+    headSha = (await get(`/git/ref/heads/${BRANCH}`)).object.sha;
+    baseTree = (await get(`/git/commits/${headSha}`)).tree.sha;
+  }
+  const newTree = await post('/git/trees', {
+    base_tree: baseTree,
+    tree: changes.map(c => ({ path:c.path, mode:c.mode || '100644', type:'blob', sha:c.sha }))
+  });
+  const commit = await post('/git/commits', { message, tree:newTree.sha, parents:[headSha] });
+  try{
+    await post(`/git/refs/heads/${BRANCH}`, { sha:commit.sha }, 'PATCH');
+  }catch(e){
+    // Stand war veraltet (z. B. Änderung direkt auf GitHub) -> einmal mit aktuellem Stand wiederholen
+    if(retry) throw e;
+    lastCommitSha = lastTreeSha = null;
+    return commitChanges(message, changes, true);
+  }
+  lastCommitSha = commit.sha;
+  lastTreeSha = newTree.sha;
+  adminPromise = null;
+}
+
+function loadAdminData(){
+  if(!adminPromise){
+    adminPromise = (async () => {
+      const subjFile = await apiGetFile(SUBJECTS_FILE);
+      let subjects = DEFAULT_SUBJECTS;
+      if(subjFile){ try{ subjects = JSON.parse(subjFile.text); }catch(e){} }
+
+      const ref = lastTreeSha || BRANCH;
+      const res = await fetch(`${API_BASE}/git/trees/${ref}?recursive=1`, { headers:apiHeaders(), cache:'no-store' });
+      if(!res.ok) throw new Error('GitHub-API-Fehler ' + res.status);
+      const { tree:entries } = await res.json();
+
+      const tree = {};
+      for(const s of subjects) tree[s.key] = emptyNode();
+      // Alle Dateien unter pages/ merken (für Verschieben und Umbenennen)
+      const blobs = entries.filter(e => e.type === 'blob' && e.path.startsWith(FOLDER + '/'));
+      for(const e of entries){
+        const parts = e.path.split('/');
+        if(parts[0] !== FOLDER || parts.length < 3) continue;
+        const subjKey = parts[1];
+        if(!tree[subjKey]) tree[subjKey] = emptyNode();
+        let node = tree[subjKey];
+        const dirParts = e.type === 'tree' ? parts.slice(2) : parts.slice(2, -1);
+        for(const d of dirParts){ node = node.folders[d] || (node.folders[d] = emptyNode()); }
+        if(e.type !== 'blob') continue;
+        const fileName = parts[parts.length - 1];
+        if(fileName === '.gitkeep') node.keepSha = e.sha;
+        else if(/\.html?$/i.test(fileName)) node.files.push({ name:fileName, path:e.path, sha:e.sha });
+      }
+      return { version:2, subjects, tree, blobs };
+    })().catch(e => { adminPromise = null; throw e; });
+  }
+  return adminPromise;
+}
+
+function getData(){ return isAdmin() ? loadAdminData() : loadIndex(); }
+
+/* Schreibt pages/index.json neu (nur Admin). Diese Datei lesen die Schülerinnen und Schüler. */
+async function updateIndexFile(){
+  if(!token) return;
+  try{
+    const data = await loadAdminData();
+    const strip = node => ({
+      files: node.files.map(f => ({ name:f.name, path:f.path })),
+      folders: Object.fromEntries(Object.entries(node.folders)
+        .sort((a, b) => a[0].localeCompare(b[0], 'de')).map(([k, v]) => [k, strip(v)]))
+    });
+    const out = { version:2, subjects:data.subjects, tree:{} };
+    for(const s of data.subjects) out.tree[s.key] = strip(data.tree[s.key] || emptyNode());
+    const text = JSON.stringify(out, null, 2) + '\n';
+    const cur = await apiGetFile(INDEX_FILE);
+    if(cur && cur.text === text) return; // nichts geändert -> kein unnötiger Commit
+    const body = { message:'Update index.json', content:toBase64(text) };
+    if(cur) body.sha = cur.sha;
+    await apiWrite('PUT', INDEX_FILE, body);
+    indexPromise = null;
+  }catch(e){ alert('Achtung: index.json konnte nicht aktualisiert werden. Die Schülerinnen und Schüler sehen die Änderung evtl. nicht.\n\n' + e.message); }
+}
+
+async function saveSubjects(subjects){
+  const cur = await apiGetFile(SUBJECTS_FILE);
+  const body = { message:'Update subjects.json', content:toBase64(JSON.stringify(subjects, null, 2) + '\n') };
+  if(cur) body.sha = cur.sha;
+  await apiWrite('PUT', SUBJECTS_FILE, body);
+}
+
+/* ---------- Navigation (#deutsch/Verben) ---------- */
+function getHashPath(){
+  const h = location.hash.replace(/^#/, '');
+  return h ? h.split('/').map(decodeURIComponent) : [];
+}
+function goTo(parts){ location.hash = parts.map(encodeURIComponent).join('/'); }
+window.addEventListener('hashchange', render);
+backBtn.addEventListener('click', () => goTo(getHashPath().slice(0, -1)));
+homeBtn.addEventListener('click', () => goTo([]));
+$('brand').addEventListener('click', () => goTo([]));
+
+let renderId = 0;
+async function render(){
+  const myId = ++renderId;
+  const path = getHashPath();
+  toolbar.style.display = (isAdmin() && path.length) ? 'flex' : 'none';
+  let data;
+  try{ data = await getData(); }
+  catch(e){ if(myId === renderId) setStatus('Daten konnten nicht geladen werden: ' + e.message, true); return; }
+  if(myId !== renderId) return;
+
+  if(!path.length){
+    hero.style.display = '';
+    homeView.style.display = 'block';
+    subjectView.style.display = 'none';
+    homeLabel.style.display = '';
+    backBtn.style.display = homeBtn.style.display = 'none';
+    renderSubjectCards(data);
+    return;
+  }
+
+  const subject = data.subjects.find(s => s.key === path[0]);
+  let node = subject ? data.tree[subject.key] || emptyNode() : null;
+  for(const f of path.slice(1)){ node = node && node.folders[f]; }
+  if(!subject || !node){ goTo([]); return; }
+
+  hero.style.display = 'none';
+  homeView.style.display = 'none';
+  subjectView.style.display = 'block';
+  homeLabel.style.display = 'none';
+  backBtn.style.display = '';
+  backBtn.textContent = path.length > 2 ? `← Zurück zu ${path[path.length - 2]}`
+                      : path.length === 2 ? `← Zurück zu ${subject.label}` : '← Alle Fächer';
+  homeBtn.style.display = path.length > 1 ? '' : 'none'; // im Fach selbst führt "Zurück" schon zur Startseite
+  renderHeading(subject, path, node);
+  await renderFolder(node, path, myId);
+}
+
+function renderHeading(subject, path, node){
+  heading.innerHTML = '';
+  const emoji = document.createElement('div');
+  emoji.className = 'd-emoji'; emoji.textContent = subject.emoji;
+  const h2 = document.createElement('h2');
+  const parts = [subject.label, ...path.slice(1)];
+  parts.forEach((p, i) => {
+    if(i > 0){ const sep = document.createElement('span'); sep.className = 'crumb-sep'; sep.textContent = '/'; h2.appendChild(sep); }
+    const span = document.createElement('span');
+    span.textContent = p;
+    if(i < parts.length - 1){ span.className = 'crumb'; span.addEventListener('click', () => goTo(path.slice(0, i + 1))); }
+    h2.appendChild(span);
+  });
+  const sub = document.createElement('div');
+  sub.className = 'd-sub';
+  const nF = Object.keys(node.folders).length, nA = node.files.length;
+  sub.textContent = [nF ? `${nF} Ordner` : '', `${nA} Seite${nA === 1 ? '' : 'n'}`].filter(Boolean).join(' · ');
+  heading.append(emoji, h2, sub);
+}
+
+/* Karten leicht schräg stellen – wie Zettel an einer Pinnwand */
+const ROT = ['-1.2deg','0.9deg','-0.6deg','1.2deg','-0.9deg','0.7deg'];
+function makeCard(i, onOpen, extraClass){
+  const card = document.createElement('div');
+  card.className = 'card' + (extraClass ? ' ' + extraClass : '');
+  card.style.transform = `rotate(${ROT[i % ROT.length]})`;
+  card.tabIndex = 0;
+  card.addEventListener('click', onOpen);
+  card.addEventListener('keydown', e => { if(e.key === 'Enter' && e.target === card) onOpen(); });
+  const tape = document.createElement('div');
+  tape.className = 'tape';
+  card.appendChild(tape);
+  return card;
+}
+function el(tag, cls, text){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text != null) e.textContent = text;
+  return e;
+}
+function metaRow(nr, subText){
+  const meta = el('div', 'meta');
+  meta.append(el('span', 'nr', String(nr).padStart(2, '0')), el('span', 'sub', subText));
+  return meta;
+}
+function seitenText(n){ return `${n} Seite${n === 1 ? '' : 'n'}`; }
+
+/* Admin-Aktionen unter einer Karte (als unterstrichene Text-Links) */
+function adminRow(actions){
+  const row = el('div', 'admin');
+  for(const [label, fn] of actions){
+    const b = el('button', null, label);
+    b.addEventListener('click', e => { e.stopPropagation(); fn(); });
+    row.appendChild(b);
+  }
+  return row;
+}
+
+function renderSubjectCards(data){
+  subjectGrid.innerHTML = '';
+  data.subjects.forEach((subject, i) => {
+    const node = data.tree[subject.key] || emptyNode();
+    const card = makeCard(i, () => goTo([subject.key]));
+    const photo = el('div', 'photo');
+    photo.appendChild(el('span', 'big', subject.emoji));
+    card.append(metaRow(i + 1, seitenText(countFiles(node))), photo, el('h3', null, subject.label), el('span', 'more', 'Öffnen →'));
+    if(isAdmin()){
+      const actions = [['Bearbeiten', () => editSubject(subject)]];
+      if(isEmptyNode(node)) actions.push(['Löschen', () => deleteSubject(subject)]);
+      card.appendChild(adminRow(actions));
+    }
+    subjectGrid.appendChild(card);
+  });
+  if(isAdmin()){
+    const card = el('div', 'card new');
+    card.tabIndex = 0;
+    card.append(el('span', 'plus', '+'), el('span', null, 'Neuer Bereich'));
+    card.addEventListener('click', createSubject);
+    subjectGrid.appendChild(card);
+  }
+}
+
+// "1794058211948-adverbs_of_frequency.html" -> "adverbs of frequency"
+function prettyName(fileName){
+  return displayName(fileName).replace(/\.html?$/i, '').replace(/[_-]+/g, ' ').trim();
+}
+
+async function renderFolder(node, path, myId){
+  grid.innerHTML = '';
+  emptyMsg.style.display = 'none';
+  const folderNames = Object.keys(node.folders).sort((a, b) => a.localeCompare(b, 'de'));
+  let i = 0;
+
+  // Ordner-Karten
+  for(const name of folderNames){
+    const sub = node.folders[name];
+    const card = makeCard(i, () => goTo([...path, name]), 'folder');
+    const photo = el('div', 'photo');
+    photo.appendChild(el('span', 'big', '📁'));
+    card.append(metaRow(++i, 'Ordner · ' + seitenText(countFiles(sub))), photo, el('h3', null, name), el('span', 'more', 'Öffnen →'));
+    if(isAdmin()){
+      card.appendChild(adminRow([
+        ['Umbenennen', () => renameFolder(node, path, name)],
+        ['Löschen', () => deleteFolder(sub, path, name)]
+      ]));
+    }
+    grid.appendChild(card);
+  }
+
+  if(!node.files.length){
+    if(!folderNames.length) emptyMsg.style.display = 'block';
+    return;
+  }
+
+  // App-Karten
+  setStatus('Lade Seiten …');
+  try{
+    const pages = await Promise.all(node.files.map(async f => {
+      const raw = isAdmin()
+        ? await fetch(`${API_BASE}/contents/${encPath(f.path)}?ref=${readRef()}`,
+            { headers:apiHeaders({ Accept:'application/vnd.github.raw' }), cache:'no-store' })
+        : await fetch(encPath(f.path));
+      if(!raw.ok) throw new Error(displayName(f.name) + ' (' + raw.status + ')');
+      return { name:f.name, path:f.path, sha:f.sha, content: await raw.text() };
+    }));
+    if(myId !== renderId) return;
+    pages.sort((a, b) => prettyName(a.name).localeCompare(prettyName(b.name), 'de'));
+    pages.forEach(page => grid.appendChild(appCard(page, i++)));
+    fitPreviews();
+    setStatus('');
+  }catch(e){
+    if(myId === renderId) setStatus('Seiten konnten nicht geladen werden: ' + e.message, true);
+  }
+}
+
+/* Vorschau so skalieren, dass die App-Seite (800 × 600) genau ins Bild passt */
+function fitPreviews(){
+  document.querySelectorAll('.photo iframe').forEach(f => {
+    f.style.transform = `scale(${f.parentElement.clientWidth / 800})`;
+  });
+}
+window.addEventListener('resize', fitPreviews);
+
+/* Für die Vorschau: Ersatz-Speicher, damit Apps mit localStorage in der Sandbox nicht abstürzen. */
+const PREVIEW_SHIM = '<script>(function(){function m(){var d={};return{getItem:function(k){return k in d?d[k]:null},setItem:function(k,v){d[k]=String(v)},removeItem:function(k){delete d[k]},clear:function(){d={}},key:function(i){return Object.keys(d)[i]||null},get length(){return Object.keys(d).length}}}' +
+  'try{Object.defineProperty(window,"localStorage",{value:m(),configurable:true})}catch(e){}' +
+  'try{Object.defineProperty(window,"sessionStorage",{value:m(),configurable:true})}catch(e){}' +
+  'window.alert=window.confirm=window.prompt=function(){};})();<\/script>';
+
+/* Öffnet eine App in einem neuen Tab, ohne Verbindung zur Hauptseite ("noopener").
+   So bleibt der Token geschützt; der Lernfortschritt (localStorage) funktioniert weiterhin. */
+function openApp(page){
+  const url = URL.createObjectURL(new Blob([page.content], { type:'text/html;charset=utf-8' }));
+  window.open(url, '_blank', 'noopener');
+}
+
+function appCard(page, i){
+  const card = makeCard(i, () => openApp(page), 'app');
+  const photo = el('div', 'photo');
+  const iframe = document.createElement('iframe');
+  /* Vorschau abgeschottet ("sandbox"): Die App kann nicht auf die Hauptseite
+     (und damit nicht auf den Token) zugreifen. */
+  iframe.sandbox = 'allow-scripts';
+  iframe.tabIndex = -1;
+  iframe.srcdoc = PREVIEW_SHIM + page.content;
+  photo.appendChild(iframe);
+  card.append(metaRow(i + 1, 'Lern-App'), photo, el('h3', null, prettyName(page.name)), el('span', 'more', 'App starten →'));
+  if(isAdmin()){
+    card.appendChild(adminRow([
+      ['Verschieben', () => moveFile(page)],
+      ['Löschen', async () => {
+        if(!confirm(`"${prettyName(page.name)}" wirklich löschen?`)) return;
+        await deleteFile(page);
+      }]
+    ]));
+  }
+  return card;
+}
+
+/* ---------- Admin-Aktionen ---------- */
+async function runAction(startMsg, doneMsg, fn){
+  setStatus(startMsg);
+  try{
+    await fn();
+    await updateIndexFile();
+    setStatus(doneMsg);
+  }catch(e){ setStatus('Fehler: ' + e.message, true); }
+  render();
+}
+
+function deleteFile(page){
+  return runAction('Lösche ' + displayName(page.name) + '...', 'Gelöscht ✅', () =>
+    apiWrite('DELETE', page.path, { message:`Remove ${page.name}`, sha:page.sha }));
+}
+
+addBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files);
+  fileInput.value = '';
+  if(!files.length) return;
+  const dir = [FOLDER, ...getHashPath()].join('/');
+  await runAction('Lade hoch...', 'Hochgeladen ✅', async () => {
+    for(const file of files){
+      setStatus('Lade hoch: ' + file.name + '...');
+      const content = await file.text();
+      const safeName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+      await apiWrite('PUT', `${dir}/${safeName}`, { message:`Add ${safeName}`, content:toBase64(content) });
+    }
+  });
+});
+
+newFolderBtn.addEventListener('click', async () => {
+  const path = getHashPath();
+  const data = await loadAdminData();
+  let node = data.tree[path[0]];
+  for(const f of path.slice(1)) node = node.folders[f];
+  const values = await askForm('📁 Neuer Ordner', [
+    { id:'name', label:'Name des Ordners', placeholder:'z. B. Verben' }
+  ], v => {
+    const name = cleanFolderName(v.name);
+    if(!name) return 'Bitte einen Namen eingeben.';
+    if(Object.keys(node.folders).some(f => f.toLowerCase() === name.toLowerCase())) return 'Diesen Ordner gibt es schon.';
+  });
+  if(!values) return;
+  const name = cleanFolderName(values.name);
+  const dir = [FOLDER, ...path, name].join('/');
+  // GitHub kennt keine leeren Ordner, darum legen wir eine leere Platzhalter-Datei (.gitkeep) an
+  runAction('Erstelle Ordner...', `Ordner "${name}" erstellt ✅`, () =>
+    apiWrite('PUT', `${dir}/.gitkeep`, { message:`Create folder ${name}`, content:'' }));
+});
+
+function deleteFolder(node, path, name){
+  if(!isEmptyNode(node)){ alert(`Der Ordner "${name}" ist nicht leer.\nBitte zuerst alle Seiten und Unterordner darin löschen.`); return; }
+  if(!confirm(`Ordner "${name}" wirklich löschen?`)) return;
+  const dir = [FOLDER, ...path, name].join('/');
+  runAction('Lösche Ordner...', 'Ordner gelöscht ✅', () =>
+    apiWrite('DELETE', `${dir}/.gitkeep`, { message:`Remove folder ${name}`, sha:node.keepSha }));
+}
+
+/* App in einen anderen Ordner (auch in einen anderen Bereich) verschieben */
+async function moveFile(page){
+  const data = await loadAdminData();
+  const curDir = page.path.split('/').slice(0, -1).join('/');
+  const options = [];
+  const walk = (node, parts, label) => {
+    const dir = [FOLDER, ...parts].join('/');
+    options.push({ value:dir, label: label + (dir === curDir ? '  (aktueller Ordner)' : ''), disabled: dir === curDir });
+    for(const name of Object.keys(node.folders).sort((a, b) => a.localeCompare(b, 'de'))){
+      walk(node.folders[name], [...parts, name], label + ' › ' + name);
+    }
+  };
+  for(const s of data.subjects) walk(data.tree[s.key] || emptyNode(), [s.key], `${s.emoji} ${s.label}`);
+  const firstFree = options.find(o => !o.disabled);
+  if(!firstFree){ alert('Es gibt noch keinen anderen Ordner.'); return; }
+  const values = await askForm(`📂 „${displayName(page.name)}“ verschieben`, [
+    { id:'dest', label:'Ziel-Ordner', type:'select', options, value:firstFree.value }
+  ], null, 'Verschieben');
+  if(!values) return;
+  const fileName = page.path.split('/').pop();
+  const blob = data.blobs.find(b => b.path === page.path);
+  runAction('Verschiebe...', 'Verschoben ✅', () => commitChanges(`Move ${fileName}`, [
+    { path:`${values.dest}/${fileName}`, sha:blob.sha, mode:blob.mode },
+    { path:page.path, sha:null, mode:blob.mode }
+  ]));
+}
+
+/* Ordner umbenennen: alle Dateien darin (auch in Unterordnern) bekommen den neuen Pfad */
+async function renameFolder(parentNode, path, oldName){
+  const values = await askForm('✏️ Ordner umbenennen', [
+    { id:'name', label:'Neuer Name', value:oldName }
+  ], v => {
+    const name = cleanFolderName(v.name);
+    if(!name) return 'Bitte einen Namen eingeben.';
+    if(name !== oldName && Object.keys(parentNode.folders).some(f => f !== oldName && f.toLowerCase() === name.toLowerCase())) return 'Diesen Ordner gibt es schon.';
+  }, 'Umbenennen');
+  if(!values) return;
+  const newName = cleanFolderName(values.name);
+  if(newName === oldName) return;
+  const data = await loadAdminData();
+  const oldDir = [FOLDER, ...path, oldName].join('/') + '/';
+  const newDir = [FOLDER, ...path, newName].join('/') + '/';
+  const changes = [];
+  for(const b of data.blobs.filter(b => b.path.startsWith(oldDir))){
+    changes.push({ path: newDir + b.path.slice(oldDir.length), sha:b.sha, mode:b.mode });
+    changes.push({ path: b.path, sha:null, mode:b.mode });
+  }
+  if(!changes.length) return;
+  runAction('Benenne um...', `Ordner heisst jetzt "${newName}" ✅`, () =>
+    commitChanges(`Rename folder ${oldName} to ${newName}`, changes));
+}
+
+/* Name und Emoji eines Bereichs ändern (der Ordner im Repo bleibt gleich) */
+async function editSubject(subject){
+  const data = await loadAdminData();
+  const values = await askForm('✏️ Bereich bearbeiten', [
+    { id:'label', label:'Name des Bereichs', value:subject.label },
+    { id:'emoji', label:'Emoji', value:subject.emoji }
+  ], v => {
+    if(!v.label.trim()) return 'Bitte einen Namen eingeben.';
+    if(data.subjects.some(s => s.key !== subject.key && s.label.toLowerCase() === v.label.trim().toLowerCase())) return 'Diesen Bereich gibt es schon.';
+  }, 'Speichern');
+  if(!values) return;
+  const updated = data.subjects.map((s, i) => s.key === subject.key
+    ? Object.assign({}, s, { label:values.label.trim().slice(0, 40), emoji:values.emoji.trim() || s.emoji, color: s.color ?? i })
+    : Object.assign({ color:i }, s));
+  runAction('Speichere...', 'Gespeichert ✅', () => saveSubjects(updated));
+}
+
+async function createSubject(){
+  const data = await loadAdminData();
+  const values = await askForm('➕ Neuer Bereich', [
+    { id:'label', label:'Name des Bereichs', placeholder:'z. B. M+I' },
+    { id:'emoji', label:'Emoji', placeholder:'z. B. 💻', value:'📚', hint:'Tipp: Windows-Taste + Punkt (Mac: Ctrl + Cmd + Leertaste) öffnet die Emoji-Auswahl.' }
+  ], v => {
+    if(!v.label.trim()) return 'Bitte einen Namen eingeben.';
+    if(data.subjects.some(s => s.label.toLowerCase() === v.label.trim().toLowerCase())) return 'Diesen Bereich gibt es schon.';
+  });
+  if(!values) return;
+  const label = values.label.trim().slice(0, 40);
+  let key = slugify(label), n = 2;
+  while(data.subjects.some(s => s.key === key) || (data.tree[key] && !isEmptyNode(data.tree[key]))) key = slugify(label) + '-' + n++;
+  const used = data.subjects.map(s => s.color);
+  let color = 0;
+  while(used.includes(color) && color < PALETTE.length) color++;
+  if(color >= PALETTE.length) color = data.subjects.length % PALETTE.length;
+  const subject = { key, label, emoji: values.emoji.trim() || '📚', color };
+  runAction('Erstelle Bereich...', `Bereich "${label}" erstellt ✅`, async () => {
+    await apiWrite('PUT', `${FOLDER}/${key}/.gitkeep`, { message:`Create subject ${label}`, content:'' });
+    await saveSubjects([...data.subjects, subject]);
+  });
+}
+
+async function deleteSubject(subject){
+  const data = await loadAdminData();
+  const node = data.tree[subject.key];
+  if(node && !isEmptyNode(node)){ alert('Dieser Bereich ist nicht leer.'); return; }
+  if(!confirm(`Bereich "${subject.label}" wirklich löschen?`)) return;
+  runAction('Lösche Bereich...', 'Bereich gelöscht ✅', async () => {
+    if(node && node.keepSha) await apiWrite('DELETE', `${FOLDER}/${subject.key}/.gitkeep`, { message:`Remove subject ${subject.label}`, sha:node.keepSha });
+    await saveSubjects(data.subjects.filter(s => s.key !== subject.key));
+  });
+}
+
+/* ---------- Eingabefenster für "Neuer Ordner" / "Neuer Bereich" ---------- */
+const formDialog = $('formDialog'), formForm = $('formForm'), formFields = $('formFields'), formMsg = $('formMsg');
+$('formCancel').addEventListener('click', () => formDialog.close());
+
+function askForm(title, fields, validate, okText){
+  $('formTitle').textContent = title.replace(/^\S*[^\w\s„"]\s+/u, '');
+  $('formOk').textContent = okText || 'Erstellen';
+  formFields.innerHTML = '';
+  formMsg.textContent = '';
+  for(const f of fields){
+    const label = document.createElement('label');
+    label.textContent = f.label; label.htmlFor = 'f_' + f.id;
+    let input;
+    if(f.type === 'select'){
+      input = document.createElement('select');
+      for(const o of f.options){
+        const opt = document.createElement('option');
+        opt.value = o.value; opt.textContent = o.label; opt.disabled = !!o.disabled;
+        input.appendChild(opt);
+      }
+    }else{
+      input = document.createElement('input');
+      input.placeholder = f.placeholder || '';
+      input.autocomplete = 'off';
+    }
+    input.id = 'f_' + f.id; input.value = f.value || '';
+    formFields.append(label, input);
+    if(f.hint){ const p = document.createElement('p'); p.className = 'hint'; p.textContent = f.hint; formFields.appendChild(p); }
+  }
+  return new Promise(resolve => {
+    let done = false;
+    const finish = val => { if(done) return; done = true; formForm.onsubmit = null; formDialog.onclose = null; formDialog.close(); resolve(val); };
+    formDialog.onclose = () => finish(null);
+    formForm.onsubmit = e => {
+      e.preventDefault();
+      const values = {};
+      for(const f of fields) values[f.id] = $('f_' + f.id).value;
+      const err = validate && validate(values);
+      if(err){ formMsg.textContent = err; return; }
+      finish(values);
+    };
+    formDialog.showModal();
+    formFields.querySelector('input, select').focus();
+  });
+}
+
+/* ---------- Anmeldung mit Passwort ---------- */
+const loginDialog = $('loginDialog'), loginForm = $('loginForm'), loginInput = $('loginInput'), loginMsg = $('loginMsg');
+$('loginCancel').addEventListener('click', () => loginDialog.close());
+
+function b64ToBytes(b64){ return Uint8Array.from(atob(b64), c => c.charCodeAt(0)); }
+
+/* Entschlüsselt den Token mit dem Passwort (PBKDF2 + AES-GCM). Falsches Passwort -> Fehler. */
+async function decryptToken(password){
+  const [v, iter, salt, iv, ct] = ENCRYPTED_TOKEN.trim().split('.');
+  if(v !== 'v1') throw new Error('Unbekanntes Format');
+  const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt:b64ToBytes(salt), iterations:Number(iter), hash:'SHA-256' },
+    baseKey, { name:'AES-GCM', length:256 }, false, ['decrypt']);
+  const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv:b64ToBytes(iv) }, key, b64ToBytes(ct));
+  return new TextDecoder().decode(plain);
+}
+
+async function tokenWorks(t){
+  try{
+    const res = await fetch(API_BASE, { headers:{ Authorization:`token ${t}` } });
+    return res.ok;
+  }catch(e){ return false; }
+}
+
+/* Zeigt das Anmelde-Fenster. Gibt den gültigen Token zurück oder null (abgebrochen). */
+function askToken(){
+  const withPassword = !!ENCRYPTED_TOKEN.trim();
+  loginInput.placeholder = withPassword ? 'Passwort' : 'GitHub-Token';
+  loginInput.value = '';
+  loginMsg.textContent = '';
+  return new Promise(resolve => {
+    let done = false;
+    const finish = val => { if(done) return; done = true; loginForm.onsubmit = null; loginDialog.onclose = null; loginDialog.close(); resolve(val); };
+    loginDialog.onclose = () => finish(null);
+    loginForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const input = loginInput.value;
+      if(!input) return;
+      loginMsg.style.color = '#888';
+      loginMsg.textContent = 'Prüfe...';
+      let t = null;
+      try{ t = withPassword ? await decryptToken(input) : input.trim(); }
+      catch(err){ t = null; }
+      if(!t){ loginMsg.style.color = ''; loginMsg.textContent = 'Passwort falsch.'; loginInput.select(); return; }
+      if(!(await tokenWorks(t))){
+        loginMsg.style.color = '';
+        loginMsg.textContent = withPassword
+          ? 'Passwort stimmt, aber der Token ist abgelaufen oder ungültig. Bitte neuen Token verschlüsseln.'
+          : 'Token ungültig oder ohne Rechte für dieses Repo.';
+        return;
+      }
+      finish(t);
+    };
+    loginDialog.showModal();
+    loginInput.focus();
+  });
+}
+
+adminToggle.addEventListener('click', async () => {
+  if(!isAdmin()){
+    const t = await askToken();
+    if(!t) return;
+    token = t;
+    lastTreeSha = null;
+    lastCommitSha = null;
+    adminPromise = null;
+    updateAdminUI();
+    setStatus('Angemeldet ✅');
+    updateIndexFile();
+  } else {
+    token = null;
+    adminPromise = null;
+    indexPromise = null; // nach dem Abmelden die Liste neu laden
+    updateAdminUI();
+    setStatus('Abgemeldet. Änderungen sind für Schüler:innen nach 1–2 Minuten sichtbar.');
+  }
+  render();
+});
+
+function updateAdminUI(){
+  adminToggle.textContent = isAdmin() ? 'Abmelden' : 'Admin';
+  adminToggle.classList.toggle('active', isAdmin());
+}
+
+updateAdminUI();
+render();
+</script>
+</body>
+</html>

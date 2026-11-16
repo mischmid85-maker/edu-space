@@ -1,28 +1,60 @@
 {
-  "deutsch": [
+  "version": 2,
+  "subjects": [
     {
-      "name": "1794135013130-verben_zeitformen.html",
-      "path": "pages/deutsch/1794135013130-verben_zeitformen.html"
-    }
-  ],
-  "englisch": [
-    {
-      "name": "1794058211948-adverbs_of_frequency.html",
-      "path": "pages/englisch/1794058211948-adverbs_of_frequency.html"
+      "key": "deutsch",
+      "label": "Deutsch",
+      "emoji": "🥨",
+      "color": 0
     },
     {
-      "name": "1794060754987-present-continuous-arena.html",
-      "path": "pages/englisch/1794060754987-present-continuous-arena.html"
+      "key": "englisch",
+      "label": "Englisch",
+      "emoji": "🫅",
+      "color": 1
     },
     {
-      "name": "1794427240682-fragen-short-answers.html",
-      "path": "pages/englisch/1794427240682-fragen-short-answers.html"
+      "key": "franzoesisch",
+      "label": "Französisch",
+      "emoji": "🥐",
+      "color": 2
     }
   ],
-  "franzoesisch": [
-    {
-      "name": "1794242329128-adjectifs-unite2.html",
-      "path": "pages/franzoesisch/1794242329128-adjectifs-unite2.html"
+  "tree": {
+    "deutsch": {
+      "files": [
+        {
+          "name": "1794135013130-verben_zeitformen.html",
+          "path": "pages/deutsch/1794135013130-verben_zeitformen.html"
+        }
+      ],
+      "folders": {}
+    },
+    "englisch": {
+      "files": [
+        {
+          "name": "1794058211948-adverbs_of_frequency.html",
+          "path": "pages/englisch/1794058211948-adverbs_of_frequency.html"
+        },
+        {
+          "name": "1794060754987-present-continuous-arena.html",
+          "path": "pages/englisch/1794060754987-present-continuous-arena.html"
+        },
+        {
+          "name": "1794427240682-fragen-short-answers.html",
+          "path": "pages/englisch/1794427240682-fragen-short-answers.html"
+        }
+      ],
+      "folders": {}
+    },
+    "franzoesisch": {
+      "files": [
+        {
+          "name": "1794242329128-adjectifs-unite2.html",
+          "path": "pages/franzoesisch/1794242329128-adjectifs-unite2.html"
+        }
+      ],
+      "folders": {}
     }
-  ]
+  }
 }

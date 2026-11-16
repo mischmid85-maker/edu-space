@@ -30,7 +30,12 @@
       ],
       "folders": {
         "Verben": {
-          "files": [],
+          "files": [
+            {
+              "name": "1794854387426-verben_zeitformen.html",
+              "path": "pages/deutsch/Verben/1794854387426-verben_zeitformen.html"
+            }
+          ],
           "folders": {}
         }
       }

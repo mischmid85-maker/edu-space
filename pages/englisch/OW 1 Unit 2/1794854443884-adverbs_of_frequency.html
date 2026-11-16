@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chimp Sentences – Adverbs of Frequency</title>
+<style>
+  :root{
+    --green:#2f6f4e; --green-d:#1f4d36; --green-l:#e3f1e8;
+    --brown:#8a5a2b; --sand:#fff8e8; --gold:#f5b72e; --gold-l:#fff1c4;
+    --red:#c8453b; --red-l:#fde8e6; --ok:#2e9d5b; --ok-l:#dff5e7;
+    --ink:#26332b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;color:var(--ink);
+    background:linear-gradient(180deg,#d8efdc 0%,#f3ead2 100%);min-height:100vh}
+  .wrap{max-width:860px;margin:0 auto;padding:16px}
+  header.top{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px}
+  .logo{font-weight:800;font-size:1.35rem;color:var(--green-d)}
+  .logo small{display:block;font-weight:500;font-size:.8rem;color:var(--brown)}
+  .btn{border:none;border-radius:12px;padding:11px 18px;font-size:1rem;font-weight:700;cursor:pointer;
+    background:var(--green);color:#fff;box-shadow:0 3px 0 var(--green-d);transition:transform .08s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--green-d)}
+  .btn.sec{background:#fff;color:var(--green-d);box-shadow:0 3px 0 #b9cbbd;border:2px solid #b9cbbd}
+  .btn.warn{background:var(--gold);color:#4a3200;box-shadow:0 3px 0 #b98511}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .card{background:#fff;border-radius:20px;padding:22px;box-shadow:0 6px 20px rgba(40,70,50,.15);margin-bottom:16px}
+  h1,h2,h3{margin:0 0 8px}
+  .hidden{display:none!important}
+
+  /* start */
+  .hero{text-align:center}
+  .hero .big{font-size:3.4rem}
+  .hero h2{font-size:1.7rem;color:var(--green-d)}
+  .levels{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px}
+  .lvl{border:3px solid var(--green-l);background:var(--sand);border-radius:16px;padding:14px;text-align:left;cursor:pointer;font-family:inherit;color:var(--ink);transition:.15s}
+  .lvl:hover{border-color:var(--green);transform:translateY(-2px)}
+  .lvl b{display:block;font-size:1.1rem;color:var(--green-d)}
+  .lvl span{font-size:.9rem}
+  .example{background:var(--gold-l);border-radius:14px;padding:12px 14px;margin:14px 0;text-align:left;font-size:.98rem}
+  .example .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+  .example .chips span{background:#fff;border:2px solid #e0cfa0;border-radius:10px;padding:4px 9px}
+  .example .chips span.a{border-color:var(--gold);background:#ffe9a6;font-weight:700}
+
+  /* scale */
+  .scale{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+  .scale span{padding:5px 9px;border-radius:9px;font-weight:700;font-size:.9rem;color:#fff}
+  .scale-lab{display:flex;justify-content:space-between;font-size:.8rem;color:#6b5a40}
+  .rules ol{padding-left:20px;margin:6px 0}
+  .rules li{margin-bottom:8px}
+  .rules em.ad{background:var(--gold-l);font-style:normal;font-weight:700;padding:0 4px;border-radius:5px}
+
+  /* game */
+  .stats{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+  .pill{background:#fff;border-radius:999px;padding:6px 14px;font-weight:700;box-shadow:0 2px 6px rgba(0,0,0,.08);font-size:.95rem}
+  .bar{flex:1;min-width:120px;height:14px;background:#fff;border-radius:99px;overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.15)}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#6cc08b,var(--green));transition:width .4s}
+  .task-title{font-size:1.05rem;color:var(--brown);font-weight:700;margin-bottom:12px}
+  .zone-label{font-size:.85rem;font-weight:700;color:#6a7d70;margin:10px 0 6px;text-transform:uppercase;letter-spacing:.04em}
+  .zone{min-height:62px;border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  #pool{background:var(--green-l);border:2px dashed #9cc4a8}
+  #ans{background:var(--sand);border:2px dashed #d3b97a;min-height:70px}
+  #ans.over{background:#fff0c4}
+  .ph{color:#a38c57;font-style:italic;font-size:.95rem}
+  .chip{font-family:inherit;font-size:1.08rem;padding:9px 14px;border-radius:12px;border:2px solid #9fb8a6;background:#fff;
+    cursor:pointer;color:var(--ink);box-shadow:0 3px 0 #b8cabd;transition:transform .08s;user-select:none}
+  .chip:hover{transform:translateY(-2px)}
+  .chip.adv{border-color:var(--gold);background:#fff6d6;box-shadow:0 3px 0 #dcae3c}
+  .chip.dragging{opacity:.4}
+  .chip:disabled{cursor:default;transform:none}
+  #ans .chip{border-color:#d3b97a;box-shadow:0 3px 0 #d9c58f}
+  #ans .chip.adv{border-color:var(--gold)}
+  .legend{font-size:.82rem;color:#6a7d70;margin-top:6px}
+  .legend b{background:#fff6d6;border:2px solid var(--gold);border-radius:6px;padding:0 6px}
+  .preview{margin-top:12px;font-size:1.25rem;font-weight:600;min-height:2em;padding:10px 14px;border-radius:12px;background:#f6f6f6;color:#444}
+  .preview.ok{background:var(--ok-l);color:#155d33}
+  .preview.err{background:var(--red-l);color:#8b2a22}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .coach{display:flex;gap:12px;align-items:flex-start;margin-top:14px}
+  .coach .face{font-size:2.6rem;line-height:1}
+  .bubble{flex:1;border-radius:14px;padding:12px 14px;background:#f1f5f2;font-size:1rem;line-height:1.45}
+  .bubble.ok{background:var(--ok-l)}
+  .bubble.err{background:var(--red-l)}
+  .bubble.tip{background:var(--gold-l)}
+  .bubble .big-s{font-weight:800}
+  .shake{animation:shake .45s}
+  @keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+  .bounce{animation:bounce .6s}
+  @keyframes bounce{30%{transform:translateY(-14px) rotate(-6deg)}60%{transform:translateY(0)}80%{transform:translateY(-5px)}}
+
+  /* result */
+  .stars{font-size:2.6rem;letter-spacing:6px}
+  .res-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .res-grid div{background:var(--sand);border-radius:14px;padding:12px;text-align:center}
+  .res-grid b{display:block;font-size:1.6rem;color:var(--green-d)}
+
+  /* overlay */
+  .overlay{position:fixed;inset:0;background:rgba(20,40,28,.55);display:flex;align-items:center;justify-content:center;padding:14px;z-index:20}
+  .overlay .card{max-width:640px;max-height:90vh;overflow:auto;margin:0}
+  .floaty{position:fixed;font-size:1.6rem;pointer-events:none;z-index:30;animation:fall 1.4s ease-in forwards}
+  @keyframes fall{from{transform:translateY(-20px) rotate(0);opacity:1}to{transform:translateY(100vh) rotate(360deg);opacity:.2}}
+  @media(max-width:520px){.chip{font-size:1rem;padding:8px 11px}.card{padding:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">🐒 Chimp Sentences<small>Adverbs of frequency – put the sentence in order</small></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn sec" id="rulesBtn">📘 Regeln</button>
+      <button class="btn sec hidden" id="menuBtn">🏠 Menü</button>
+    </div>
+  </header>
+
+  <!-- START -->
+  <section id="start" class="card hero">
+    <div class="big">🌴🐒🍌</div>
+    <h2>Wo steht das Adverb?</h2>
+    <p>Bei den Schimpansen ist alles durcheinander geraten! Bringe die Satzglieder in die richtige Reihenfolge und achte besonders darauf, <b>wo das Adverb of frequency</b> steht.</p>
+    <div class="example">
+      <b>Beispiel:</b>
+      <div class="chips"><span>groom each other</span><span>sit together</span><span class="a">often</span><span>and</span><span>they</span></div>
+      ➜ <b>They <u>often</u> sit together and groom each other.</b>
+    </div>
+    <p style="margin-bottom:4px"><b>Wähle ein Level:</b></p>
+    <div class="levels" id="levels"></div>
+  </section>
+
+  <!-- GAME -->
+  <section id="game" class="hidden">
+    <div class="stats">
+      <span class="pill" id="numPill">Satz 1 / 9</span>
+      <div class="bar"><i id="barI"></i></div>
+      <span class="pill" id="scorePill">⭐ 0</span>
+      <span class="pill" id="streakPill">🔥 0</span>
+    </div>
+    <div class="card" id="taskCard">
+      <div class="task-title">Setze die Satzglieder in die richtige Reihenfolge.</div>
+      <div class="zone-label">Satzglieder</div>
+      <div class="zone" id="pool"></div>
+      <div class="legend">Das <b>gelbe</b> Satzglied ist das Adverb of frequency.</div>
+      <div class="zone-label">Dein Satz</div>
+      <div class="zone" id="ans"></div>
+      <div class="preview" id="preview"></div>
+      <div class="actions">
+        <button class="btn" id="checkBtn">✔ Prüfen</button>
+        <button class="btn sec" id="resetBtn">↺ Neu anordnen</button>
+        <button class="btn warn hidden" id="showBtn">👀 Lösung zeigen</button>
+        <button class="btn hidden" id="nextBtn">Weiter ➜</button>
+      </div>
+      <div class="coach">
+        <div class="face" id="face">🐒</div>
+        <div class="bubble" id="bubble">Tippe auf die Satzglieder (oder ziehe sie in dein Satzfeld). Tippst du ein Satzglied im Satzfeld an, springt es zurück.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="card hero hidden">
+    <div class="stars" id="stars"></div>
+    <h2 id="resTitle">Geschafft!</h2>
+    <p id="resText"></p>
+    <div class="res-grid">
+      <div><b id="rScore">0</b>Punkte</div>
+      <div><b id="rFirst">0</b>gleich richtig</div>
+      <div><b id="rBest">0</b>beste Serie</div>
+    </div>
+    <div class="actions" style="justify-content:center">
+      <button class="btn warn hidden" id="retryBtn">🔁 Fehler wiederholen</button>
+      <button class="btn" id="againBtn">Neue Runde</button>
+      <button class="btn sec" id="toMenuBtn">Zum Menü</button>
+    </div>
+  </section>
+</div>
+
+<!-- RULES OVERLAY -->
+<div class="overlay hidden" id="overlay">
+  <div class="card rules">
+    <h3>📘 Adverbs of frequency</h3>
+    <p style="margin-top:0">Sie sagen, <b>wie oft</b> etwas passiert:</p>
+    <div class="scale" id="scale"></div>
+    <div class="scale-lab"><span>immer (100 %)</span><span>nie (0 %)</span></div>
+    <h3 style="margin-top:16px">Wo steht das Adverb?</h3>
+    <ol>
+      <li><b>Vor dem Vollverb:</b><br>They <em class="ad">often</em> sit together.</li>
+      <li><b>Nach am / is / are (be):</b><br>The chimps are <em class="ad">always</em> hungry.</li>
+      <li><b>Nach can / must / will, aber vor dem Vollverb:</b><br>Chimps can <em class="ad">sometimes</em> use tools.</li>
+    </ol>
+    <p><b>Gut zu wissen:</b> Bei <i>usually, normally, generally, often, regularly, sometimes, occasionally</i> ist auch der Satzanfang möglich (<i>Sometimes chimps use tools.</i>). <i>always, never, seldom, rarely</i> stehen dagegen <u>nicht</u> am Satzanfang. In dieser App übst du vor allem die Stellung in der Satzmitte.</p>
+    <button class="btn" id="closeRules">Verstanden</button>
+  </div>
+</div>
+
+<script>
+/* ---------- DATA ---------- */
+const FLEX = new Set(['usually','normally','generally','often','regularly','sometimes','occasionally']);
+// [chunks in correct order, index of adverb, index of reference verb, kind: v = before main verb, b = after "be", m = after modal]
+const T = (c,a,r,k,end)=>({c,a,r,k,end:!!end});
+const LEVELS = [
+ {name:'Level 1', sub:'Einfache Sätze', desc:'Adverb vor dem Vollverb und nach is/are', icon:'🌱', tasks:[
+   T(['they','often','sit together','and','groom each other'],1,2,'v'),
+   T(['chimpanzees','usually','eat','fruit and leaves'],1,2,'v'),
+   T(['wild chimpanzees','never','live','outside Africa'],1,2,'v'),
+   T(['baby chimps','are','always','very curious'],2,1,'b'),
+   T(['chimpanzees','normally','sleep','in trees'],1,2,'v'),
+   T(['the chimps','are','sometimes','very noisy'],2,1,'b'),
+   T(['mother chimps','often','carry','their babies'],1,2,'v'),
+   T(['chimpanzees','rarely','swim','in deep water'],1,2,'v'),
+   T(['the young chimps','are','generally','very playful'],2,1,'b')
+ ]},
+ {name:'Level 2', sub:'Mit Modalverben', desc:'Auch can und längere Sätze', icon:'🌿', tasks:[
+   T(['chimpanzees','can','sometimes','use tools'],2,1,'m'),
+   T(['young chimps','can','never','survive','without their mothers'],2,1,'m'),
+   T(['the chimps','usually','wake up','at sunrise'],1,2,'v'),
+   T(['chimpanzees','occasionally','hunt','small monkeys'],1,2,'v',true),
+   T(['researchers','regularly','visit','the chimpanzees','in Tanzania'],1,2,'v'),
+   T(['chimpanzees','generally','prefer','ripe fruit'],1,2,'v'),
+   T(['the leader of the group','is','usually','a strong male'],2,1,'b'),
+   T(['chimpanzees','seldom','eat','meat'],1,2,'v'),
+   T(['chimpanzees','are','often','very clever'],2,1,'b')
+ ]},
+ {name:'Level 3', sub:'Profi', desc:'Lange Sätze mit and, am, can …', icon:'🌳', tasks:[
+   T(['chimpanzees','sometimes','share','their food','and','hug each other'],1,2,'v'),
+   T(['they','regularly','make','loud calls','and','drum on trees'],1,2,'v'),
+   T(['adult males','sometimes','fight','for the top position'],1,2,'v',true),
+   T(['mother chimps','often','show','their babies','how to use tools'],1,2,'v'),
+   T(['chimpanzees','normally','build','a new nest','every evening'],1,2,'v'),
+   T(['the forest','is','never','quiet','when the chimps are awake'],2,1,'b'),
+   T(['chimpanzees','can','often','hear','each other','from far away'],2,1,'m'),
+   T(['I','often','watch','chimpanzee videos','on YouTube'],1,2,'v'),
+   T(['scientists','always','take','notes','when they watch chimps'],1,2,'v'),
+   T(['I','am','never','bored','when I watch chimps'],2,1,'b')
+ ]}
+];
+const MIX = {name:'Mix', sub:'Zufallsrunde', desc:'10 Sätze aus allen Levels', icon:'🎲'};
+const SCALE = ['always','usually','normally','generally','often','regularly','sometimes','occasionally','seldom','rarely','never'];
+
+/* ---------- HELPERS ---------- */
+const $ = s=>document.querySelector(s);
+const shuffle = a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const cap = s=>s.charAt(0).toUpperCase()+s.slice(1);
+const sentence = arr=>cap(arr.join(' '))+'.';
+function accepted(t){
+  const adv=t.c[t.a], list=[{s:t.c,type:'main'}];
+  if(FLEX.has(adv)){
+    const rest=t.c.filter((_,i)=>i!==t.a);
+    list.push({s:[adv,...rest],type:'front'});
+    if(t.end) list.push({s:[...rest,adv],type:'end'});
+  }
+  return list;
+}
+const keyOf = a=>a.join('|').toLowerCase();
+const KIND_RULE = {
+  v:'Regel: Das Adverb steht <b>vor dem Vollverb</b>.',
+  b:'Regel: Das Adverb steht <b>nach am / is / are</b>.',
+  m:'Regel: Das Adverb steht <b>nach dem Modalverb</b> (can …) und <b>vor dem Vollverb</b>.'
+};
+
+/* ---------- STATE ---------- */
+let S = {};
+let lastTasks = [];
+let lastMissed = [];
+
+function show(id){
+  ['start','game','result'].forEach(x=>$('#'+x).classList.toggle('hidden',x!==id));
+  $('#menuBtn').classList.toggle('hidden',id==='start');
+}
+
+/* ---------- START ---------- */
+function buildMenu(){
+  const box=$('#levels'); box.innerHTML='';
+  LEVELS.concat([MIX]).forEach((lv,i)=>{
+    const b=document.createElement('button'); b.className='lvl';
+    b.innerHTML=`<b>${lv.icon} ${lv.name}: ${lv.sub}</b><span>${lv.desc}</span>`;
+    b.onclick=()=>{
+      let tasks;
+      if(lv===MIX) tasks=shuffle(LEVELS.flatMap(l=>l.tasks)).slice(0,10);
+      else tasks=lv.tasks;
+      startRound(tasks);
+    };
+    box.appendChild(b);
+  });
+  const sc=$('#scale'); sc.innerHTML='';
+  SCALE.forEach((w,i)=>{
+    const s=document.createElement('span'); s.textContent=w;
+    const hue=130-(i/(SCALE.length-1))*130; // green -> red
+    s.style.background=`hsl(${hue},55%,40%)`; sc.appendChild(s);
+  });
+}
+
+/* ---------- ROUND ---------- */
+function startRound(tasks){
+  lastTasks=tasks;
+  S={tasks:shuffle(tasks),i:0,score:0,first:0,missed:[],streak:0,best:0};
+  show('game'); loadTask();
+}
+function loadTask(){
+  const t=S.tasks[S.i]; S.t=t;
+  S.texts=t.c;
+  const acc=accepted(t).map(a=>keyOf(a.s));
+  let order, guard=0;
+  do{ order=shuffle(t.c.map((_,i)=>i)); guard++; }
+  while(acc.includes(keyOf(order.map(i=>t.c[i]))) && guard<50);
+  S.order=order; S.ans=[]; S.attempts=0; S.done=false; S.counted=false;
+  $('#numPill').textContent=`Satz ${S.i+1} / ${S.tasks.length}`;
+  $('#barI').style.width=(S.i/S.tasks.length*100)+'%';
+  updateStats();
+  $('#checkBtn').classList.remove('hidden');
+  $('#resetBtn').classList.remove('hidden');
+  $('#showBtn').classList.add('hidden');
+  $('#nextBtn').classList.add('hidden');
+  say('🐒','Tippe auf die Satzglieder (oder ziehe sie in dein Satzfeld). Tippst du ein Satzglied im Satzfeld an, springt es zurück.','');
+  render();
+}
+function updateStats(){
+  $('#scorePill').textContent='⭐ '+S.score;
+  $('#streakPill').textContent='🔥 '+S.streak;
+}
+function say(face,html,cls){
+  $('#face').textContent=face;
+  const b=$('#bubble'); b.innerHTML=html; b.className='bubble '+cls;
+}
+
+/* ---------- RENDER ---------- */
+function chip(id){
+  const b=document.createElement('button');
+  b.className='chip'+(id===S.t.a?' adv':'');
+  b.textContent=S.t.c[id]; b.dataset.id=id; b.type='button';
+  if(S.done){ b.disabled=true; return b; }
+  b.draggable=true;
+  b.addEventListener('dragstart',e=>{
+    e.dataTransfer.setData('text/plain',String(id)); e.dataTransfer.effectAllowed='move';
+    S.drag=id; setTimeout(()=>b.classList.add('dragging'),0);
+  });
+  b.addEventListener('dragend',()=>{b.classList.remove('dragging');$('#ans').classList.remove('over')});
+  b.addEventListener('click',()=>{
+    if(S.ans.includes(id)) S.ans=S.ans.filter(x=>x!==id); else S.ans.push(id);
+    clearVerdict(); render();
+  });
+  return b;
+}
+function render(){
+  const pool=$('#pool'), ans=$('#ans'); pool.innerHTML=''; ans.innerHTML='';
+  S.order.filter(id=>!S.ans.includes(id)).forEach(id=>pool.appendChild(chip(id)));
+  if(!S.ans.length){
+    const p=document.createElement('span'); p.className='ph'; p.textContent='Hier entsteht dein Satz …'; ans.appendChild(p);
+  }
+  S.ans.forEach(id=>ans.appendChild(chip(id)));
+  if(!pool.children.length){ const p=document.createElement('span'); p.className='ph'; p.textContent='Alle Satzglieder sind eingesetzt ✔'; pool.appendChild(p); }
+  const pv=$('#preview');
+  if(!S.ans.length){ pv.textContent='Dein ganzer Satz erscheint hier.'; pv.style.opacity=.55; }
+  else{
+    pv.style.opacity=1;
+    const texts=S.ans.map(i=>S.t.c[i]);
+    pv.textContent = S.ans.length===S.t.c.length ? sentence(texts) : cap(texts.join(' '))+' …';
+  }
+}
+function clearVerdict(){ $('#preview').classList.remove('ok','err'); }
+
+/* drag & drop */
+function dropIndex(x,y){
+  const chips=[...$('#ans').querySelectorAll('.chip')].filter(c=>!c.classList.contains('dragging'));
+  for(let k=0;k<chips.length;k++){
+    const r=chips[k].getBoundingClientRect();
+    if(y<r.top) return k;
+    if(y<=r.bottom && x<r.left+r.width/2) return k;
+  }
+  return chips.length;
+}
+const ansEl=$('#ans'), poolEl=$('#pool');
+ansEl.addEventListener('dragover',e=>{e.preventDefault();ansEl.classList.add('over')});
+ansEl.addEventListener('dragleave',()=>ansEl.classList.remove('over'));
+ansEl.addEventListener('drop',e=>{
+  e.preventDefault(); ansEl.classList.remove('over');
+  if(S.done) return;
+  const id=parseInt(e.dataTransfer.getData('text/plain'),10); if(isNaN(id)) return;
+  const rest=S.ans.filter(x=>x!==id);
+  let idx=0;
+  const chips=[...ansEl.querySelectorAll('.chip')].filter(c=>parseInt(c.dataset.id,10)!==id);
+  idx=chips.length;
+  for(let k=0;k<chips.length;k++){
+    const r=chips[k].getBoundingClientRect();
+    if(e.clientY<r.top || (e.clientY<=r.bottom && e.clientX<r.left+r.width/2)){ idx=k; break; }
+  }
+  rest.splice(idx,0,id); S.ans=rest; clearVerdict(); render();
+});
+poolEl.addEventListener('dragover',e=>e.preventDefault());
+poolEl.addEventListener('drop',e=>{
+  e.preventDefault(); if(S.done) return;
+  const id=parseInt(e.dataTransfer.getData('text/plain'),10);
+  S.ans=S.ans.filter(x=>x!==id); clearVerdict(); render();
+});
+
+/* ---------- CHECK ---------- */
+function check(){
+  if(S.done) return;
+  const t=S.t;
+  if(S.ans.length<t.c.length){
+    say('🐒','Setze zuerst <b>alle</b> Satzglieder in dein Satzfeld ein.','tip'); return;
+  }
+  const seq=S.ans.map(i=>t.c[i]);
+  const match=accepted(t).find(a=>keyOf(a.s)===keyOf(seq));
+  if(match){
+    const pts=[3,2,1][Math.min(S.attempts,2)];
+    S.score+=pts;
+    if(S.attempts===0){ S.first++; S.streak++; S.best=Math.max(S.best,S.streak); } else S.streak=0;
+    finishTask(match,pts);
+  }else{
+    S.attempts++; S.streak=0; updateStats();
+    if(!S.counted){ S.counted=true; S.missed.push(t); }
+    const pv=$('#preview'); pv.classList.add('err');
+    const card=$('#ans'); card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    say('🙈',tipText(t,seq,S.attempts),'err');
+    if(S.attempts>=3) $('#showBtn').classList.remove('hidden');
+  }
+}
+function tipText(t,seq,n){
+  const adv=t.c[t.a], ref=t.c[t.r], flex=FLEX.has(adv);
+  const ia=seq.indexOf(adv), ir=seq.indexOf(ref), last=seq.length-1;
+  const posOK = (t.k==='v' && ia===ir-1) || (t.k!=='v' && ia===ir+1) || (flex && ia===0);
+  let main;
+  if(posOK){
+    main='👍 Das Adverb <b>«'+adv+'»</b> steht schon richtig. Aber die anderen Satzglieder sind noch nicht in der richtigen Reihenfolge. Denk an: <b>Wer?</b> (Subjekt) → <b>Was tut er?</b> (Verb) → Ergänzung.';
+  }else if(ia===0 && !flex){
+    main='💡 <b>«'+adv+'»</b> steht normalerweise <b>nicht am Satzanfang</b>. Setze es in die Satzmitte.';
+  }else if(ia===last){
+    main='💡 Am Satzende steht <b>«'+adv+'»</b> hier nicht. Das Adverb gehört in die <b>Satzmitte</b>, in die Nähe des Verbs.';
+  }else if(t.k==='v'){
+    main = ia>ir
+      ? '💡 Das Adverb steht <b>vor</b> dem Vollverb <b>«'+ref+'»</b>, nicht danach.'
+      : '💡 Das Adverb steht zu weit vorne. Es muss <b>direkt vor</b> dem Vollverb <b>«'+ref+'»</b> stehen.';
+  }else if(t.k==='b'){
+    main = ia<ir
+      ? '💡 Bei <b>be</b> (am / is / are) steht das Adverb <b>nach</b> dem Verb <b>«'+ref+'»</b>.'
+      : '💡 Das Adverb muss <b>direkt nach</b> <b>«'+ref+'»</b> stehen.';
+  }else{
+    main = ia<ir
+      ? '💡 Bei Modalverben steht das Adverb <b>nach</b> <b>«'+ref+'»</b>, aber <b>vor</b> dem Vollverb.'
+      : '💡 Das Adverb muss <b>direkt nach</b> dem Modalverb <b>«'+ref+'»</b> stehen, also vor dem Vollverb.';
+  }
+  let extra='';
+  if(n>=2 && !posOK){
+    extra+='<br><br><b>Tipp 2:</b> Das Verb im Satz ist <b>«'+ref+'»</b>. Das Adverb <b>«'+adv+'»</b> gehört '+(t.k==='v'?'direkt <u>davor</u>':'direkt <u>danach</u>')+'.';
+    if(t.c.includes('and')) extra+=' Bei <i>and</i> steht das Adverb nur beim ersten Verb, <u>vor</u> <i>and</i>.';
+  }
+  if(n>=3){
+    extra+='<br><br><b>Tipp 3:</b> Der Satz beginnt mit: <i>'+cap(t.c.slice(0,2).join(' '))+' …</i>';
+  }
+  return main+extra;
+}
+function finishTask(match,pts){
+  S.done=true; updateStats();
+  const t=S.t; const mainS=sentence(t.c);
+  $('#preview').classList.remove('err'); $('#preview').classList.add('ok');
+  $('#preview').textContent=sentence(match.s);
+  render(); $('#preview').textContent=sentence(match.s);
+  const face=$('#face'); face.classList.remove('bounce'); void face.offsetWidth; face.classList.add('bounce');
+  let msg='<span class="big-s">✅ Richtig! +'+pts+' '+(pts===1?'Punkt':'Punkte')+'</span><br>';
+  if(match.type!=='main'){
+    msg+='Diese Stellung ist auch möglich. Die Standardposition in der Satzmitte wäre: <b>'+mainS+'</b><br>';
+  }
+  msg+=KIND_RULE[t.k];
+  say('🐵',msg,'ok');
+  confetti();
+  $('#checkBtn').classList.add('hidden'); $('#resetBtn').classList.add('hidden'); $('#showBtn').classList.add('hidden');
+  const nb=$('#nextBtn'); nb.classList.remove('hidden');
+  nb.textContent = S.i===S.tasks.length-1 ? 'Auswertung ➜' : 'Weiter ➜';
+  nb.focus();
+}
+function revealSolution(){
+  if(S.done) return;
+  const t=S.t;
+  S.ans=t.c.map((_,i)=>i); S.done=true; S.streak=0; updateStats();
+  if(!S.counted){S.counted=true;S.missed.push(t);}
+  render();
+  $('#preview').textContent=sentence(t.c); $('#preview').classList.add('ok');
+  say('🐒','<b>So sieht die Lösung aus:</b> '+sentence(t.c)+'<br>'+KIND_RULE[t.k]+'<br>Merke dir den Satz, du siehst ihn später vielleicht nochmals.','tip');
+  $('#checkBtn').classList.add('hidden'); $('#resetBtn').classList.add('hidden'); $('#showBtn').classList.add('hidden');
+  const nb=$('#nextBtn'); nb.classList.remove('hidden');
+  nb.textContent = S.i===S.tasks.length-1 ? 'Auswertung ➜' : 'Weiter ➜';
+}
+function next(){
+  if(S.i<S.tasks.length-1){ S.i++; loadTask(); } else showResult();
+}
+function confetti(){
+  const em=['🍌','🌴','⭐','🐒','🍃'];
+  for(let i=0;i<14;i++){
+    const f=document.createElement('div'); f.className='floaty';
+    f.textContent=em[Math.floor(Math.random()*em.length)];
+    f.style.left=Math.random()*95+'vw'; f.style.top='0';
+    f.style.animationDelay=(Math.random()*0.4)+'s';
+    document.body.appendChild(f); setTimeout(()=>f.remove(),2000);
+  }
+}
+
+/* ---------- RESULT ---------- */
+function showResult(){
+  const n=S.tasks.length, max=n*3, pct=S.score/max;
+  const st = pct>=.85?3: pct>=.6?2: 1;
+  $('#stars').textContent='⭐'.repeat(st)+'☆'.repeat(3-st);
+  $('#resTitle').textContent = st===3?'Fantastisch – echte Chimp-Expertin / echter Chimp-Experte!': st===2?'Gut gemacht!':'Weiter üben lohnt sich!';
+  $('#resText').textContent = `Du hast ${S.first} von ${n} Sätzen gleich beim ersten Versuch richtig gelöst.`;
+  $('#rScore').textContent=S.score+' / '+max;
+  $('#rFirst').textContent=S.first+' / '+n;
+  $('#rBest').textContent=S.best;
+  lastMissed=S.missed.slice();
+  $('#retryBtn').classList.toggle('hidden',!lastMissed.length);
+  show('result');
+  if(st>=2) confetti();
+}
+
+/* ---------- EVENTS ---------- */
+$('#checkBtn').onclick=check;
+$('#resetBtn').onclick=()=>{ if(S.done) return; S.ans=[]; clearVerdict(); render(); };
+$('#showBtn').onclick=revealSolution;
+$('#nextBtn').onclick=next;
+$('#menuBtn').onclick=()=>show('start');
+$('#toMenuBtn').onclick=()=>show('start');
+$('#againBtn').onclick=()=>startRound(lastTasks);
+$('#retryBtn').onclick=()=>startRound(lastMissed);
+$('#rulesBtn').onclick=()=>$('#overlay').classList.remove('hidden');
+$('#closeRules').onclick=()=>$('#overlay').classList.add('hidden');
+$('#overlay').addEventListener('click',e=>{ if(e.target.id==='overlay') $('#overlay').classList.add('hidden'); });
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') $('#overlay').classList.add('hidden');
+  if(e.key==='Enter' && !$('#game').classList.contains('hidden') && document.activeElement.tagName!=='BUTTON'){
+    if(S.done) next(); else check();
+  }
+});
+
+buildMenu();
+</script>
+</body>
+</html>

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>être, faire, aller au présent</title>
+<style>
+/* Idee: ein französisches Schulheft (Séyès-Lineatur). Der rote Korrekturrand trägt Aufgabennummer und Korrekturzeichen. */
+:root {
+  --page: #e8edf8; --paper: #fdfdff; --ink: #18265a; --muted: #525e88;
+  --rule: #c3cfea; --rule-faint: #dde4f4; --pen: #c21f30; --good: #11694f;
+  --soft: #eef2fb; --pen-soft: #fdeef0; --good-soft: #e5f4ee; --warn-soft: #fdf4dc; --warn: #7a5600;
+  --display: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --body: "Avenir Next", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --margin: 58px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0f152b; --paper: #182140; --ink: #e9edfb; --muted: #aab4d6;
+    --rule: #2c3862; --rule-faint: #1b2545; --pen: #ff8d93; --good: #66d6b4;
+    --soft: #212c52; --pen-soft: #3a2240; --good-soft: #17393f; --warn-soft: #3a3320; --warn: #f0cf7c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0f152b; --paper: #182140; --ink: #e9edfb; --muted: #aab4d6;
+  --rule: #2c3862; --rule-faint: #1b2545; --pen: #ff8d93; --good: #66d6b4;
+  --soft: #212c52; --pen-soft: #3a2240; --good-soft: #17393f; --warn-soft: #3a3320; --warn: #f0cf7c;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  color: var(--ink); font: 17px/1.5 var(--body);
+  background-color: var(--page);
+  background-image:
+    linear-gradient(var(--rule) 1px, transparent 1px),
+    linear-gradient(var(--rule-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+  background-size: 32px 32px, 100% 8px, 32px 32px;
+}
+main { max-width: 720px; margin: 0 auto; padding: 32px 16px 56px; }
+.sheet {
+  position: relative; background: var(--paper); border: 1px solid var(--rule); border-radius: 4px;
+  padding: 28px 28px 30px calc(var(--margin) + 24px);
+  box-shadow: 0 2px 0 var(--rule);
+}
+.sheet::before {
+  content: ""; position: absolute; top: 0; bottom: 0; left: var(--margin); width: 2px; background: var(--pen); opacity: .65;
+}
+.gutter {
+  position: absolute; left: 0; top: 26px; width: var(--margin); display: grid; justify-items: center; gap: 8px;
+  font: italic 22px/1 var(--display); color: var(--muted);
+}
+.gutter svg { width: 34px; height: 34px; fill: none; stroke: var(--pen); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.gutter svg.ok { stroke: var(--good); }
+.gutter svg path { stroke-dasharray: 60; animation: draw .38s ease-out both; }
+.gutter svg path + path { animation-delay: .16s; }
+@keyframes draw { from { stroke-dashoffset: 60; } to { stroke-dashoffset: 0; } }
+
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; margin: 0; text-wrap: balance; font-weight: 600; }
+h1 { font-size: clamp(38px, 8vw, 58px); font-style: italic; letter-spacing: -.01em; }
+h1 span { color: var(--pen); font-style: normal; font-weight: 400; }
+h2 { font-size: 26px; }
+h3 { font-size: 20px; }
+p { margin: 0; }
+.stack { display: grid; gap: 18px; }
+.lead { font-size: 19px; max-width: 34em; }
+.muted { color: var(--muted); }
+.small { font-size: 15px; }
+
+.plan { list-style: none; margin: 0; padding: 0; display: grid; }
+.plan li { display: grid; grid-template-columns: 1fr auto; gap: 2px 16px; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.plan b { font: italic 600 19px/1.3 var(--display); }
+.plan span { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 15px; }
+.plan small { grid-column: 1 / -1; font-size: 15px; color: var(--muted); }
+
+label { font-weight: 600; font-size: 15px; display: block; margin-bottom: 4px; }
+input[type="text"] {
+  font: 24px/1.2 var(--display); color: var(--ink); background: var(--soft);
+  border: 0; border-bottom: 2px solid var(--ink); border-radius: 3px 3px 0 0; padding: 9px 10px; width: 100%; max-width: 320px;
+}
+#name { font-size: 19px; }
+button {
+  font: 600 17px/1.2 var(--body); color: var(--ink); background: var(--paper);
+  border: 1.5px solid var(--ink); border-radius: 4px; padding: 12px 18px; cursor: pointer; min-height: 46px;
+}
+button:hover { background: var(--soft); }
+button.main { background: var(--ink); color: var(--paper); }
+button.main:hover { background: var(--ink); opacity: .88; }
+:focus-visible { outline: 3px solid var(--pen); outline-offset: 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+.head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.step { font: italic 600 20px/1.2 var(--display); }
+.count { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar { height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--ink); transition: width .25s; }
+.sentence { font: 29px/1.3 var(--display); overflow-wrap: anywhere; }
+.sentence .gap { display: inline-block; min-width: 2.6em; border-bottom: 2px solid var(--ink); }
+.sentence u { text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.de { color: var(--muted); font-size: 16px; }
+.hint { background: var(--warn-soft); color: var(--ink); padding: 8px 12px; border-radius: 3px; font-size: 15px; }
+.options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.options button { font: 23px/1.2 var(--display); }
+.keys { display: flex; flex-wrap: wrap; gap: 6px; }
+.keys button { font: 19px/1 var(--display); min-width: 44px; min-height: 44px; padding: 6px; border-width: 1px; }
+
+.fb { padding: 14px 16px; border-radius: 3px; display: grid; gap: 6px; }
+.fb.ok { background: var(--good-soft); }
+.fb.no { background: var(--pen-soft); }
+.fb.half { background: var(--warn-soft); }
+.fb strong.t { font: italic 600 20px/1.2 var(--display); }
+.fb.ok strong.t { color: var(--good); }
+.fb.no strong.t { color: var(--pen); }
+.fb.half strong.t { color: var(--warn); }
+.fix { font: 22px/1.3 var(--display); overflow-wrap: anywhere; }
+s { color: var(--pen); text-decoration-thickness: 2px; }
+.fix b, .fixlist b { color: var(--good); }
+
+.grade { font: italic 600 clamp(36px, 8vw, 50px)/1.05 var(--display); color: var(--pen); }
+.score { font-size: 18px; font-variant-numeric: tabular-nums; }
+section { display: grid; gap: 10px; padding-top: 18px; border-top: 1px solid var(--rule); }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--rule); }
+thead th { font: italic 600 19px/1.2 var(--display); }
+tbody th { font-weight: 500; color: var(--muted); white-space: nowrap; }
+tfoot th, tfoot td { font-weight: 600; border-bottom: 0; }
+td.c { min-width: 104px; }
+.form { font: 20px/1.2 var(--display); display: block; }
+.st { font-size: 13px; font-weight: 600; display: block; }
+td.sure { background: var(--good-soft); } td.sure .st { color: var(--good); }
+td.almost { background: var(--warn-soft); } td.almost .st { color: var(--warn); }
+td.work { background: var(--pen-soft); } td.work .st { color: var(--pen); }
+td.none .st { color: var(--muted); }
+.tip { display: grid; gap: 4px; padding: 12px 0 12px 14px; border-left: 3px solid var(--pen); }
+.fixlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.fixlist li { font: 18px/1.35 var(--display); overflow-wrap: anywhere; }
+textarea { width: 100%; min-height: 110px; font: 15px/1.4 var(--body); color: var(--ink); background: var(--soft); border: 1px solid var(--rule); padding: 8px; }
+
+@media (max-width: 480px) {
+  :root { --margin: 40px; }
+  body { font-size: 16px; }
+  main { padding: 16px 16px 40px; }
+  .sheet { padding: 20px 14px 24px calc(var(--margin) + 12px); }
+  .gutter { font-size: 18px; top: 20px; }
+  .gutter svg { width: 26px; height: 26px; }
+  .sentence { font-size: 24px; }
+  .options button { font-size: 20px; padding: 12px 6px; }
+  th, td { padding: 7px 4px; }
+  tbody th { white-space: normal; font-size: 14px; }
+  td.c { min-width: 0; }
+  .form { font-size: 17px; }
+  .st { font-size: 11px; line-height: 1.2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gutter svg path { animation: none; }
+  .bar i { transition: none; }
+}
+</style>
+</head>
+<body>
+<main id="app" aria-live="off"></main>
+<script>
+"use strict";
+/* ---------- Sprachdaten ---------- */
+const FORMS = {
+  e: { je: "suis", tu: "es", il: "est", nous: "sommes", vous: "êtes", ils: "sont" },
+  f: { je: "fais", tu: "fais", il: "fait", nous: "faisons", vous: "faites", ils: "font" },
+  a: { je: "vais", tu: "vas", il: "va", nous: "allons", vous: "allez", ils: "vont" }
+};
+const INF = { e: "être", f: "faire", a: "aller" };
+const VERBS = ["e", "f", "a"];
+const PERSONS = ["je", "tu", "il", "nous", "vous", "ils"];
+const PLABEL = { je: "je", tu: "tu", il: "il / elle / on", nous: "nous", vous: "vous", ils: "ils / elles" };
+const PRON = { je: ["je"], tu: ["tu"], il: ["il", "elle", "on"], nous: ["nous"], vous: ["vous"], ils: ["ils", "elles"] };
+const AVOIR = ["ai", "as", "a", "avons", "avez", "ont"];
+
+const DISTRACT = {
+  e: { je: ["es", "est", "sont"], tu: ["est", "suis", "êtes"], il: ["es", "et", "sont"],
+       nous: ["sont", "êtes", "somme"], vous: ["êtez", "sont", "sommes"], ils: ["son", "est", "sontent"] },
+  f: { je: ["fait", "fai", "font"], tu: ["fait", "faites", "fai"], il: ["fais", "font", "faites"],
+       nous: ["faisont", "fesons", "font"], vous: ["faisez", "faitez", "font"], ils: ["faisent", "fons", "faisons"] },
+  a: { je: ["vas", "va", "alle"], tu: ["va", "vais", "alles"], il: ["vas", "a", "alle"],
+       nous: ["vont", "allont", "allez"], vous: ["allons", "vont", "aller"], ils: ["allent", "von", "allons"] }
+};
+
+/* [Verb, Person, Satz, Übersetzung] */
+const BANK = [
+  ["e","je","Je {} en retard pour le cours de maths.","Ich bin zu spät für die Mathestunde."],
+  ["e","je","Je {} content de te voir.","Ich bin froh, dich zu sehen."],
+  ["e","je","Aujourd'hui, je {} malade.","Heute bin ich krank."],
+  ["e","tu","Tu {} d'accord avec moi ?","Bist du mit mir einverstanden?"],
+  ["e","tu","Tu {} où maintenant ?","Wo bist du jetzt?"],
+  ["e","tu","Tu {} très fort en dessin.","Du bist sehr gut im Zeichnen."],
+  ["e","il","Mon frère {} très sympa.","Mein Bruder ist sehr nett."],
+  ["e","il","Elle {} à la maison ce soir.","Sie ist heute Abend zu Hause."],
+  ["e","il","On {} à la gare de Lausanne.","Wir sind am Bahnhof Lausanne."],
+  ["e","nous","Nous {} contents de nos vacances.","Wir sind zufrieden mit unseren Ferien."],
+  ["e","nous","Nous {} en classe de français.","Wir sind in der Französischstunde."],
+  ["e","nous","Nous {} voisins depuis dix ans.","Wir sind seit zehn Jahren Nachbarn."],
+  ["e","vous","Vous {} prêts pour le test ?","Seid ihr bereit für den Test?"],
+  ["e","vous","Madame, vous {} française ?","Sind Sie Französin, Madame?"],
+  ["e","vous","Vous {} dans quelle classe ?","In welcher Klasse seid ihr?"],
+  ["e","ils","Mes parents {} au travail.","Meine Eltern sind bei der Arbeit."],
+  ["e","ils","Elles {} dans le train pour Genève.","Sie sind im Zug nach Genf."],
+  ["e","ils","Les élèves {} dans la cour.","Die Schülerinnen und Schüler sind auf dem Pausenplatz."],
+  ["f","je","Je {} du vélo le samedi.","Am Samstag fahre ich Velo."],
+  ["f","je","Je {} mes devoirs après l'école.","Ich mache meine Hausaufgaben nach der Schule."],
+  ["f","je","Ce soir, je {} une pizza.","Heute Abend mache ich eine Pizza."],
+  ["f","tu","Qu'est-ce que tu {} ce week-end ?","Was machst du dieses Wochenende?"],
+  ["f","tu","Tu {} du ski à Verbier ?","Fährst du in Verbier Ski?"],
+  ["f","tu","Tu {} souvent la cuisine ?","Kochst du oft?"],
+  ["f","il","Il {} beau aujourd'hui.","Heute ist schönes Wetter."],
+  ["f","il","Ma sœur {} de la natation.","Meine Schwester geht schwimmen."],
+  ["f","il","En janvier, il {} très froid.","Im Januar ist es sehr kalt."],
+  ["f","nous","Nous {} une promenade au bord du lac.","Wir machen einen Spaziergang am See."],
+  ["f","nous","Nous {} du théâtre à l'école.","Wir spielen in der Schule Theater."],
+  ["f","nous","Le dimanche, nous {} la grasse matinée.","Am Sonntag schlafen wir aus."],
+  ["f","vous","Qu'est-ce que vous {} dans la vie ?","Was machen Sie beruflich?"],
+  ["f","vous","Vous {} du sport le mercredi ?","Treibt ihr am Mittwoch Sport?"],
+  ["f","vous","Vous {} trop de bruit !","Ihr macht zu viel Lärm!"],
+  ["f","ils","Mes amis {} de la musique ensemble.","Meine Freunde machen zusammen Musik."],
+  ["f","ils","Elles {} les courses au marché.","Sie kaufen auf dem Markt ein."],
+  ["f","ils","Les enfants {} un bonhomme de neige.","Die Kinder machen einen Schneemann."],
+  ["e","ils","Mes voisins {} très gentils.","Meine Nachbarn sind sehr freundlich."],
+  ["a","je","Je {} à l'école à pied.","Ich gehe zu Fuss zur Schule."],
+  ["a","je","Demain, je {} chez le dentiste.","Morgen gehe ich zum Zahnarzt."],
+  ["a","je","Je {} bien, merci.","Mir geht es gut, danke."],
+  ["a","tu","Tu {} au cinéma ce soir ?","Gehst du heute Abend ins Kino?"],
+  ["a","tu","Comment {}-tu ?","Wie geht es dir?"],
+  ["a","tu","Où {}-tu en vacances ?","Wohin gehst du in die Ferien?"],
+  ["a","il","Ça {} bien ?","Geht es dir gut?"],
+  ["a","il","Mon père {} à Zurich en train.","Mein Vater fährt mit dem Zug nach Zürich."],
+  ["a","il","Elle {} à la piscine le lundi.","Am Montag geht sie ins Schwimmbad."],
+  ["a","nous","Nous {} à la montagne en février.","Im Februar gehen wir in die Berge."],
+  ["a","nous","Nous {} au marché samedi.","Am Samstag gehen wir auf den Markt."],
+  ["a","nous","Nous y {} demain.","Wir gehen morgen dorthin."],
+  ["a","vous","Comment {}-vous, Madame ?","Wie geht es Ihnen, Madame?"],
+  ["a","vous","Vous {} à la fête ce soir ?","Geht ihr heute Abend ans Fest?"],
+  ["a","vous","Vous y {} à pied ?","Geht ihr zu Fuss dorthin?"],
+  ["a","ils","Mes cousins {} en Italie cet été.","Meine Cousins fahren diesen Sommer nach Italien."],
+  ["a","ils","Elles {} au concert ce soir.","Sie gehen heute Abend ans Konzert."],
+  ["a","ils","Ils y {} en train.","Sie fahren mit dem Zug dorthin."]
+];
+/* Sätze, die auch ohne Übersetzung eindeutig sind (für den Défi) */
+const DEFI = ["Nous {} voisins depuis dix ans.", "Vous {} prêts pour le test ?", "Madame, vous {} française ?", "Mes voisins {} très gentils.",
+  "Nous {} une promenade au bord du lac.", "Qu'est-ce que vous {} dans la vie ?", "Elles {} les courses au marché.", "Les enfants {} un bonhomme de neige.",
+  "Nous y {} demain.", "Comment {}-vous, Madame ?", "Vous y {} à pied ?", "Ils y {} en train."];
+
+/* [Verb, Person, Satz, Übersetzung, gezeigte Form] */
+const DETECT_WRONG = [
+  ["f","vous","Vous {} un exposé.","Ihr macht einen Vortrag.","faisez"],
+  ["f","ils","Ils {} une pause.","Sie machen eine Pause.","faisent"],
+  ["f","je","Je {} du foot.","Ich spiele Fussball.","fait"],
+  ["f","nous","Nous {} un gâteau.","Wir machen einen Kuchen.","faisont"],
+  ["f","il","Il {} chaud.","Es ist heiss.","fais"],
+  ["e","vous","Vous {} en avance.","Ihr seid zu früh.","êtez"],
+  ["e","ils","Elles {} à la piscine.","Sie sind im Schwimmbad.","sontent"],
+  ["e","tu","Tu {} mon meilleur ami.","Du bist mein bester Freund.","est"],
+  ["e","il","Il {} dans le bus.","Er ist im Bus.","es"],
+  ["e","nous","Nous {} à Berne.","Wir sind in Bern.","sont"],
+  ["a","je","Je {} au cinéma.","Ich gehe ins Kino.","alle"],
+  ["a","tu","Tu {} à Zurich ?","Gehst du nach Zürich?","va"],
+  ["a","il","Il {} au stade.","Er geht ins Stadion.","vas"],
+  ["a","nous","Nous {} au parc.","Wir gehen in den Park.","allont"],
+  ["a","vous","Vous {} à Bâle ?","Fahrt ihr nach Basel?","vont"],
+  ["a","ils","Ils {} au lit.","Sie gehen ins Bett.","allent"]
+];
+const DETECT_RIGHT = [
+  ["f","vous","Vous {} du théâtre ?","Spielt ihr Theater?"],
+  ["f","ils","Ils {} du bruit.","Sie machen Lärm."],
+  ["f","tu","Tu {} la vaisselle.","Du wäschst das Geschirr ab."],
+  ["f","nous","Nous {} du yoga.","Wir machen Yoga."],
+  ["e","vous","Vous {} très gentils.","Ihr seid sehr freundlich."],
+  ["e","nous","Nous {} au collège.","Wir sind in der Schule."],
+  ["e","il","Elle {} fatiguée.","Sie ist müde."],
+  ["e","ils","Ils {} en Suisse.","Sie sind in der Schweiz."],
+  ["a","vous","Vous {} à Lugano ?","Fahrt ihr nach Lugano?"],
+  ["a","je","Je {} à la gare.","Ich gehe zum Bahnhof."],
+  ["a","il","Elle {} à Berne.","Sie fährt nach Bern."],
+  ["a","ils","Ils {} à l'école.","Sie gehen zur Schule."]
+];
+
+const RULES = {
+  vous: { title: "Die vous-Form", rule: "Bei être und faire gibt es kein -ez: vous êtes, vous faites. aller ist hier regelmässig: vous allez." },
+  ils: { title: "Die ils-Form", rule: "Kurz und ohne -ent: ils sont, ils font, ils vont. Alle drei enden auf -ont." },
+  nous: { title: "Die nous-Form", rule: "nous sommes ist unregelmässig. nous faisons und nous allons enden auf -ons (nicht -ont). faisons schreibt man mit «ai», auch wenn es wie «fe» klingt." },
+  singular: { title: "-s oder -t in der Einzahl", rule: "je und tu enden auf -s: je suis, tu es, je fais, tu fais. il, elle und on enden auf -t: il est, il fait." },
+  singularA: { title: "Die Einzahl von aller", rule: "je vais, tu vas, il va. Nur je hat -ais, tu hat -as, und il, elle, on haben einfach -a, ohne -t." },
+  allerReg: { title: "aller ist unregelmässig", rule: "aller ist kein normales -er-Verb: je vais, tu vas, il va, ils vont. Nur nous allons und vous allez beginnen mit all-." },
+  inf: { title: "Grundform statt Verbform", rule: "être, faire und aller sind Grundformen. Im Satz brauchst du die Form, die zum Subjekt passt." },
+  person: { title: "Pronomen und Verbform", rule: "Schau zuerst auf das Subjekt und frage: Wer tut etwas? Danach wählst du die passende Form." },
+  verb: { title: "être, faire oder aller?", rule: "être heisst «sein» (wie, wo, wer jemand ist). faire heisst «machen»: faire du sport, faire la cuisine, il fait beau. aller heisst «gehen» oder «fahren»: aller à l'école, aller en train, ça va." },
+  avoir: { title: "Verwechslung mit avoir", rule: "ai, as, a, avons, avez, ont sind Formen von avoir (haben). Gesucht ist hier être, faire oder aller." },
+  accent: { title: "Der Accent", rule: "vous êtes schreibt man mit ê. vous faites und die Formen von aller haben keinen Accent." },
+  spelling: { title: "Genaue Schreibweise", rule: "Die Form klingt ähnlich, wird aber anders geschrieben. Präge dir das Schriftbild ein: suis, fais, vais, est, fait, va." },
+  other: { title: "Form noch einmal ansehen", rule: "Diese Form gibt es so nicht. Lies die Tabelle laut und schreibe die Form einmal ab." }
+};
+
+/* ---------- Auswertung einer Antwort ---------- */
+function norm(s) {
+  return String(s || "").toLowerCase().replace(/[’`]/g, "'").trim().replace(/\s+/g, " ")
+    .replace(/[.!?]+$/, "").trim().replace(/\s*-\s*(?:je|tu|il|elle|on|nous|vous|ils|elles)$/, "")
+    .replace(/^(?:(?:je|tu|il|elle|on|nous|vous|ils|elles)\s+|j')/, "");
+}
+function plain(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+function dist(a, b) {
+  let row = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const next = [i];
+    for (let j = 1; j <= b.length; j++) {
+      next[j] = Math.min(row[j] + 1, next[j - 1] + 1, row[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    row = next;
+  }
+  return row[b.length];
+}
+const isSing = p => p === "je" || p === "tu" || p === "il";
+function personType(p, v) { return isSing(p) ? (v === "a" ? "singularA" : "singular") : p; }
+
+/* Gibt null (richtig) oder den Fehlertyp zurück. */
+function classify(given, v, p) {
+  const g = norm(given), t = FORMS[v][p], pg = plain(g);
+  if (g === t) return null;
+  if (pg === plain(t)) return "accent";
+  if (Object.values(INF).some(x => plain(x) === pg)) return "inf";
+  if (AVOIR.includes(g)) return "avoir";
+  if (VERBS.some(x => x !== v && Object.values(FORMS[x]).some(f => plain(f) === pg))) return "verb";
+  const samePerson = PERSONS.find(q => plain(FORMS[v][q]) === pg);
+  if (samePerson) return isSing(p) && isSing(samePerson) ? personType(p, v) : "person";
+  if (v === "a" && ["alle", "alles", "allent"].includes(pg)) return "allerReg";
+  const d = dist(pg, plain(t));
+  if (!isSing(p)) return d <= 4 && Object.values(FORMS[v]).some(f => plain(f)[0] === pg[0]) ? p : "other";
+  return d <= 2 ? "spelling" : "other";
+}
+
+/* ---------- Aufgaben zusammenstellen ---------- */
+const STEPS = {
+  1: { t: "Les formes", d: "Tippe auf die richtige Verbform." },
+  2: { t: "être, faire ou aller ?", d: "Welches Verb passt? Schreibe die richtige Form in die Lücke." },
+  3: { t: "Détective", d: "Prüfe das unterstrichene Verb. Stimmt es?" },
+  4: { t: "Deuxième chance", d: "Diese Formen waren noch unsicher. Jetzt klappt es!" },
+  5: { t: "Défi", d: "Keine Fehler bisher! Jetzt ohne Übersetzung." },
+  6: { t: "Training", d: "Du übst gezielt deine unsicheren Formen." }
+};
+const LIMIT = 600000;
+function shuffle(a) {
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+function takeSentence(st, v, p) {
+  let pool = BANK.filter(b => b[0] === v && b[1] === p);
+  let fresh = pool.filter(b => !st.seen.includes(b[2]));
+  if (!fresh.length) { st.seen = st.seen.filter(s => !pool.some(b => b[2] === s)); fresh = pool; }
+  const b = pick(fresh); st.seen.push(b[2]);
+  return { v, p, fr: b[2], de: b[3] };
+}
+function buildMain(st) {
+  /* Jedes Verb: 4 Personen in Etappe 1, die 2 übrigen in Etappe 2. So kommen alle 18 Formen vor. */
+  const ps = shuffle(PERSONS), vs = shuffle(VERBS), first = [], gaps = [];
+  vs.forEach((v, n) => {
+    const rest = [ps[2 * n], ps[2 * n + 1]];
+    PERSONS.filter(p => !rest.includes(p)).forEach(p => first.push({ kind: "mc", step: 1, v, p, pron: pick(PRON[p]), options: shuffle([FORMS[v][p], ...DISTRACT[v][p]]) }));
+    rest.concat(pick(["nous", "vous", "ils"])).forEach(p => gaps.push(Object.assign(takeSentence(st, v, p), { kind: "gap", step: 2 })));
+  });
+  const det = [];
+  shuffle(VERBS).forEach((v, n) => {
+    const wrong = shuffle(DETECT_WRONG.filter(d => d[0] === v)).slice(0, n === 0 ? 2 : 1);
+    wrong.forEach(d => det.push({ kind: "detect", step: 3, v, p: d[1], fr: d[2], de: d[3], shown: d[4] }));
+    if (n) { const r = pick(DETECT_RIGHT.filter(d => d[0] === v)); det.push({ kind: "detect", step: 3, v, p: r[1], fr: r[2], de: r[3], shown: null }); }
+  });
+  return shuffle(first).concat(shuffle(gaps), shuffle(det));
+}
+function weakForms(results) {
+  const n = {};
+  results.filter(r => r.type).forEach(r => { const k = r.v + "|" + r.p; n[k] = (n[k] || 0) + 1; });
+  return Object.keys(n).sort((a, b) => n[b] - n[a]);
+}
+function buildRepair(st, elapsed) {
+  const weak = weakForms(st.results);
+  if (elapsed > 540000) return [];
+  const max = elapsed > 450000 ? 3 : 5;
+  if (!weak.length) {
+    return VERBS.map(v => {
+      const pool = BANK.filter(b => b[0] === v && DEFI.includes(b[2]));
+      const b = pick(pool.filter(x => !st.seen.includes(x[2])).concat(pool).slice(0, Math.max(1, pool.filter(x => !st.seen.includes(x[2])).length)));
+      st.seen.push(b[2]);
+      return { v, p: b[1], fr: b[2], de: b[3], kind: "gap", step: 5, hideDe: true };
+    });
+  }
+  return weak.slice(0, max).map(k => {
+    const [v, p] = k.split("|");
+    return Object.assign(takeSentence(st, v, p), { kind: "gap", step: 4, hint: true });
+  });
+}
+function buildFocus(st, keys) {
+  const items = [];
+  for (let i = 0; items.length < 8; i++) {
+    const [v, p] = keys[i % keys.length].split("|");
+    items.push(Object.assign(takeSentence(st, v, p), { kind: "gap", step: 6, hint: true }));
+  }
+  return shuffle(items);
+}
+
+/* ---------- Gesamtauswertung ---------- */
+function cellsOf(results) {
+  const c = {};
+  for (const v of VERBS) for (const p of PERSONS) {
+    const rs = results.filter(r => r.v === v && r.p === p);
+    let status = "none";
+    if (rs.length) status = rs.every(r => !r.type) ? "sure" : (rs[rs.length - 1].type ? "work" : "almost");
+    c[v + "|" + p] = { status, n: rs.length };
+  }
+  return c;
+}
+function summarize(results, focus) {
+  const scored = results.filter(r => focus || r.step <= 3);
+  const sum = a => a.reduce((s, r) => s + r.credit, 0);
+  const part = v => { const a = scored.filter(r => r.v === v); return { pts: sum(a), max: a.length, pct: a.length ? Math.round(100 * sum(a) / a.length) : 0 }; };
+  const types = {};
+  results.filter(r => r.type).forEach(r => { (types[r.type] = types[r.type] || []).push(r); });
+  const order = Object.keys(types).sort((a, b) => (a === "accent") - (b === "accent") || types[b].length - types[a].length);
+  const repair = results.filter(r => r.step === 4);
+  return {
+    pts: sum(scored), max: scored.length, pct: scored.length ? Math.round(100 * sum(scored) / scored.length) : 0,
+    e: part("e"), f: part("f"), a: part("a"), types, order, cells: cellsOf(results),
+    repairOk: repair.filter(r => !r.type).length, repairN: repair.length
+  };
+}
+
+/* ---------- Oberfläche ---------- */
+if (typeof document !== "undefined") {
+  const app = document.getElementById("app");
+  let S = { screen: "start", name: "" };
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const num = n => String(Math.round(n * 10) / 10);
+  const CHECK = '<svg class="ok" viewBox="0 0 34 34" aria-hidden="true"><path d="M6 18l8 9L29 7"/></svg>';
+  const CROSS = '<svg viewBox="0 0 34 34" aria-hidden="true"><path d="M8 8l18 18"/><path d="M26 8L8 26"/></svg>';
+  const HALF = '<svg viewBox="0 0 34 34" aria-hidden="true"><path d="M5 20c5-9 9-9 13-4s8 4 11-4"/></svg>';
+  const PRAISE = ["Exact !", "Bravo !", "C'est ça !", "Très bien !", "Parfait !"];
+  const elapsed = () => S.spent + (Date.now() - S.t0);
+
+  function start(mode, keys) {
+    const seen = S.seen || [];
+    S = { screen: "q", name: S.name, seen, results: [], i: 0, fb: null, fix: false, repairBuilt: false, focus: mode === "focus", timeUp: false, spent: 0, t0: Date.now() };
+    S.items = mode === "focus" ? buildFocus(S, keys) : buildMain(S);
+    render();
+  }
+  function record(given, type, extra) {
+    const it = S.items[S.i];
+    const rec = Object.assign({ v: it.v, p: it.p, step: it.step, kind: it.kind, fr: it.fr || null, de: it.de || null, pron: it.pron || null,
+      given, type, credit: type === null ? 1 : type === "accent" ? 0.5 : 0, praise: pick(PRAISE) }, extra);
+    S.results.push(rec); S.fb = rec; S.fix = false; render();
+  }
+  function next() {
+    S.fb = null; S.i++;
+    if (elapsed() >= LIMIT) { S.timeUp = S.i < S.items.length || !S.repairBuilt; return finish(); }
+    if (S.i >= S.items.length) {
+      if (!S.focus && !S.repairBuilt) {
+        S.repairBuilt = true;
+        S.items = S.items.concat(buildRepair(S, elapsed()));
+      }
+      if (S.i >= S.items.length) return finish();
+    }
+    render();
+  }
+  function finish() { S.spent = elapsed(); S.screen = "result"; render(); }
+
+  function sentenceHtml(it, form) {
+    const parts = esc(it.fr).split("{}");
+    return parts[0] + form + parts[1];
+  }
+  function fullSentence(r) {
+    if (r.kind === "mc") return esc(r.pron) + " <b>" + FORMS[r.v][r.p] + "</b>";
+    return sentenceHtml(r, "<b>" + FORMS[r.v][r.p] + "</b>");
+  }
+  function plainSentence(r) {
+    return r.kind === "mc" ? r.pron + " " + FORMS[r.v][r.p] : r.fr.replace("{}", FORMS[r.v][r.p]);
+  }
+  function explain(r) {
+    const t = FORMS[r.v][r.p], g = norm(r.given);
+    if (r.falseAlarm) return "Dieser Satz war richtig: " + t + " ist hier die passende Form.";
+    if (r.type === "accent") return t === "êtes" ? "Fast! Nur der Accent fehlt oder stimmt nicht: Es heisst êtes mit ê." : "Fast! " + t + " schreibt man ohne Accent.";
+    if (r.type === "spelling" && g === "et") return "«et» heisst «und». Das Verb schreibt man est. Beides klingt gleich.";
+    if (r.type === "ils" && g === "son") return "«son» heisst «sein / ihr». Das Verb schreibt man sont, mit -t.";
+    if (r.type === "avoir" && t === "va") return "«a» gehört zu avoir. Die Form von aller heisst va, mit v.";
+    if (r.type === "verb") {
+      const from = VERBS.find(x => x !== r.v && Object.values(FORMS[x]).some(f => plain(f) === plain(g)));
+      return "Das ist eine Form von " + INF[from] + ". Hier brauchst du " + INF[r.v] + ". " + RULES.verb.rule;
+    }
+    return RULES[r.type].rule;
+  }
+
+  function renderStart() {
+    app.innerHTML = `<div class="sheet stack">
+      <h1>être, faire <span>&amp;</span> aller</h1>
+      <p class="lead">Wiederhole die drei wichtigen Verben im Présent. Du arbeitest allein und erhältst am Schluss eine persönliche Rückmeldung.</p>
+      <ol class="plan">
+        <li><b>Les formes</b><span>ca. 1½ Min.</span><small>12 Formen schnell antippen</small></li>
+        <li><b>être, faire ou aller ?</b><span>ca. 3 Min.</span><small>9 Sätze ergänzen</small></li>
+        <li><b>Détective</b><span>ca. 2 Min.</span><small>6 Sätze prüfen und korrigieren</small></li>
+        <li><b>Deuxième chance</b><span>ca. 1½ Min.</span><small>Deine unsicheren Formen noch einmal üben</small></li>
+      </ol>
+      <form id="f" class="stack">
+        <div><label for="name">Dein Vorname (freiwillig)</label>
+        <input type="text" id="name" maxlength="30" autocomplete="off" value="${esc(S.name)}"></div>
+        <p class="muted small">Deine Antworten bleiben auf diesem Gerät und werden nicht gespeichert.</p>
+        <div><button class="main" type="submit">Übung starten</button></div>
+      </form></div>`;
+    document.getElementById("f").onsubmit = e => { e.preventDefault(); S.name = document.getElementById("name").value.trim(); start("main"); };
+  }
+
+  function inputForm(label) {
+    const keys = ["é", "è", "ê", "î", "ç"].map(k => `<button type="button" data-k="${k}" aria-label="${k} einfügen">${k}</button>`).join("");
+    return `<form id="af" class="stack" autocomplete="off">
+      <div><label for="ans">${label}</label>
+      <input type="text" id="ans" lang="fr" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="30"></div>
+      <div class="keys">${keys}</div>
+      <p id="msg" class="small muted" role="status"></p>
+      <div><button class="main" type="submit">Prüfen</button></div></form>`;
+  }
+  function wireInput(onAnswer) {
+    const ans = document.getElementById("ans");
+    document.querySelectorAll("[data-k]").forEach(b => b.onclick = () => {
+      const a = ans.selectionStart ?? ans.value.length, z = ans.selectionEnd ?? ans.value.length;
+      ans.value = ans.value.slice(0, a) + b.dataset.k + ans.value.slice(z);
+      ans.focus(); ans.setSelectionRange(a + 1, a + 1);
+    });
+    document.getElementById("af").onsubmit = e => {
+      e.preventDefault();
+      if (!norm(ans.value)) { document.getElementById("msg").textContent = "Schreibe zuerst eine Verbform."; ans.focus(); return; }
+      onAnswer(ans.value.trim());
+    };
+    ans.focus({ preventScroll: true });
+  }
+
+  function feedbackHtml(r) {
+    const form = FORMS[r.v][r.p];
+    let cls = "ok", title = r.praise, body = "";
+    if (r.type === "accent") { cls = "half"; title = "Presque !"; }
+    else if (r.type) { cls = "no"; title = "Pas encore."; }
+    if (r.type) {
+      const wrong = r.falseAlarm ? "" : `<s>${esc(norm(r.given))}</s> → `;
+      body = `<p class="fix">${wrong}<b>${form}</b></p><p>${esc(explain(r))}</p>`;
+    }
+    const line = r.kind === "mc" ? "" : `<p>${fullSentence(r)}</p>`;
+    const de = r.de ? `<p class="de">${esc(r.de)}</p>` : "";
+    return `<div class="fb ${cls}" role="status"><strong class="t">${title}</strong>${body}${r.kind === "mc" ? (r.type ? "" : `<p>${fullSentence(r)}</p>`) : line + de}</div>`;
+  }
+
+  function renderQ() {
+    const it = S.items[S.i], meta = STEPS[it.step], r = S.fb;
+    const stepItems = S.items.filter(x => x.step === it.step);
+    const pos = S.items.slice(0, S.i + 1).filter(x => x.step === it.step).length;
+    const label = S.focus ? "Training" : "Étape " + Math.min(it.step, 4) + " von 4";
+    const mark = r ? (r.type === null ? CHECK : r.type === "accent" ? HALF : CROSS) : "";
+    let q = "";
+    if (it.kind === "mc") {
+      q = `<p class="sentence">${esc(it.pron)} <span class="gap">&nbsp;</span> <span class="muted small">(${INF[it.v]})</span></p>`;
+      if (!r) q += `<div class="options">${it.options.map(o => `<button type="button" lang="fr" data-o="${esc(o)}">${esc(o)}</button>`).join("")}</div>`;
+    } else if (it.kind === "gap") {
+      const blank = r ? "<b>" + FORMS[it.v][it.p] + "</b>" : '<span class="gap">&nbsp;</span>';
+      if (!r) {
+        q = `<p class="sentence" lang="fr">${sentenceHtml(it, blank)}</p>`;
+        if (!it.hideDe) q += `<p class="de">${esc(it.de)}</p>`;
+        if (it.hint) q += `<p class="hint">Gesucht ist eine Form von <b lang="fr">${INF[it.v]}</b>.</p>`;
+        q += inputForm("Verbform");
+      }
+    } else {
+      const shown = it.shown || FORMS[it.v][it.p];
+      q = `<p class="sentence" lang="fr">${sentenceHtml(it, "<u>" + esc(shown) + "</u>")}</p>`;
+      if (!r && !S.fix) q += `<div class="row"><button type="button" id="yes">Stimmt</button><button type="button" id="no">Stimmt nicht</button></div>`;
+      if (!r && S.fix) q += inputForm("Wie heisst die richtige Form?");
+    }
+    app.innerHTML = `<div class="sheet stack">
+      <div class="gutter"><span>${S.results.length + (r ? 0 : 1)}</span>${mark}</div>
+      <div class="head"><span class="step" lang="fr">${esc(meta.t)}</span><span class="count">${label} · Aufgabe ${pos} von ${stepItems.length}</span></div>
+      <div class="bar" aria-hidden="true"><i style="width:${Math.round(100 * (pos - (r ? 0 : 1)) / stepItems.length)}%"></i></div>
+      <p class="muted">${esc(meta.d)}</p>
+      ${q}
+      ${r ? feedbackHtml(r) + '<div><button class="main" id="next" type="button">Weiter</button></div>' : ""}
+    </div>`;
+    if (r) { const n = document.getElementById("next"); n.onclick = next; n.focus({ preventScroll: true }); return; }
+    if (it.kind === "mc") {
+      app.querySelectorAll("[data-o]").forEach(b => b.onclick = () => record(b.dataset.o, classify(b.dataset.o, it.v, it.p)));
+    } else if (it.kind === "gap") {
+      wireInput(v => record(v, classify(v, it.v, it.p)));
+    } else if (S.fix) {
+      wireInput(v => record(v, classify(v, it.v, it.p)));
+    } else {
+      document.getElementById("yes").onclick = () => {
+        if (it.shown) record(it.shown, classify(it.shown, it.v, it.p)); else record(FORMS[it.v][it.p], null);
+      };
+      document.getElementById("no").onclick = () => {
+        if (it.shown) { S.fix = true; render(); }
+        else record(FORMS[it.v][it.p], personType(it.p, it.v), { falseAlarm: true });
+      };
+    }
+  }
+
+  function verdict(s) {
+    const n = S.name ? esc(S.name) + ", " : "";
+    const cap = t => S.name ? t : t.charAt(0).toUpperCase() + t.slice(1);
+    let grade = "Courage !";
+    if (s.pct >= 90) grade = "Excellent !"; else if (s.pct >= 70) grade = "Bien joué !"; else if (s.pct >= 50) grade = "Tu progresses !";
+    let text;
+    const ranked = VERBS.map(x => ({ n: INF[x], pct: s[x].pct })).sort((x, y) => y.pct - x.pct);
+    const hi = ranked[0], lo = ranked[2];
+    if (s.pct >= 90) text = cap("du beherrschst die drei Verben sehr sicher.");
+    else if (s.pct < 50) text = cap("die Formen brauchen noch etwas Übung. Beginne mit den rot markierten Feldern in der Tabelle und starte dann das Training.");
+    else if (hi.pct - lo.pct < 10) text = cap("être, faire und aller gelingen dir ähnlich gut. Mit den Tipps unten holst du bei allen noch mehr heraus.");
+    else text = cap(`${hi.n} gelingt dir am besten. Bei ${lo.n} lohnt sich jetzt noch etwas Übung.`);
+    return { grade, text: n + text };
+  }
+  function mission(s) {
+    const pri = ["work", "almost"];
+    for (const st of pri) {
+      const k = Object.keys(s.cells).find(c => s.cells[c].status === st);
+      if (k) { const [v, p] = k.split("|"); return `Schreibe drei eigene Sätze mit <b lang="fr">${PRON[p][0]} ${FORMS[v][p]}</b> und lies sie laut vor.`; }
+    }
+    return 'Schreibe drei Sätze über dein Wochenende. Verwende dabei <b lang="fr">nous sommes</b>, <b lang="fr">vous faites</b> und <b lang="fr">ils vont</b>.';
+  }
+  function copyText(s) {
+    const lines = ["être, faire, aller au présent"];
+    if (S.name) lines.push("Name: " + S.name);
+    lines.push(`Punkte: ${num(s.pts)} von ${s.max} (${s.pct} %)`, `être: ${s.e.pct} %, faire: ${s.f.pct} %, aller: ${s.a.pct} %`);
+    if (s.repairN) lines.push(`Deuxième chance: ${s.repairOk} von ${s.repairN} richtig`);
+    const w = Object.keys(s.cells).filter(k => s.cells[k].status === "work" || s.cells[k].status === "almost")
+      .map(k => { const [v, p] = k.split("|"); return PRON[p][0] + " " + FORMS[v][p]; });
+    lines.push("Noch üben: " + (w.length ? w.join(", ") : "nichts Besonderes"));
+    return lines.join("\n");
+  }
+
+  function renderResult() {
+    const s = summarize(S.results, S.focus), v = verdict(s);
+    const STAT = { sure: "sicher", almost: "fast sicher", work: "noch üben", none: "nicht geprüft" };
+    const rows = PERSONS.map(p => `<tr><th scope="row">${PLABEL[p]}</th>${VERBS.map(x => {
+      const c = s.cells[x + "|" + p];
+      return `<td class="c ${c.status}"><span class="form" lang="fr">${FORMS[x][p]}</span><span class="st">${STAT[c.status]}</span></td>`;
+    }).join("")}</tr>`).join("");
+    const tips = s.order.slice(0, 2).map(t => {
+      const ex = s.types[t].find(r => !r.falseAlarm) || s.types[t][0];
+      const sample = ex.falseAlarm ? "" : `<p class="fix small" lang="fr">${PRON[ex.p][0]} <s>${esc(norm(ex.given))}</s> → <b>${FORMS[ex.v][ex.p]}</b></p>`;
+      const times = s.types[t].length === 1 ? "1 Fehler" : s.types[t].length + " Fehler";
+      return `<div class="tip"><h3>${RULES[t].title} <span class="muted small">(${times})</span></h3>${sample}<p>${esc(RULES[t].rule)}</p></div>`;
+    }).join("");
+    const errs = S.results.filter(r => r.type);
+    const list = errs.slice(0, 8).map(r => `<li lang="fr">${r.falseAlarm ? "" : `<s>${esc(norm(r.given))}</s> → `}${fullSentence(r)}</li>`).join("");
+    const min = Math.floor(S.spent / 60000), sec = Math.floor(S.spent / 1000) % 60;
+    const weak = Object.keys(s.cells).filter(k => s.cells[k].status === "work" || s.cells[k].status === "almost");
+    const repair = s.repairN ? `<p>In der zweiten Chance hast du <b>${s.repairOk} von ${s.repairN}</b> unsicheren Formen richtig geschrieben.</p>` : "";
+    app.innerHTML = `<div class="sheet stack">
+      <div class="gutter">${s.pct >= 70 ? CHECK : HALF}</div>
+      <p class="muted">${S.focus ? "Dein Training" : "Deine Rückmeldung"}</p>
+      <h1 class="grade" lang="fr">${v.grade}</h1>
+      <p class="lead">${v.text}</p>
+      <p class="score"><b>${num(s.pts)} von ${s.max} Punkten</b> (${s.pct} %) in ${min} Min. ${sec} Sek.</p>
+      ${S.timeUp ? '<p class="hint">Die 10 Minuten sind um. Die Auswertung zeigt alles, was du bis jetzt gelöst hast.</p>' : ""}
+      ${repair}
+      <section><h2>Deine Formen</h2>
+        <div class="tablewrap"><table>
+          <thead><tr><th scope="col">Person</th><th scope="col" lang="fr">être</th><th scope="col" lang="fr">faire</th><th scope="col" lang="fr">aller</th></tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot><tr><th scope="row">Ergebnis</th><td>${s.e.pct} %</td><td>${s.f.pct} %</td><td>${s.a.pct} %</td></tr></tfoot>
+        </table></div>
+      </section>
+      <section><h2>Dein nächster Schritt</h2>
+        ${tips || "<p>Du hast keinen Fehler gemacht. Jetzt kannst du die Verben frei anwenden.</p>"}
+        <p><b>Dein Auftrag:</b> ${mission(s)}</p>
+      </section>
+      ${errs.length ? `<section><h2>Deine Korrekturen</h2><ul class="fixlist">${list}</ul>${errs.length > 8 ? `<p class="muted small">Dazu kommen ${errs.length - 8} weitere Fehler.</p>` : ""}</section>` : ""}
+      <section>
+        <div class="row">
+          ${weak.length ? '<button class="main" id="focus" type="button">Unsichere Formen üben (2 Min.)</button>' : ""}
+          <button type="button" id="again" ${weak.length ? "" : 'class="main"'}>Neue Runde starten</button>
+          <button type="button" id="copy">Ergebnis kopieren</button>
+        </div>
+        <p id="cmsg" class="small muted" role="status"></p>
+        <div id="cbox"></div>
+      </section></div>`;
+    window.scrollTo(0, 0);
+    if (weak.length) document.getElementById("focus").onclick = () => start("focus", weak);
+    document.getElementById("again").onclick = () => start("main");
+    document.getElementById("copy").onclick = async () => {
+      const text = copyText(s), msg = document.getElementById("cmsg");
+      try { await navigator.clipboard.writeText(text); msg.textContent = "Ergebnis kopiert. Du kannst es jetzt einfügen und abgeben."; }
+      catch (e) {
+        msg.textContent = "Automatisches Kopieren geht hier nicht. Markiere den Text und kopiere ihn von Hand.";
+        document.getElementById("cbox").innerHTML = '<textarea id="ct" readonly aria-label="Ergebnis als Text"></textarea>';
+        const t = document.getElementById("ct"); t.value = text; t.select();
+      }
+    };
+  }
+  function render() {
+    if (S.screen === "start") renderStart();
+    else if (S.screen === "q") renderQ();
+    else renderResult();
+  }
+  function boot(data) {
+    if (data && data.screen) { S = data; if (S.screen === "q") S.t0 = Date.now(); }
+    render();
+  }
+  const hot = window.claude && window.claude.hot;
+  if (hot && hot.snapshot) hot.snapshot(() => (S.screen === "q" ? Object.assign({}, S, { spent: elapsed() }) : S));
+  if (hot && hot.ready) hot.ready(boot); else boot(hot && hot.data ? hot.data : {});
+}
+if (typeof module !== "undefined") module.exports = { VERBS, DEFI, FORMS, BANK, DISTRACT, DETECT_WRONG, DETECT_RIGHT, classify, norm, buildMain, buildRepair, buildFocus, summarize, RULES, PERSONS };
+</script>
+</body>
+</html>

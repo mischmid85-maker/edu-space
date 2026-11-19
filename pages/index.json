@@ -112,7 +112,12 @@
       }
     },
     "denkspiele": {
-      "files": [],
+      "files": [
+        {
+          "name": "1795102696593-zauberwuerfel.html",
+          "path": "pages/denkspiele/1795102696593-zauberwuerfel.html"
+        }
+      ],
       "folders": {}
     }
   }

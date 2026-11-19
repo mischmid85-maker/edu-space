@@ -18,6 +18,12 @@
       "label": "Französisch",
       "emoji": "🥐",
       "color": 2
+    },
+    {
+      "key": "denkspiele",
+      "label": "Denkspiele",
+      "emoji": "💡",
+      "color": 3
     }
   ],
   "tree": {
@@ -104,6 +110,10 @@
           "folders": {}
         }
       }
+    },
+    "denkspiele": {
+      "files": [],
+      "folders": {}
     }
   }
 }

@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sitzordnung</title>
+<style>
+:root{
+  --bg:#f3efe6; --panel:#fffdf8; --ink:#1e2a2d; --muted:#6a7376; --line:#e2dccd;
+  --accent:#2f5d62; --accent-ink:#fff; --accent-soft:#e3eeee;
+  --girl:#c8553d; --girl-bg:#fbe4dc; --boy:#2a7b86; --boy-bg:#d6edef;
+  --wood:#ead9b9; --wood-edge:#c6a874; --floor:#fbf8f1; --slate:#22313a;
+  --danger:#b3412e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:15px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand h1{font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:22px;margin:0;letter-spacing:-.01em}
+.classbar{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.classbar select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:600;min-width:140px}
+.btn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;font-weight:500;transition:background .15s,border-color .15s}
+.btn:hover{border-color:#cfc6b2;background:#faf7ef}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{background:#264c50}
+.btn.danger{color:var(--danger)}
+.btn.big{width:100%;padding:12px;font-size:16px;font-weight:700;border-radius:10px}
+.btn.small{padding:4px 8px;font-size:13px}
+#sync{font-size:12px;color:var(--muted)}
+main{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:18px;padding:18px;align-items:start;max-width:1500px;margin:0 auto}
+@media (max-width:900px){main{grid-template-columns:1fr;padding:10px;gap:12px} header{padding:10px 12px}}
+.stage{min-width:0}
+.room-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;max-width:calc((100vh - 130px) * 1.11);margin:0 auto}
+@media (max-width:900px){.room-wrap{padding:8px;max-width:none}}
+.room{position:relative;width:100%;aspect-ratio:100/90;background:var(--floor);border-radius:10px;container-type:inline-size;
+  background-image:linear-gradient(#efe9dc 1px,transparent 1px),linear-gradient(90deg,#efe9dc 1px,transparent 1px);background-size:5% 5.555%;border:2px solid #ddd5c3;overflow:hidden;user-select:none;-webkit-user-select:none}
+.room-wrap:fullscreen{display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:0;max-width:none}
+.room-wrap:fullscreen .room{width:min(96vw, 96vh * 1.111)}
+.item{position:absolute;display:flex;border-radius:1.1cqw}
+.item.table{background:var(--wood);border:1px solid var(--wood-edge);padding:.45cqw;gap:.45cqw;box-shadow:0 .25cqw 0 #d6bf93}
+.item.table.rot{flex-direction:column}
+.item.teacher{background:#8a6a45;border:1px solid #6f5434;color:#fff;align-items:center;justify-content:center;font-weight:700;font-size:clamp(8px,1.7cqw,16px);box-shadow:0 .25cqw 0 #5e4529;text-align:center}
+.item.board{background:var(--slate);color:#e8f1f2;align-items:center;justify-content:center;font-weight:700;font-size:clamp(7px,1.45cqw,14px);letter-spacing:.06em;text-transform:uppercase;border-radius:.6cqw;text-align:center;overflow:hidden}
+.item.board.rot span,.item.teacher.rot span{writing-mode:vertical-rl}
+.tno{display:none;position:absolute;top:-1.1cqw;left:-1.1cqw;background:var(--accent);color:#fff;font-size:clamp(8px,1.2cqw,12px);font-weight:700;border-radius:99px;min-width:2.4cqw;height:2.4cqw;align-items:center;justify-content:center;padding:0 .4cqw;z-index:2}
+.room.editing .tno,.room.nums .tno{display:flex}
+.room.editing .item{cursor:grab;touch-action:none;outline:1.5px dashed rgba(47,93,98,.35);outline-offset:.3cqw}
+.room.editing .item.picked{outline:2.5px solid var(--accent);z-index:3}
+.room.editing .seat{pointer-events:none}
+.seat{position:relative;flex:1;min-width:0;min-height:0;background:#fff;border:1.5px solid #d9ccb0;border-radius:.8cqw;display:flex;align-items:center;justify-content:center;text-align:center;
+  font-size:clamp(7px,1.5cqw,15px);line-height:1.08;padding:.2cqw;font-weight:600;overflow:hidden;cursor:pointer;transition:transform .12s, box-shadow .12s}
+.seat span{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:normal;word-break:normal;max-width:100%}
+.seat.empty{background:rgba(255,255,255,.55);border-style:dashed;color:#b4a68a;font-weight:500}
+.seat.g-w{background:var(--girl-bg);border-color:var(--girl);color:#7a2d1d}
+.seat.g-m{background:var(--boy-bg);border-color:var(--boy);color:#174a51}
+.seat.selected{box-shadow:0 0 0 .5cqw var(--accent);transform:scale(1.04);z-index:2}
+.seat.over{box-shadow:0 0 0 .5cqw #e0a43a}
+.room.has-sel .seat:not(.selected){cursor:copy}
+.room.has-sel .seat.empty{border-color:var(--accent);color:var(--accent)}
+.pin{position:absolute;top:.1cqw;right:.25cqw;font-size:clamp(7px,1.1cqw,12px);font-style:normal}
+.front-note{font-size:12px;color:var(--muted);text-align:center;margin:0 0 6px}
+#selbar{margin:10px auto 0;max-width:calc((100vh - 130px) * 1.11)}
+.selbox{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--accent-soft);border:1px solid #c5dada;border-radius:10px;padding:9px 12px}
+.selbox .txt{margin-right:auto}
+.legend{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;font-size:13px;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px;border:1.5px solid}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+.tabs button{border:0;background:transparent;padding:12px 2px;font-weight:600;color:var(--muted);border-bottom:3px solid transparent}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--accent);background:#fff}
+.pbody{padding:16px;display:flex;flex-direction:column;gap:14px}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:#efe9dc;border-radius:10px;padding:4px;gap:4px}
+.seg.three{grid-template-columns:repeat(3,1fr)}
+.seg button{border:0;background:transparent;border-radius:7px;padding:9px 6px;font-weight:600;color:var(--muted);line-height:1.2}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.hint{font-size:13px;color:var(--muted);margin:0;line-height:1.45}
+.field{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:600}
+.field select,.field input,textarea{padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:400;font-size:15px}
+textarea{width:100%;resize:vertical}
+h3{margin:0;font-size:15px}
+.box{border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff}
+.box.drop.over{border-color:#e0a43a;background:#fff8ea}
+.box.drop.removable{border-style:dashed;border-color:var(--accent)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{border:1.5px solid;border-radius:99px;padding:5px 10px;font-weight:600;font-size:13px;background:#fff;cursor:pointer}
+.chip.w{border-color:var(--girl);background:var(--girl-bg);color:#7a2d1d}
+.chip.m{border-color:var(--boy);background:var(--boy-bg);color:#174a51}
+.chip.plain{border-color:#cfc6b2;background:#fff;color:var(--ink)}
+.chip.selected{box-shadow:0 0 0 3px var(--accent)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row > .btn{flex:1}
+.toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
+.sw{position:relative;width:42px;height:24px;flex:none}
+.sw input{opacity:0;width:0;height:0}
+.sw span{position:absolute;inset:0;background:#d7cfbd;border-radius:99px;transition:.15s}
+.sw span::after{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s}
+.sw input:checked + span{background:var(--accent)}
+.sw input:checked + span::after{transform:translateX(18px)}
+.stats{display:flex;gap:8px;flex-wrap:wrap}
+.stat{flex:1;min-width:80px;background:#f6f2e9;border-radius:8px;padding:8px 10px;font-size:12px;color:var(--muted)}
+.stat b{display:block;font-size:20px;color:var(--ink)}
+.warn{background:#fff3df;border:1px solid #f0d29c;color:#7a5410;border-radius:8px;padding:8px 10px;font-size:13px}
+.addform{display:flex;flex-direction:column;gap:8px}
+.addform input{padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-size:15px}
+.gpick{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.gpick button{border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:8px;font-weight:600}
+.gpick button.on.w{border-color:var(--girl);background:var(--girl-bg);color:#7a2d1d}
+.gpick button.on.m{border-color:var(--boy);background:var(--boy-bg);color:#174a51}
+.slist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;max-height:420px;overflow:auto}
+.slist li{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:#faf7f0}
+.slist .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gtag{border:1.5px solid;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;background:#fff;min-width:70px}
+.gtag.w{border-color:var(--girl);color:var(--girl)}
+.gtag.m{border-color:var(--boy);color:var(--boy)}
+.x{border:0;background:transparent;color:var(--muted);font-size:16px;padding:2px 6px;border-radius:6px}
+.x:hover{background:#efe6d6;color:var(--danger)}
+details summary{cursor:pointer;font-weight:600;font-size:14px}
+details[open] summary{margin-bottom:8px}
+.presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.preset{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:8px 6px;font-weight:600;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.preset:hover{border-color:var(--accent)}
+.preset svg{width:100%;height:auto}
+.modal{position:fixed;inset:0;background:rgba(30,42,45,.45);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal[hidden]{display:none}
+.dlg{background:var(--panel);border-radius:14px;padding:18px;max-width:420px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:12px;max-height:85vh;overflow:auto}
+.dlg h2{margin:0;font-family:Georgia,"Times New Roman",serif;font-weight:600;font-size:20px}
+.dlg .actions{display:flex;justify-content:flex-end;gap:8px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.2s;pointer-events:none;z-index:60}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.mixed-info{font-size:13px;color:var(--muted)}
+.seat.conflict{outline:.45cqw dashed var(--danger);outline-offset:-.1cqw}
+.seat.grp{border-width:2px}
+.gno{position:absolute;top:.1cqw;left:.3cqw;font-size:clamp(6px,1cqw,11px);font-style:normal;font-weight:700;opacity:.75}
+.sizes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.sizes button{border:1.5px solid var(--line);background:#fff;border-radius:8px;padding:8px 4px;font-weight:700}
+.sizes button.on{border-color:var(--accent);background:var(--accent);color:#fff}
+.ask{background:#fff8e8;border:1.5px solid #ecc979;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.ask p{margin:0;font-size:14px;line-height:1.4}
+.opt{border:1.5px solid var(--line);background:#fff;border-radius:9px;padding:9px 11px;text-align:left;display:flex;flex-direction:column;gap:2px}
+.opt b{font-size:14px}.opt span{font-size:13px;color:var(--muted)}
+.opt.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.info{background:var(--accent-soft);border-radius:8px;padding:9px 11px;font-size:14px}
+.gcards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gcard{border:2px solid var(--gc);background:var(--gb);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.35}
+.gcard .gh{font-weight:700;color:var(--gc);display:flex;justify-content:space-between;margin-bottom:3px}
+.aplist{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:4px}
+.aplist li{display:flex;align-items:center;gap:8px;background:#faf7f0;border-radius:8px;padding:5px 8px;font-size:14px}
+.aplist li span{flex:1}
+.row select{flex:1;min-width:0;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.warn.bad{background:#fde8e4;border-color:#efb3a6;color:#8a2c1b}
+
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="2" y="3" width="26" height="4" rx="1.5" fill="#22313a"/><rect x="3" y="12" width="10" height="6" rx="1.5" fill="#c8553d"/><rect x="17" y="12" width="10" height="6" rx="1.5" fill="#2a7b86"/><rect x="3" y="21" width="10" height="6" rx="1.5" fill="#2a7b86"/><rect x="17" y="21" width="10" height="6" rx="1.5" fill="#c8553d"/></svg>
+    <h1>Sitzordnung</h1>
+  </div>
+  <div class="classbar">
+    <select id="classSel" aria-label="Klasse wählen"></select>
+    <button class="btn" id="addClass">＋ Klasse</button>
+    <button class="btn" id="renClass">Umbenennen</button>
+    <button class="btn danger" id="delClass">Löschen</button>
+  </div>
+  <button class="btn" id="backupBtn">💾 Sichern</button>
+  <span id="sync"></span>
+</header>
+
+<main>
+  <section class="stage">
+    <div class="room-wrap" id="roomWrap">
+      <p class="front-note" id="frontNote"></p>
+      <div class="room" id="room"></div>
+    </div>
+    <div id="selbar"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+  <aside class="panel">
+    <nav class="tabs">
+      <button data-tab="plan">Sitzplan</button>
+      <button data-tab="gruppen">Gruppen</button>
+      <button data-tab="klasse">Klasse</button>
+      <button data-tab="raum">Zimmer</button>
+    </nav>
+    <div class="pbody" id="panelBody"></div>
+  </aside>
+</main>
+
+<div class="modal" id="modal" hidden></div>
+<div id="toast"></div>
+<input type="file" id="restoreFile" accept=".json,application/json" hidden>
+
+<script>
+/* ---------- Grundlagen ---------- */
+const W = 100, H = 90;
+const SIZES = { table:{w:22,h:9}, teacher:{w:20,h:9}, board:{w:40,h:3.5} };
+const LS_KEY = 'sitzordnung-v1';
+const NEAR = 12.5; // Abstand, ab dem zwei Plätze als «nebeneinander/gegenüber» gelten
+const PALETTE = [['#f8dccf','#c0502f'],['#d3ebe6','#22806b'],['#e6ddf4','#6d4fae'],['#fbe9b9','#a37a0c'],['#d6e6f7','#33669f'],
+  ['#f6d7e5','#a83d70'],['#e0edcd','#557f24'],['#f1dfcc','#99602a'],['#dbe3e6','#48606b'],['#ecf1c4','#7d8216']];
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const newId = () => Math.random().toString(36).slice(2, 10);
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+const MAX_TABLES = 20;
+// Positionen für n Pulte je Vorlage
+function presetPositions(name, n){
+  const pos = []; const P = (cx, cy, rot = 0) => pos.push({cx, cy, rot});
+  if(name === 'gruppen'){
+    const g = Math.ceil(n / 2); const per = g <= 9 ? 3 : 4; const rows = Math.ceil(g / per);
+    const xs = per === 3 ? [20, 50, 80] : [14, 38, 62, 86];
+    const ys = rows === 1 ? [40] : Array.from({length:rows}, (_, r) => 32 + r * Math.min(34, 46 / (rows - 1)));
+    let left = n;
+    for(let r = 0; r < rows; r++){
+      const inRow = Math.min(per, g - r * per); const off = (per - inRow) / 2;
+      for(let k = 0; k < inRow; k++){
+        const cx = per === 3 ? 20 + (k + off) * 30 : 14 + (k + off) * 24;
+        P(cx, ys[r] - 4.5); left--; if(left > 0){ P(cx, ys[r] + 4.5); left--; }
+      }
+    }
+  } else if(name === 'u'){
+    const m = Math.min(n, 10);
+    const sd = Math.min(3, Math.floor(m / 3)); const b = m - 2 * sd;
+    for(let i = 0; i < sd; i++) P(8, 23 + 22 * i, 90);
+    const by = sd ? 12 + 22 * sd + 5 : 60;
+    for(let j = 0; j < b; j++) P(50 + (j - (b - 1) / 2) * 22, by);
+    for(let i = sd - 1; i >= 0; i--) P(92, 23 + 22 * i, 90);
+    for(let k = 0; k < n - m; k++){ const row = Math.floor(k / 3), inRow = Math.min(3, n - m - row * 3); P(50 + (k % 3 - (inRow - 1) / 2) * 24, 66 - row * 12); }
+  } else {
+    const cols = n <= 10 ? 2 : n <= 15 ? 3 : 4; const rows = Math.ceil(n / cols);
+    const xs = cols === 2 ? [27, 73] : cols === 3 ? [17, 50, 83] : [13, 37, 63, 87];
+    const step = rows > 1 ? Math.min(12, 54 / (rows - 1)) : 0;
+    for(let i = 0; i < n; i++) P(xs[i % cols], 28 + Math.floor(i / cols) * step);
+  }
+  return pos;
+}
+function presetItems(name, n = 10, ids){
+  const items = [{id:'board', type:'board', cx:50, cy:3.5, rot:0}, {id:'teacher', type:'teacher', cx: name === 'u' ? 50 : 82, cy: name === 'u' ? 17 : 13, rot:0}];
+  presetPositions(name, n).forEach((p, i) => items.push({id: ids ? ids[i] : 'T' + (i + 1), type:'table', ...p}));
+  return items;
+}
+const seatCount = () => tables().length * 2;
+function sortedTableIds(){ return tables().map(t => t.id).sort((a, b) => +a.slice(1) - +b.slice(1)); }
+// Pulte lückenlos neu nummerieren (Sitzordnungen aller Klassen werden mitgezogen)
+function renumberTables(){
+  const map = {}; sortedTableIds().forEach((id, i) => map[id] = 'T' + (i + 1));
+  const remapSeats = seats => { const out = {}; for(const k in seats){ const [tid, n] = k.split('-'); if(map[tid]) out[map[tid] + '-' + n] = seats[k]; } return out; };
+  state.layout.forEach(it => { if(map[it.id]) it.id = map[it.id]; });
+  state.classes.forEach(c => { c.seats = remapSeats(c.seats); });
+}
+function regroupAll(){ state.classes.forEach(c => { if(c.gw.groups.length) placeGroups(c); }); }
+function overlaps(a, b, margin = 1){
+  const ra = SIZES[a.type], rb = SIZES[b.type];
+  const aw = a.rot ? ra.h : ra.w, ah = a.rot ? ra.w : ra.h, bw = b.rot ? rb.h : rb.w, bh = b.rot ? rb.w : rb.h;
+  return Math.abs(a.cx - b.cx) < (aw + bw) / 2 + margin && Math.abs(a.cy - b.cy) < (ah + bh) / 2 + margin;
+}
+function addTable(){
+  if(tables().length >= MAX_TABLES){ toast(`Höchstens ${MAX_TABLES} Pulte möglich`); return; }
+  const id = 'T' + (Math.max(0, ...tables().map(t => +t.id.slice(1))) + 1);
+  const cands = [];
+  for(let cy = 84; cy >= 22; cy -= 1) for(let cx = 11; cx <= 89; cx += 1) cands.push({cx, cy});
+  cands.sort((a, b) => (b.cy - a.cy) || (Math.abs(a.cx - 50) - Math.abs(b.cx - 50)));
+  const free = cands.find(p => !state.layout.some(it => overlaps({type:'table', rot:0, ...p}, it)));
+  const it = {id, type:'table', cx: free ? free.cx : 50, cy: free ? free.cy : 50, rot:0};
+  state.layout.push(it); selItem = id; regroupAll(); commit();
+  toast(free ? `Pult ${tableNo(it)} hinzugefügt – verschiebe es an die richtige Stelle` : 'Kein freier Platz – das neue Pult liegt in der Mitte, bitte verschieben');
+}
+function removeTable(id){
+  if(tables().length <= 1){ toast('Mindestens ein Pult muss bleiben'); return; }
+  const doIt = () => {
+    state.layout = state.layout.filter(i => i.id !== id);
+    state.classes.forEach(c => { for(const k in c.seats) if(k.split('-')[0] === id) delete c.seats[k]; });
+    selItem = null; renumberTables(); regroupAll(); commit(); toast('Pult entfernt');
+  };
+  const affected = state.classes.filter(c => Object.keys(c.seats).some(k => k.split('-')[0] === id));
+  if(!affected.length){ doIt(); return; }
+  const names = affected.map(c => `«${esc(c.name)}»`).join(', ');
+  openModal({ title:`Pult ${id.slice(1)} entfernen?`, html:`<p class="hint">An diesem Pult sitzen Kinder in ${affected.length === 1 ? 'der Klasse' : 'den Klassen'} ${names}. Sie verlieren ihren Platz und erscheinen unter «Noch ohne Platz». Die übrigen Pulte werden neu nummeriert.</p>`,
+    actions:[{label:'Abbrechen'},{label:'Entfernen', cls:'primary', onClick:doIt}] });
+}
+const defaultGw = () => ({ mix:'mixed', groupGender:[], size:3, choice:null, move:true, layout:null, seats:{}, groupOf:{}, groups:[], absent:[] });
+const newClass = name => ({id:newId(), name, students:[], seats:{}, pinned:[], apart:[], pairing:'mixed', gw:defaultGw()});
+function defaultState(){
+  const c = newClass('Meine Klasse');
+  return { v:1, updatedAt:0, layout:presetItems('reihen'), classes:[c], activeClassId:c.id,
+    settings:{ mode:'random', fill:'front', showGender:true, flip:false, showNums:true } };
+}
+function normalize(s){
+  const d = defaultState();
+  if(!s || typeof s !== 'object') return d;
+  s.layout = Array.isArray(s.layout) && s.layout.length ? s.layout : d.layout;
+  s.classes = Array.isArray(s.classes) && s.classes.length ? s.classes : d.classes;
+  s.classes.forEach(c => { c.students ||= []; c.seats ||= {}; c.pinned ||= []; c.apart ||= []; c.pairing ||= 'mixed'; c.gw = Object.assign(defaultGw(), c.gw || {}); });
+  if(!s.classes.find(c => c.id === s.activeClassId)) s.activeClassId = s.classes[0].id;
+  s.settings = Object.assign({}, d.settings, s.settings || {});
+  s.updatedAt ||= 0;
+  return s;
+}
+
+let state = (() => { try { return normalize(JSON.parse(localStorage.getItem(LS_KEY))); } catch { return defaultState(); } })();
+let tab = 'plan';
+let sel = null;        // {studentId, fromSeat}
+let selItem = null;    // ausgewähltes Möbel beim Verschieben
+let groupEdit = false; // Pulte in der Gruppenarbeit verschieben
+let newGender = 'w';
+let drag = null, dragItem = null;
+
+const cls = () => state.classes.find(c => c.id === state.activeClassId);
+const seatsOf = it => [it.id+'-0', it.id+'-1'];
+const tablesOf = layout => layout.filter(i => i.type === 'table');
+const tables = () => tablesOf(state.layout);
+const tableNo = it => it.id.slice(1);
+function seatPos(it, i){ const d = 5.5; return it.rot ? {x:it.cx, y:it.cy+(i?d:-d)} : {x:it.cx+(i?d:-d), y:it.cy}; }
+function seatPosMap(layout){ const m = {}; tablesOf(layout).forEach(t => seatsOf(t).forEach((s,i) => m[s] = seatPos(t,i))); return m; }
+const boardOf = layout => layout.find(i => i.type === 'board') || {cx:50, cy:0};
+const nameOf = (c, id) => (c.students.find(s => s.id === id) || {name:'?'}).name;
+
+function inGroupView(){ return tab === 'gruppen' && cls().gw.groups.length > 0; }
+function activeLayout(){ const gw = cls().gw; return inGroupView() && gw.move && gw.layout ? gw.layout : state.layout; }
+function isEditing(){ return tab === 'raum' || (tab === 'gruppen' && groupEdit && inGroupView() && cls().gw.move); }
+
+/* ---------- Speichern (nur in diesem Browser) ---------- */
+const LB_KEY = 'sitzordnung-letzte-sicherung';
+let storageOk = true;
+function lastBackup(){ try { return +localStorage.getItem(LB_KEY) || 0; } catch { return 0; } }
+function setSync(){
+  const el = $('#sync');
+  if(!storageOk){ el.innerHTML = '<span style="color:var(--danger)">⚠ Speichern im Browser nicht möglich</span>'; return; }
+  const hasData = state.classes.some(c => c.students.length);
+  const lb = lastBackup(); const days = lb ? Math.floor((Date.now() - lb) / 864e5) : null;
+  if(hasData && (days === null || days >= 14)) el.innerHTML = `<span style="color:#9a6a10">⚠ ${days === null ? 'Noch keine Sicherung' : 'Letzte Sicherung vor ' + days + ' Tagen'}</span>`;
+  else el.textContent = 'Nur auf diesem Gerät gespeichert';
+}
+function persist(){
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); storageOk = true; }
+  catch { if(storageOk) toast('Speichern im Browser nicht möglich – lade eine Sicherung herunter!'); storageOk = false; }
+  setSync();
+}
+function todayStr(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function downloadBackup(){
+  const data = JSON.stringify({app:'sitzordnung', version:1, savedAt:new Date().toISOString(), state}, null, 1);
+  const url = URL.createObjectURL(new Blob([data], {type:'application/json'}));
+  const a = document.createElement('a'); a.href = url; a.download = `sitzordnung-sicherung-${todayStr()}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+  try { localStorage.setItem(LB_KEY, String(Date.now())); } catch {}
+  setSync(); toast('Sicherung heruntergeladen');
+}
+function openBackup(){
+  const lb = lastBackup();
+  openModal({ title:'Sichern & Wiederherstellen', html:`
+    <p class="hint">Alle Daten sind <b>nur in diesem Browser auf diesem Gerät</b> gespeichert und werden nirgends hochgeladen. Wenn du den Browserverlauf bzw. die Website-Daten löschst, sind sie weg.</p>
+    <p class="hint">Lade darum regelmässig eine Sicherung herunter und bewahre sie an einem sicheren Ort auf (z. B. im Speicher deiner Schule). Mit der Sicherungsdatei kannst du die Daten auch auf ein anderes Gerät übertragen.</p>
+    <p class="hint"><b>Letzte Sicherung:</b> ${lb ? new Date(lb).toLocaleString('de-CH', {dateStyle:'medium', timeStyle:'short'}) : 'noch keine'}</p>
+    <button class="btn primary big" id="dlBackup">⬇ Sicherung herunterladen</button>
+    <button class="btn big" id="upBackup" style="font-weight:600">⬆ Sicherung laden …</button>
+    <hr style="border:0;border-top:1px solid var(--line);width:100%;margin:4px 0">
+    <h3>Als PDF herunterladen</h3>
+    <p class="hint">Für die Klasse «${esc(cls().name)}» – zum Ausdrucken oder Weitergeben. Das PDF wird direkt auf deinem Gerät erstellt.</p>
+    <button class="btn big" id="pdfSeat" style="font-weight:600">📄 Sitzordnung als PDF</button>
+    ${cls().gw.groups.length ? '<button class="btn big" id="pdfGroups" style="font-weight:600">📄 Gruppenarbeit als PDF</button>' : '<p class="hint">Sobald du Gruppen gebildet hast, kannst du hier auch die Gruppenarbeit als PDF speichern.</p>'}`,
+    actions:[{label:'Schliessen'}] });
+}
+function restoreFrom(file){
+  const r = new FileReader();
+  r.onload = () => {
+    let data = null; try { data = JSON.parse(r.result); } catch {}
+    const st = data && (data.state || data);
+    if(!st || !Array.isArray(st.classes)){ toast('Das ist keine gültige Sicherungsdatei'); return; }
+    const n = st.classes.length, k = st.classes.reduce((a, c) => a + ((c.students || []).length), 0);
+    openModal({ title:'Sicherung laden?', html:`<p class="hint">Die Datei enthält ${n} ${n === 1 ? 'Klasse' : 'Klassen'} mit insgesamt ${k} Kindern. <b>Alle aktuellen Daten in diesem Browser werden dadurch ersetzt.</b></p>`,
+      actions:[{label:'Abbrechen'},{label:'Ersetzen', cls:'primary', onClick:() => {
+        state = normalize(st); sel = null; selItem = null; groupEdit = false; tab = 'plan'; commit(); toast('Sicherung geladen');
+      }}]});
+  };
+  r.readAsText(file);
+}
+function commit(){ state.updatedAt = Date.now(); persist(); render(); }
+
+/* ---------- Regeln «nicht nebeneinander» ---------- */
+function seatingConflicts(c, seats, layout){
+  const pos = seatPosMap(layout); const where = {};
+  for(const k in seats) if(pos[k]) where[seats[k]] = pos[k];
+  return c.apart.filter(([a,b]) => where[a] && where[b] && Math.hypot(where[a].x-where[b].x, where[a].y-where[b].y) <= NEAR);
+}
+function conflictSeats(c, seats, layout){
+  const bad = new Set(seatingConflicts(c, seats, layout).flat()); const out = new Set();
+  for(const k in seats) if(bad.has(seats[k])) out.add(k);
+  return out;
+}
+
+/* ---------- Zufallsgenerator Sitzordnung ---------- */
+function buildParity(){
+  const pts = [];
+  tables().forEach(t => seatsOf(t).forEach((s,i) => { const p = seatPos(t,i); pts.push({s, x:Math.round(p.x/3), y:Math.round(p.y/3)}); }));
+  const xs = [...new Set(pts.map(p=>p.x))].sort((a,b)=>a-b);
+  const ys = [...new Set(pts.map(p=>p.y))].sort((a,b)=>a-b);
+  const out = {}; pts.forEach(p => out[p.s] = (xs.indexOf(p.x) + ys.indexOf(p.y)) % 2);
+  return out;
+}
+function generateOnce(c, baseSeats, parity){
+  const board = boardOf(state.layout);
+  const dist = t => Math.hypot(t.cx - board.cx, t.cy - board.cy);
+  const byId = Object.fromEntries(c.students.map(s => [s.id, s]));
+  const pinned = new Set(c.pinned.filter(id => byId[id]));
+  const seats = {};
+  for(const [seat, sid] of Object.entries(baseSeats)) if(pinned.has(sid) && byId[sid]) seats[seat] = sid;
+  const done = new Set(Object.values(seats));
+  const G = shuffle(c.students.filter(s => s.g === 'w' && !done.has(s.id)).map(s => s.id));
+  const B = shuffle(c.students.filter(s => s.g !== 'w' && !done.has(s.id)).map(s => s.id));
+  const take = pref => pref === 'w' ? (G.length ? G.pop() : B.pop()) : (B.length ? B.pop() : G.pop());
+
+  const sorted = [...tables()].sort((a,b) => dist(a) - dist(b) || a.cx - b.cx);
+  const empty = [];
+  for(const t of sorted){
+    const [s0, s1] = seatsOf(t); const a = seats[s0], b = seats[s1];
+    if(a && b) continue;
+    if(a || b){
+      if(!G.length && !B.length) continue;
+      const mine = byId[a || b].g === 'w' ? 'w' : 'm';
+      const other = c.pairing === 'separate' ? mine : c.pairing === 'egal' ? (Math.random() < .5 ? 'w' : 'm') : (mine === 'w' ? 'm' : 'w');
+      seats[a ? s1 : s0] = take(other);
+    } else empty.push(t);
+  }
+  while(G.length + B.length > empty.length * 2){ (G.length >= B.length ? G : B).pop(); }
+
+  if(c.pairing === 'egal'){
+    const all = shuffle([...G, ...B]); const n = Math.ceil(all.length / 2);
+    const chosen = state.settings.fill === 'front' ? empty.slice(0, n) : shuffle([...empty]).slice(0, n);
+    const single = all.length % 2 ? Math.floor(Math.random() * n) : -1;
+    chosen.forEach((t, i) => { const [s0, s1] = seatsOf(t);
+      if(i === single) seats[Math.random() < .5 ? s0 : s1] = all.pop(); else { seats[s0] = all.pop(); seats[s1] = all.pop(); } });
+    for(const k in seats) if(!seats[k]) delete seats[k];
+    return seats;
+  }
+  if(c.pairing === 'separate'){
+    const units = [...Array(Math.floor(G.length/2)).fill('GG'), ...Array(Math.floor(B.length/2)).fill('BB'),
+      ...(G.length % 2 ? ['G'] : []), ...(B.length % 2 ? ['B'] : [])];
+    if(units.length > empty.length){ units.splice(units.indexOf('G'), 1); units.splice(units.indexOf('B'), 1); units.push('GB'); }
+    const n = units.length;
+    const chosen = state.settings.fill === 'front' ? empty.slice(0, n) : shuffle([...empty]).slice(0, n);
+    shuffle(units).forEach((u, i) => {
+      const [s0, s1] = seatsOf(chosen[i]);
+      if(u === 'GG'){ seats[s0] = G.pop(); seats[s1] = G.pop(); }
+      else if(u === 'BB'){ seats[s0] = B.pop(); seats[s1] = B.pop(); }
+      else if(u === 'GB'){ const f = Math.random() < .5; seats[s0] = f ? G.pop() : B.pop(); seats[s1] = f ? B.pop() : G.pop(); }
+      else seats[Math.random() < .5 ? s0 : s1] = u === 'G' ? G.pop() : B.pop();
+    });
+    for(const k in seats) if(!seats[k]) delete seats[k];
+    return seats;
+  }
+
+  const g = G.length, b = B.length;
+  const mixed = Math.min(g, b), extra = Math.abs(g - b);
+  const sameP = Math.floor(extra / 2), single = extra % 2;
+  const T = mixed + sameP + single;
+  const majority = g > b ? 'w' : 'm';
+  const chosen = state.settings.fill === 'front'
+    ? empty.slice(0, T)
+    : shuffle([...empty]).slice(0, T).sort((a,b) => dist(a) - dist(b) || a.cx - b.cx);
+
+  const units = new Array(T).fill('mixed');
+  const specials = shuffle([...Array(sameP).fill('same'), ...(single ? ['single'] : [])]);
+  specials.forEach((sp, i) => { let idx = Math.floor((i + 0.5) * T / specials.length); while(units[idx] !== 'mixed') idx = (idx + 1) % T; units[idx] = sp; });
+
+  const start = Math.random() < .5 ? 0 : 1;
+  chosen.forEach((t, i) => {
+    const [s0, s1] = seatsOf(t); const u = units[i];
+    if(u === 'mixed'){
+      const p0 = parity[s0], p1 = parity[s1];
+      const girlFirst = p0 !== p1 ? ((p0 + start) % 2 === 0) : Math.random() < .5;
+      seats[s0] = girlFirst ? G.pop() : B.pop();
+      seats[s1] = girlFirst ? B.pop() : G.pop();
+    } else if(u === 'same'){ seats[s0] = take(majority); seats[s1] = take(majority); }
+    else { seats[Math.random() < .5 ? s0 : s1] = take(majority); }
+  });
+  for(const k in seats) if(!seats[k]) delete seats[k];
+  return seats;
+}
+// Getrennt: gemischte Pulte zählen stark, gemischte Nachbarn an angrenzenden Pulten schwach
+function mixedContacts(c, seats, layout){
+  const pos = seatPosMap(layout); const g = Object.fromEntries(c.students.map(s => [s.id, s.g]));
+  const ks = Object.keys(seats).filter(k => pos[k]); let n = 0;
+  for(let i = 0; i < ks.length; i++) for(let j = i + 1; j < ks.length; j++){
+    const a = ks[i], b = ks[j]; if(g[seats[a]] === g[seats[b]]) continue;
+    if(a.split('-')[0] === b.split('-')[0]) n += 100;
+    else if(Math.hypot(pos[a].x-pos[b].x, pos[a].y-pos[b].y) <= NEAR) n += 1;
+  }
+  return n;
+}
+function mixedDesks(c){
+  const g = Object.fromEntries(c.students.map(s => [s.id, s.g]));
+  return tables().filter(t => { const [a, b] = seatsOf(t).map(k => c.seats[k]); return a && b && g[a] !== g[b]; }).map(tableNo);
+}
+function generate(){
+  const c = cls(); const base = {...c.seats}; const parity = buildParity();
+  let best = null, bestN = Infinity;
+  for(let i = 0; i < 600 && bestN > 0; i++){
+    const s = generateOnce(c, base, parity);
+    const rules = seatingConflicts(c, s, state.layout).length;
+    const score = rules * 10000 + (c.pairing === 'separate' ? mixedContacts(c, s, state.layout) : 0);
+    if(score < bestN){ bestN = score; best = s; }
+  }
+  c.seats = best || {};
+  return Math.floor(bestN / 10000);
+}
+
+/* ---------- Gruppenarbeit ---------- */
+function groupPlans(N, s){
+  if(N <= 0) return {plans:[], exact:true};
+  if(N <= s) return {plans:[{key:'one', sizes:[N]}], exact:N === s};
+  if(N % s === 0) return {plans:[{key:'exact', sizes:Array(N/s).fill(s)}], exact:true};
+  const even = G => { const b = Math.floor(N/G), r = N % G; return [...Array(r).fill(b+1), ...Array(G-r).fill(b)]; };
+  const plans = [{key:'bigger', sizes:even(Math.floor(N/s))}];
+  const small = even(Math.ceil(N/s));
+  if(Math.min(...small) >= 2) plans.push({key:'smaller', sizes:small});
+  return {plans, exact:false};
+}
+function describeSizes(sizes){
+  const cnt = {}; sizes.forEach(x => cnt[x] = (cnt[x]||0) + 1);
+  return Object.keys(cnt).map(Number).sort((a,b) => b - a).map(k => `${cnt[k]} × ${k}er`).join(' + ');
+}
+function presentStudents(c){ const ab = new Set(c.gw.absent); return c.students.filter(s => !ab.has(s.id)); }
+function groupParts(c){
+  const present = presentStudents(c); const size = c.gw.size;
+  if(c.gw.mix === 'separate')
+    return [['w','Mädchen'],['m','Jungs']].map(([g, label]) => { const st = present.filter(x => (x.g === 'w') === (g === 'w')); return {g, label, students:st, ...groupPlans(st.length, size)}; }).filter(p => p.students.length);
+  return [{g:null, label:null, students:present, ...groupPlans(present.length, size)}];
+}
+function currentPlan(c){
+  const out = [];
+  for(const p of groupParts(c)){
+    if(!p.plans.length) continue;
+    const pl = p.plans.length === 1 ? p.plans[0] : p.plans.find(x => x.key === c.gw.choice);
+    if(!pl) return null;
+    out.push({...p, sizes:pl.sizes});
+  }
+  return out.length ? out : null;
+}
+function makeGroups(students, sizes, balance){
+  if(!balance){
+    const st = shuffle(students.map(s => s.id)); let i = 0;
+    return [...sizes].sort((a,b) => b - a).map(n => st.slice(i, i += n));
+  }
+  const groups = shuffle(sizes.map(cap => ({cap, m:[], w:0, b:0})));
+  const place = (id, key) => {
+    const cand = groups.filter(g => g.m.length < g.cap);
+    cand.sort((a,b) => (a[key]/a.cap - b[key]/b.cap) || (a.m.length/a.cap - b.m.length/b.cap));
+    cand[0].m.push(id); cand[0][key]++;
+  };
+  shuffle(students.filter(s => s.g === 'w')).forEach(s => place(s.id, 'w'));
+  shuffle(students.filter(s => s.g !== 'w')).forEach(s => place(s.id, 'b'));
+  return groups.sort((a,b) => b.cap - a.cap).map(g => shuffle(g.m));
+}
+function groupConflicts(c, groups){
+  const of = {}; groups.forEach((g,i) => g.forEach(id => of[id] = i));
+  return c.apart.filter(([a,b]) => of[a] !== undefined && of[a] === of[b]).length;
+}
+function generateGroups(){
+  const c = cls(), gw = c.gw; const plan = currentPlan(c); if(!plan) return null;
+  let best = null, bestN = Infinity;
+  const balance = gw.mix === 'mixed';
+  for(let i = 0; i < 600 && bestN > 0; i++){
+    const g = plan.flatMap(part => makeGroups(part.students, part.sizes, balance)); const n = groupConflicts(c, g);
+    if(n < bestN){ bestN = n; best = g; }
+  }
+  gw.groups = best;
+  gw.groupGender = plan.flatMap(part => part.sizes.map(() => part.g));
+  syncGroupOf(gw);
+  placeGroups(c);
+  return bestN;
+}
+function syncGroupOf(gw){ gw.groupOf = {}; gw.groups.forEach((g,i) => g.forEach(id => gw.groupOf[id] = i)); }
+
+// Pulte zu Gruppentischen zusammenschieben
+function packGroups(groups, genders = []){
+  const allT = tables().map(t => t.id).sort((a,b) => +a.slice(1) - +b.slice(1));
+  let clusters = groups.map((g,i) => ({gis:[i], n:g.length}));
+  const need = () => clusters.reduce((s,c) => s + Math.ceil(c.n/2), 0);
+  while(need() > allT.length && clusters.length > 1){
+    const gOf = cl => { const gs = [...new Set(cl.gis.map(i => genders[i] || null))]; return gs.length === 1 ? gs[0] : 'x'; };
+    const pickPair = list => { for(let i = 0; i < list.length; i++) for(let j = i + 1; j < list.length; j++) if(gOf(list[i]) === gOf(list[j])) return [list[i], list[j]]; return list.slice(0,2); };
+    const odd = clusters.filter(c => c.n % 2).sort((a,b) => a.n - b.n);
+    const pair = odd.length >= 2 ? pickPair(odd) : pickPair([...clusters].sort((a,b) => a.n - b.n));
+    clusters = clusters.filter(c => !pair.includes(c));
+    clusters.push({gis:[...pair[0].gis, ...pair[1].gis], n:pair[0].n + pair[1].n});
+  }
+  clusters.sort((a,b) => Math.min(...a.gis) - Math.min(...b.gis));
+  const layout = state.layout.filter(i => i.type !== 'table').map(i => ({...i}));
+  const seats = {}; const blocks = []; let ti = 0;
+  for(const cl of clusters){
+    const k = Math.min(Math.max(1, Math.ceil(cl.n/2)), allT.length - ti); if(k <= 0) break;
+    const cols = Math.ceil(k/2), rows = k > 1 ? 2 : 1;
+    const ids = allT.slice(ti, ti + k); ti += k;
+    const order = [];
+    ids.slice(0, cols).forEach(id => order.push(id+'-0', id+'-1'));
+    ids.slice(cols).reverse().forEach(id => order.push(id+'-1', id+'-0'));
+    cl.gis.flatMap(gi => groups[gi]).forEach((m, idx) => { if(order[idx]) seats[order[idx]] = m; });
+    blocks.push({w:cols*22, h:rows*9, t:ids.map((id,j) => ({id, rx:(j < cols ? j : j - cols)*22 + 11, ry:(j < cols ? 0 : 1)*9 + 4.5}))});
+  }
+  const spareIds = allT.slice(ti);
+  const spareBlocks = strip => {
+    const out = []; let i = 0;
+    while(i < spareIds.length){
+      if(strip){ // abgestellte Pulte hochkant nebeneinander (platzsparend)
+        const ids = spareIds.slice(i, i + 10); i += ids.length;
+        out.push({w:ids.length*9, h:22, t:ids.map((id,j) => ({id, rx:j*9 + 4.5, ry:11, rot:90}))});
+      } else { // kompakte 2×2-Blöcke
+        const k = Math.min(4, spareIds.length - i); const cols = Math.ceil(k/2), rows = k > 1 ? 2 : 1; const ids = spareIds.slice(i, i + k); i += k;
+        out.push({w:cols*22, h:rows*9, t:ids.map((id,j) => ({id, rx:(j < cols ? j : j - cols)*22 + 11, ry:(j < cols ? 0 : 1)*9 + 4.5}))});
+      }
+    }
+    return out;
+  };
+  const gapX = 3, maxW = 96;
+  const makeRows = list => { const rowsArr = []; let cur = {b:[], w:0, h:0};
+    for(const b of list){
+      const add = cur.b.length ? gapX + b.w : b.w;
+      if(cur.b.length && cur.w + add > maxW){ rowsArr.push(cur); cur = {b:[], w:0, h:0}; }
+      cur.w += cur.b.length ? gapX + b.w : b.w; cur.b.push(b); cur.h = Math.max(cur.h, b.h);
+    }
+    if(cur.b.length) rowsArr.push(cur);
+    return rowsArr; };
+  const front = layout.filter(i => i.cy < H/2).map(i => { const sz = SIZES[i.type]; return i.cy + (i.rot ? sz.w : sz.h)/2; });
+  let y0 = Math.max(20, (front.length ? Math.max(...front) : 10) + 5);
+  const fits = r => y0 + r.reduce((a, x) => a + x.h, 0) + 1.5 * (r.length - 1) <= 89;
+  let rowsArr = makeRows([...blocks, ...spareBlocks(false)]);
+  if(!fits(rowsArr)){ const alt = makeRows([...blocks, ...spareBlocks(true)]); if(fits(alt) || alt.reduce((a,x)=>a+x.h,0) < rowsArr.reduce((a,x)=>a+x.h,0)) rowsArr = alt; }
+  const sumH = rowsArr.reduce((s,r) => s + r.h, 0);
+  let gapY = 6;
+  if(y0 + sumH + gapY*(rowsArr.length-1) > 89){
+    gapY = Math.max(1.5, (89 - y0 - sumH) / Math.max(1, rowsArr.length-1));
+    if(y0 + sumH + gapY*(rowsArr.length-1) > 89) y0 = Math.max(6, 89 - sumH - gapY*(rowsArr.length-1));
+  }
+  let y = y0;
+  for(const r of rowsArr){
+    let x = (W - r.w) / 2;
+    for(const b of r.b){ b.t.forEach(t => layout.push({id:t.id, type:'table', cx:x + t.rx, cy:y + t.ry, rot:t.rot || 0})); x += b.w + gapX; }
+    y += r.h + gapY;
+  }
+  return {layout, seats};
+}
+// Pulte bleiben stehen: Gruppen auf nahe beieinander liegende Plätze setzen
+function fillNearby(groups){
+  const pos = seatPosMap(state.layout); const board = boardOf(state.layout);
+  const free = new Set(Object.keys(pos)); const seats = {};
+  const order = groups.map((g,i) => i).sort((a,b) => groups[b].length - groups[a].length);
+  for(const gi of order){
+    const mem = groups[gi]; if(!free.size) break;
+    const grow = start => {
+      const ch = [start]; const fr = new Set(free); fr.delete(start);
+      while(ch.length < mem.length && fr.size){
+        const cx = ch.reduce((s,k) => s + pos[k].x, 0)/ch.length, cy = ch.reduce((s,k) => s + pos[k].y, 0)/ch.length;
+        const nx = [...fr].sort((a,b) => Math.hypot(pos[a].x-cx, pos[a].y-cy) - Math.hypot(pos[b].x-cx, pos[b].y-cy))[0];
+        ch.push(nx); fr.delete(nx);
+      }
+      let spread = 0; ch.forEach(a => ch.forEach(b => spread = Math.max(spread, Math.hypot(pos[a].x-pos[b].x, pos[a].y-pos[b].y))));
+      return {ch, score: spread*10 + Math.hypot(pos[start].x-board.cx, pos[start].y-board.cy)/10};
+    };
+    const chosen = [...free].map(grow).sort((a,b) => a.score - b.score)[0].ch;
+    chosen.forEach(k => free.delete(k));
+    chosen.forEach((k,i) => seats[k] = mem[i]);
+  }
+  return seats;
+}
+function placeGroups(c){
+  const gw = c.gw;
+  if(gw.move){ const r = packGroups(gw.groups, gw.groupGender); gw.layout = r.layout; gw.seats = r.seats; }
+  else { gw.layout = null; gw.seats = fillNearby(gw.groups); }
+}
+function groupMove(from, to){
+  const gw = cls().gw; if(from === to) return;
+  const a = gw.seats[from], b = gw.seats[to]; if(!a) return;
+  gw.seats[to] = a;
+  if(b){ gw.seats[from] = b; const ga = gw.groupOf[a]; gw.groupOf[a] = gw.groupOf[b]; gw.groupOf[b] = ga; }
+  else delete gw.seats[from];
+  gw.groups = gw.groups.map((_, i) => Object.keys(gw.groupOf).filter(id => gw.groupOf[id] === i));
+}
+
+/* ---------- Platzieren (Sitzplan) ---------- */
+function seatOfStudent(c, sid){ return Object.keys(c.seats).find(k => c.seats[k] === sid) || null; }
+function placeStudent(studentId, fromSeat, toSeat){
+  const c = cls(); if(fromSeat === toSeat) return;
+  const occ = c.seats[toSeat];
+  const src = fromSeat || seatOfStudent(c, studentId);
+  if(src) delete c.seats[src];
+  c.seats[toSeat] = studentId;
+  if(occ && occ !== studentId && src) c.seats[src] = occ;
+}
+function unseat(studentId){ const c = cls(); const s = seatOfStudent(c, studentId); if(s) delete c.seats[s]; }
+function togglePin(studentId){ const c = cls(); const i = c.pinned.indexOf(studentId); if(i >= 0) c.pinned.splice(i,1); else c.pinned.push(studentId); }
+function removeStudent(c, id){
+  c.students = c.students.filter(x => x.id !== id);
+  for(const k in c.seats) if(c.seats[k] === id) delete c.seats[k];
+  c.pinned = c.pinned.filter(x => x !== id);
+  c.apart = c.apart.filter(p => !p.includes(id));
+  const gw = c.gw;
+  for(const k in gw.seats) if(gw.seats[k] === id) delete gw.seats[k];
+  gw.absent = gw.absent.filter(x => x !== id);
+  if(gw.groupOf[id] !== undefined){ const keep = gw.groups.map(g => g.filter(x => x !== id)); gw.groupGender = (gw.groupGender || []).filter((_, i) => keep[i].length); gw.groups = keep.filter(g => g.length); syncGroupOf(gw); }
+}
+
+/* ---------- Darstellung ---------- */
+function render(){ renderHeader(); renderRoom(); renderSelBar(); renderPanel(); }
+
+function renderHeader(){
+  $('#classSel').innerHTML = state.classes.map(c => `<option value="${c.id}" ${c.id===state.activeClassId?'selected':''}>${esc(c.name)}</option>`).join('');
+  $('#delClass').disabled = state.classes.length < 2;
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+}
+function displayRect(it){
+  const sz = SIZES[it.type]; const w = it.rot ? sz.h : sz.w, h = it.rot ? sz.w : sz.h;
+  const flip = state.settings.flip;
+  const cx = flip ? W - it.cx : it.cx, cy = flip ? H - it.cy : it.cy;
+  return `left:${(cx-w/2)/W*100}%;top:${(cy-h/2)/H*100}%;width:${w/W*100}%;height:${h/H*100}%`;
+}
+function renderRoom(){
+  const c = cls(); const edit = isEditing(); const showG = state.settings.showGender;
+  const gv = inGroupView(); const layout = activeLayout();
+  const map = gv ? c.gw.seats : c.seats;
+  const byId = Object.fromEntries(c.students.map(s => [s.id, s]));
+  const pinned = new Set(c.pinned);
+  const bad = gv ? new Set() : conflictSeats(c, c.seats, state.layout);
+  let html = '';
+  for(const it of layout){
+    const cl = ['item', it.type, it.rot ? 'rot' : '', edit && selItem === it.id ? 'picked' : ''].join(' ');
+    if(it.type === 'table'){
+      const seatHtml = seatsOf(it).map(seat => {
+        const st = byId[map[seat]];
+        if(!st) return `<div class="seat empty" data-seat="${seat}"><span>frei</span></div>`;
+        const s = sel && sel.studentId === st.id ? 'selected' : '';
+        if(gv){
+          const gi = c.gw.groupOf[st.id] ?? 0; const [bg, fg] = PALETTE[gi % PALETTE.length];
+          return `<div class="seat grp ${s}" data-seat="${seat}" draggable="${!edit}" style="background:${bg};border-color:${fg};color:${fg}"><i class="gno">G${gi+1}</i><span>${esc(st.name)}</span></div>`;
+        }
+        const g = showG ? (st.g === 'w' ? 'g-w' : 'g-m') : '';
+        return `<div class="seat ${g} ${s} ${bad.has(seat)?'conflict':''}" data-seat="${seat}" draggable="${!edit}">${pinned.has(st.id) ? '<i class="pin">📌</i>' : ''}<span>${esc(st.name)}</span></div>`;
+      });
+      if(state.settings.flip) seatHtml.reverse();
+      html += `<div class="${cl}" data-item="${it.id}" style="${displayRect(it)}"><span class="tno">${tableNo(it)}</span>${seatHtml.join('')}</div>`;
+    } else {
+      html += `<div class="${cl}" data-item="${it.id}" style="${displayRect(it)}"><span>${it.type === 'board' ? 'Smartbildschirm' : 'Lehrerpult'}</span></div>`;
+    }
+  }
+  const room = $('#room');
+  room.innerHTML = html;
+  room.classList.toggle('editing', edit);
+  room.classList.toggle('nums', !!state.settings.showNums);
+  room.classList.toggle('has-sel', !!sel);
+  let note;
+  if(tab === 'raum') note = 'Zimmer bearbeiten: Elemente verschieben und antippen';
+  else if(gv) note = c.gw.move ? (groupEdit ? 'Gruppenarbeit: Pulte verschieben' : 'Gruppenarbeit – Pulte umgestellt (die normale Sitzordnung bleibt gespeichert)') : 'Gruppenarbeit – Pulte bleiben stehen';
+  else if(tab === 'gruppen') note = 'Noch keine Gruppen gebildet – hier siehst du die normale Sitzordnung';
+  else note = state.settings.flip ? 'Ansicht vom Lehrerpult aus' : 'Ansicht von hinten (Smartbildschirm vorne)';
+  $('#frontNote').textContent = note;
+  $('#legend').innerHTML = gv ? `<span>Farben = Gruppen · Tippe zwei Kinder an, um sie zu tauschen</span>` : (showG
+    ? `<span><i style="background:var(--girl-bg);border-color:var(--girl)"></i>Mädchen</span><span><i style="background:var(--boy-bg);border-color:var(--boy)"></i>Jungs</span><span>📌 fixiert</span>${c.apart.length ? '<span><i style="border-style:dashed;border-color:var(--danger)"></i>Regel verletzt</span>' : ''}`
+    : `<span>📌 fixiert</span>`);
+}
+function renderSelBar(){
+  const bar = $('#selbar');
+  if(!sel || tab === 'raum' || isEditing()){ bar.innerHTML = ''; return; }
+  const c = cls(); const st = c.students.find(s => s.id === sel.studentId);
+  if(!st){ sel = null; bar.innerHTML = ''; return; }
+  if(inGroupView()){
+    bar.innerHTML = `<div class="selbox"><span class="txt"><b>${esc(st.name)}</b> (Gruppe ${(c.gw.groupOf[st.id] ?? 0) + 1}) – tippe auf ein anderes Kind zum Tauschen.</span><button class="btn small" data-act="cancel">Abbrechen</button></div>`;
+    return;
+  }
+  const pinned = c.pinned.includes(st.id);
+  bar.innerHTML = `<div class="selbox"><span class="txt"><b>${esc(st.name)}</b> – tippe auf einen Platz${sel.fromSeat ? ' zum Tauschen' : ''}.</span>
+    ${sel.fromSeat ? `<button class="btn small" data-act="pin">${pinned ? 'Lösen' : '📌 Fixieren'}</button><button class="btn small" data-act="unseat">Vom Platz nehmen</button>` : ''}
+    <button class="btn small" data-act="cancel">Abbrechen</button></div>`;
+}
+function stats(c){ const w = c.students.filter(s => s.g === 'w').length; return { w, m: c.students.length - w, total: c.students.length }; }
+
+function renderPanel(){
+  const c = cls(); const body = $('#panelBody'); const s = state.settings;
+  if(tab === 'plan'){
+    const seated = new Set(Object.values(c.seats));
+    const unplaced = c.students.filter(st => !seated.has(st.id));
+    const byId = Object.fromEntries(c.students.map(x => [x.id, x]));
+    let mixedT = 0, usedT = 0;
+    tables().forEach(t => { const [a,b] = seatsOf(t).map(k => byId[c.seats[k]]); if(a || b) usedT++; if(a && b && a.g !== b.g) mixedT++; });
+    const st = stats(c);
+    const conf = seatingConflicts(c, c.seats, state.layout);
+    const sepBad = c.pairing === 'separate' ? mixedDesks(c) : [];
+    body.innerHTML = `
+      <div class="seg">
+        <button data-mode="random" class="${s.mode==='random'?'on':''}">🎲 Per Zufallsgenerator</button>
+        <button data-mode="manual" class="${s.mode==='manual'?'on':''}">✋ Ordnung selber erstellen</button>
+      </div>
+      ${st.total === 0 ? `<div class="warn">Diese Klasse hat noch keine Kinder. Erfasse sie im Tab <b>Klasse</b>.</div>` : ''}
+      ${st.total > seatCount() ? `<div class="warn">${st.total} Kinder, aber nur ${seatCount()} Plätze – ${st.total-seatCount()} bleiben ohne Platz. Pulte hinzufügen kannst du im Tab <b>Zimmer</b>.</div>` : ''}
+      ${conf.length ? `<div class="warn bad">⚠ Sitzen nebeneinander, obwohl sie es nicht sollen: ${conf.map(([a,b]) => `<b>${esc(nameOf(c,a))}</b> & <b>${esc(nameOf(c,b))}</b>`).join(', ')}</div>` : ''}
+      ${sepBad.length ? (sepBad.length === 1 && st.w % 2 && st.m % 2 && st.total >= seatCount()
+        ? `<div class="warn">Bei ${st.w} Mädchen und ${st.m} Jungs auf ${seatCount()} Plätzen muss ein Pult gemischt sein (Pult ${sepBad[0]}).</div>`
+        : `<div class="warn bad">⚠ Mädchen und Jungs sitzen zusammen an Pult ${sepBad.join(', ')}, obwohl «getrennt» eingestellt ist.</div>`) : ''}
+      <div class="field">Pultnachbarn
+        <div class="seg three">
+          <button data-pairing="mixed" class="${c.pairing==='mixed'?'on':''}">Gemischt<br><small style="font-weight:500">Mädchen neben Jungen</small></button>
+          <button data-pairing="separate" class="${c.pairing==='separate'?'on':''}">Getrennt<br><small style="font-weight:500">Mädchen / Jungs unter sich</small></button>
+          <button data-pairing="egal" class="${c.pairing==='egal'?'on':''}">Egal<br><small style="font-weight:500">kein Unterschied</small></button>
+        </div>
+      </div>
+      ${s.mode === 'random' ? `
+        <p class="hint">${c.pairing === 'separate'
+          ? 'Mädchen sitzen nur neben Mädchen, Jungs nur neben Jungs – auch an direkt angrenzenden Pulten, soweit möglich. Fixierte'
+          : c.pairing === 'egal' ? 'Die Plätze werden rein zufällig verteilt, ohne Unterschied zwischen Mädchen und Jungs. Fixierte'
+          : 'Mädchen und Jungs werden gleichmässig verteilt: möglichst jedes Pult gemischt und im Zimmer abwechselnd wie ein Schachbrett. Fixierte'} Kinder (📌) bleiben sitzen${c.apart.length ? `, und ${c.apart.length === 1 ? 'die Regel' : `die ${c.apart.length} Regeln`} «nicht nebeneinander» ${c.apart.length === 1 ? 'wird' : 'werden'} beachtet` : ''}.</p>
+        <label class="field">Leere Plätze
+          <select id="fillSel">
+            <option value="front" ${s.fill==='front'?'selected':''}>Vorne zuerst besetzen</option>
+            <option value="random" ${s.fill==='random'?'selected':''}>Zufällig im Zimmer verteilen</option>
+          </select></label>
+        <button class="btn primary big" id="genBtn" ${st.total===0?'disabled':''}>🎲 Neue Sitzordnung erstellen</button>
+      ` : `<p class="hint">Tippe auf ein Kind und danach auf einen Platz. Ein besetzter Platz wird getauscht. Auf einen freien Platz tippen öffnet die Auswahl. Am Computer geht es auch per Ziehen.</p>`}
+      <div class="box drop ${sel && sel.fromSeat ? 'removable' : ''}" id="unplacedBox">
+        <h3>Noch ohne Platz (${unplaced.length})</h3>
+        ${unplaced.length ? `<div class="chips">${unplaced.map(x => `<button class="chip ${s.showGender ? x.g : 'plain'} ${sel && sel.studentId===x.id ? 'selected':''}" data-student="${x.id}" draggable="true">${esc(x.name)}</button>`).join('')}</div>`
+          : `<p class="hint" style="margin-top:6px">${st.total ? 'Alle Kinder haben einen Platz.' : '–'}</p>`}
+      </div>
+      <div class="stats">
+        <div class="stat"><b>${st.w}</b>Mädchen</div>
+        <div class="stat"><b>${st.m}</b>Jungs</div>
+        <div class="stat"><b>${mixedT}/${usedT}</b>gemischte Pulte</div>
+      </div>
+      <label class="toggle">Geschlecht farbig anzeigen <span class="sw"><input type="checkbox" id="showG" ${s.showGender?'checked':''}><span></span></span></label>
+      <label class="toggle">Pultnummern anzeigen <span class="sw"><input type="checkbox" id="showN" ${s.showNums?'checked':''}><span></span></span></label>
+      <label class="toggle">Ansicht vom Lehrerpult aus <span class="sw"><input type="checkbox" id="flipV" ${s.flip?'checked':''}><span></span></span></label>
+      <div class="row">
+        <button class="btn" id="copyTxt">Als Text kopieren</button>
+        <button class="btn" id="fullBtn">Vollbild</button>
+      </div>
+      <button class="btn danger" id="clearBtn">Alle Plätze leeren${c.pinned.length ? ' (ohne fixierte)' : ''}</button>`;
+  }
+  else if(tab === 'gruppen'){
+    const gw = c.gw; const present = presentStudents(c); const N = present.length;
+    const parts = groupParts(c); const needAsk = parts.some(p => p.plans.length > 1);
+    const plan = currentPlan(c);
+    const who = p => p.label ? `${p.students.length} ${p.label}` : `${p.students.length} Kinder`;
+    const describe = key => { const segs = parts.map(p => { const pl = p.plans.find(x => x.key === key) || p.plans[0]; return {p, pl}; });
+      const n = segs.reduce((a, x) => a + x.pl.sizes.length, 0);
+      return segs.map(({p, pl}) => (p.label ? p.label + ': ' : '') + describeSizes(pl.sizes)).join(' · ') + ` (${n} Gruppen)`; };
+    let planHtml = '';
+    if(!N) planHtml = `<div class="warn">${c.students.length ? 'Alle Kinder sind als abwesend markiert.' : 'Erfasse zuerst Kinder im Tab <b>Klasse</b>.'}</div>`;
+    else if(!needAsk) planHtml = `<div class="info">${parts.map(p => `${who(p)} → <b>${describeSizes(p.plans[0].sizes)}</b>${p.exact ? '' : ` <span style="color:var(--muted)">(${gw.size}er gehen nicht auf)</span>`}`).join('<br>')}</div>`;
+    else {
+      const odd = parts.filter(p => p.plans.length > 1);
+      planHtml = `<div class="ask">
+        <p><b>${odd.map(who).join(' und ')} gehen nicht in ${gw.size}er-Gruppen auf.</b> Sollen die übrigen Gruppen 1 grösser oder 1 kleiner sein?</p>
+        <button class="opt ${gw.choice==='bigger'?'on':''}" data-choice="bigger"><b>Grösser</b><span>${describe('bigger')}</span></button>
+        <button class="opt ${gw.choice==='smaller'?'on':''}" data-choice="smaller"><b>Kleiner</b><span>${describe('smaller')}</span></button>
+      </div>`;
+    }
+    const mixHint = gw.mix === 'separate' ? 'Reine Mädchen- und reine Jungsgruppen.' : gw.mix === 'egal' ? 'Die Gruppen werden rein zufällig gebildet, ohne Unterschied zwischen Mädchen und Jungs.' : 'Mädchen und Jungs werden gleichmässig auf alle Gruppen verteilt.';
+    const absent = new Set(gw.absent);
+    const showG = s.showGender;
+    const cards = gw.groups.map((g, i) => { const [bg, fg] = PALETTE[i % PALETTE.length];
+      return `<div class="gcard" style="--gb:${bg};--gc:${fg}"><div class="gh"><span>Gruppe ${i+1}</span><span>${g.length}</span></div>${gw.mix === 'separate' && gw.groupGender && gw.groupGender[i] ? `<div style="font-size:11px;font-weight:700;color:var(--gc);margin:-3px 0 2px">${gw.groupGender[i] === 'w' ? 'Mädchen' : 'Jungs'}</div>` : ''}${g.map(id => esc(nameOf(c,id))).join(', ')}</div>`; }).join('');
+    const gconf = gw.groups.length ? groupConflicts(c, gw.groups) : 0;
+    const it = gw.layout && gw.layout.find(i => i.id === selItem);
+    body.innerHTML = `
+      <div class="field">Wie gross sollen die Gruppen sein?
+        <div class="sizes">${[2,3,4,5,6,7,8].map(n => `<button data-size="${n}" class="${gw.size===n?'on':''}">${n}er</button>`).join('')}</div>
+      </div>
+      <div class="field">Zusammensetzung
+        <div class="seg three">
+          <button data-mix="mixed" class="${gw.mix==='mixed'?'on':''}">Gemischt<br><small style="font-weight:500">Mädchen & Jungs</small></button>
+          <button data-mix="separate" class="${gw.mix==='separate'?'on':''}">Getrennt<br><small style="font-weight:500">Mädchen- / Jungsgruppen</small></button>
+          <button data-mix="egal" class="${gw.mix==='egal'?'on':''}">Egal<br><small style="font-weight:500">kein Unterschied</small></button>
+        </div>
+        <span class="hint" style="font-weight:400">${mixHint}</span>
+      </div>
+      <details ${gw.absent.length ? 'open' : ''}>
+        <summary>Wer fehlt heute? (${gw.absent.length})</summary>
+        <p class="hint">Antippen, um ein Kind für die Gruppenarbeit wegzulassen.</p>
+        <div class="chips">${c.students.map(x => `<button class="chip ${absent.has(x.id) ? 'plain' : (showG ? x.g : 'plain')}" data-absent="${x.id}" style="${absent.has(x.id) ? 'text-decoration:line-through;opacity:.55' : ''}">${esc(x.name)}</button>`).join('') || '<span class="hint">–</span>'}</div>
+      </details>
+      ${planHtml}
+      <label class="toggle">Pulte für die Gruppenarbeit umstellen <span class="sw"><input type="checkbox" id="moveDesks" ${gw.move?'checked':''}><span></span></span></label>
+      <p class="hint" style="margin-top:-8px">${gw.move ? 'Die Pulte werden zu Gruppentischen zusammengeschoben. Das normale Zimmer und die Sitzordnung bleiben gespeichert.' : 'Die Pulte bleiben stehen. Jede Gruppe sitzt möglichst nah beieinander.'}</p>
+      <button class="btn primary big" id="groupBtn" ${plan ? '' : 'disabled'}>👥 ${gw.groups.length ? 'Neue Gruppen bilden' : 'Gruppen bilden'}</button>
+      ${!plan && N && needAsk ? '<p class="hint" style="margin-top:-8px;text-align:center">Wähle zuerst «Grösser» oder «Kleiner».</p>' : ''}
+      ${gconf ? `<div class="warn bad">⚠ ${gconf === 1 ? 'Eine Regel' : gconf + ' Regeln'} «nicht nebeneinander» konnte${gconf === 1 ? '' : 'n'} nicht eingehalten werden.</div>` : ''}
+      ${gw.groups.length ? `
+        <div class="gcards">${cards}</div>
+        ${gw.move ? `<label class="toggle">Pulte von Hand verschieben <span class="sw"><input type="checkbox" id="groupEdit" ${groupEdit?'checked':''}><span></span></span></label>
+          ${groupEdit ? `<div class="row">${it ? `<button class="btn" id="rotBtn">↻ Pult ${it.type==='table' ? tableNo(it) : ''} drehen</button>` : '<span class="hint">Tippe ein Pult an, um es zu drehen.</span>'}<button class="btn" id="rearrange">Automatisch anordnen</button></div>` : ''}` : ''}
+        <div class="row">
+          <button class="btn" id="copyGroups">Als Text kopieren</button>
+          <button class="btn" id="fullBtn">Vollbild</button>
+        </div>
+        <button class="btn danger" id="endGroups">Gruppenarbeit beenden</button>` : ''}`;
+  }
+  else if(tab === 'klasse'){
+    const st = stats(c);
+    const opts = [...c.students].sort((a,b) => a.name.localeCompare(b.name,'de')).map(x => `<option value="${x.id}">${esc(x.name)}</option>`).join('');
+    body.innerHTML = `
+      <label class="field">Name der Klasse <input id="className" value="${esc(c.name)}"></label>
+      <div class="stats">
+        <div class="stat"><b>${st.w}</b>Mädchen</div>
+        <div class="stat"><b>${st.m}</b>Jungs</div>
+        <div class="stat"><b>${st.total}/${seatCount()}</b>Plätze</div>
+      </div>
+      <form class="addform" id="addForm">
+        <input id="newName" placeholder="Name des Kindes" autocomplete="off" maxlength="40">
+        <div class="gpick">
+          <button type="button" data-g="w" class="w ${newGender==='w'?'on':''}">Mädchen</button>
+          <button type="button" data-g="m" class="m ${newGender==='m'?'on':''}">Junge</button>
+        </div>
+        <button type="submit" class="btn primary">Hinzufügen</button>
+      </form>
+      <details>
+        <summary>Ganze Liste einfügen</summary>
+        <p class="hint">Ein Kind pro Zeile, dahinter <b>w</b> oder <b>m</b> – z. B. «Lea w» oder «Noah, m». Ohne Angabe gilt die Auswahl oben (${newGender==='w'?'Mädchen':'Junge'}).</p>
+        <textarea id="bulk" rows="6" placeholder="Lea w&#10;Noah m&#10;Elena w"></textarea>
+        <button class="btn" id="bulkAdd" style="margin-top:8px;width:100%">Liste übernehmen</button>
+      </details>
+      <div class="box">
+        <h3>Nicht nebeneinander</h3>
+        <p class="hint" style="margin-top:4px">Diese Kinder sitzen beim Zufallsgenerator nie direkt nebeneinander oder gegenüber und kommen nicht in dieselbe Gruppe.</p>
+        ${c.students.length >= 2 ? `<div class="row" style="margin-top:8px"><select id="apA">${opts}</select><select id="apB">${opts}</select><button class="btn primary" id="apAdd" style="flex:none">＋</button></div>` : ''}
+        ${c.apart.length ? `<ul class="aplist">${c.apart.map(([a,b], i) => `<li><span><b>${esc(nameOf(c,a))}</b> ✕ <b>${esc(nameOf(c,b))}</b></span><button class="x" data-apdel="${i}" title="Regel löschen">✕</button></li>`).join('')}</ul>` : ''}
+      </div>
+      ${c.students.length ? `<ul class="slist">${[...c.students].sort((a,b)=>a.name.localeCompare(b.name,'de')).map(x => `
+        <li><span class="nm">${esc(x.name)}</span>
+          <button class="gtag ${x.g}" data-toggleg="${x.id}" title="Geschlecht ändern">${x.g==='w'?'Mädchen':'Junge'}</button>
+          <button class="x" data-del="${x.id}" title="Entfernen">✕</button></li>`).join('')}</ul>`
+        : `<button class="btn" id="sampleBtn">Beispielklasse laden</button>`}`;
+    const b = $('#apB'); if(b && b.options.length > 1) b.selectedIndex = 1;
+  }
+  else {
+    const it = state.layout.find(i => i.id === selItem);
+    const label = it ? (it.type === 'table' ? 'Pult ' + tableNo(it) : it.type === 'board' ? 'Smartbildschirm' : 'Lehrerpult') : null;
+    body.innerHTML = `
+      <p class="hint">Verschiebe Pulte, Lehrerpult und Smartbildschirm so, wie sie in deinem Zimmer stehen. Das Zimmer gilt für alle Klassen; bestehende Sitzordnungen bleiben erhalten.</p>
+      <div class="box">
+        <div class="row" style="justify-content:space-between"><h3>Pulte: ${tables().length} <span style="font-weight:400;color:var(--muted)">(${seatCount()} Plätze)</span></h3></div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn primary" id="addTable" ${tables().length >= MAX_TABLES ? 'disabled' : ''}>＋ Pult hinzufügen</button>
+          <button class="btn danger" id="delTable" ${it && it.type === 'table' ? '' : 'disabled'}>${it && it.type === 'table' ? '✕ Pult ' + tableNo(it) + ' entfernen' : '✕ Pult entfernen'}</button>
+        </div>
+        ${it && it.type === 'table' ? '' : '<p class="hint" style="margin-top:6px">Zum Entfernen zuerst ein Pult im Zimmer antippen.</p>'}
+      </div>
+      <h3>Vorlagen</h3>
+      <p class="hint" style="margin-top:-8px">Ordnet alle ${tables().length} Pulte neu an.</p>
+      <div class="presets">
+        <button class="preset" data-preset="reihen">${miniSvg('reihen')}Reihen</button>
+        <button class="preset" data-preset="gruppen">${miniSvg('gruppen')}Gruppen</button>
+        <button class="preset" data-preset="u">${miniSvg('u')}U-Form</button>
+      </div>
+      <div class="box">
+        ${it ? `<div class="row"><span style="flex:1"><b>${label}</b> ausgewählt</span><button class="btn" id="rotBtn">↻ Drehen</button></div>`
+             : `<p class="hint">Tippe ein Element an, um es zu drehen.</p>`}
+      </div>
+      <p class="hint">Tipp: Die Nummern auf den Pulten helfen beim Kopieren als Text.</p>`;
+  }
+}
+function miniSvg(name){
+  const items = presetItems(name, tables().length);
+  return `<svg viewBox="0 0 100 90"><rect x="1" y="1" width="98" height="88" rx="5" fill="#fbf8f1" stroke="#ddd5c3" stroke-width="2"/>${items.map(it => {
+    const sz = SIZES[it.type]; const w = it.rot ? sz.h : sz.w, h = it.rot ? sz.w : sz.h;
+    const fill = it.type === 'table' ? '#ead9b9' : it.type === 'board' ? '#22313a' : '#8a6a45';
+    return `<rect x="${it.cx-w/2}" y="${it.cy-h/2}" width="${w}" height="${h}" rx="1.5" fill="${fill}"/>`;
+  }).join('')}</svg>`;
+}
+
+/* ---------- Dialoge ---------- */
+function openModal({title, html, actions}){
+  const m = $('#modal');
+  m.innerHTML = `<div class="dlg" role="dialog" aria-modal="true"><h2>${esc(title)}</h2>${html || ''}<div class="actions">${actions.map((a,i) => `<button class="btn ${a.cls||''}" data-mi="${i}">${esc(a.label)}</button>`).join('')}</div></div>`;
+  m.hidden = false;
+  m.onclick = e => {
+    if(e.target === m){ closeModal(); return; }
+    const b = e.target.closest('[data-mi]'); if(b){ const a = actions[+b.dataset.mi]; if(!a.onClick || a.onClick() !== false) closeModal(); }
+  };
+  const inp = m.querySelector('input'); if(inp){ inp.focus(); inp.select(); inp.onkeydown = e => { if(e.key === 'Enter'){ const p = actions.findIndex(a => a.primary); if(p >= 0) m.querySelector(`[data-mi="${p}"]`).click(); } }; }
+  return m;
+}
+function closeModal(){ const m = $('#modal'); m.hidden = true; m.innerHTML = ''; }
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200); }
+function openPicker(seat){
+  const c = cls(); const seated = new Set(Object.values(c.seats));
+  const free = c.students.filter(s => !seated.has(s.id));
+  if(!free.length){ toast(c.students.length ? 'Alle Kinder haben schon einen Platz.' : 'Erfasse zuerst Kinder im Tab «Klasse».'); return; }
+  const showG = state.settings.showGender;
+  const m = openModal({ title:'Wer sitzt hier?', html:`<div class="chips">${free.map(s => `<button class="chip ${showG ? s.g : 'plain'}" data-pick="${s.id}">${esc(s.name)}</button>`).join('')}</div>`, actions:[{label:'Abbrechen'}] });
+  m.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => { placeStudent(b.dataset.pick, null, seat); closeModal(); commit(); }));
+}
+function copyText(txt, ok){ navigator.clipboard.writeText(txt).then(() => toast(ok), () => toast('Kopieren nicht möglich')); }
+function goFullscreen(){
+  const w = $('#roomWrap');
+  try { const p = w.requestFullscreen ? w.requestFullscreen() : (w.webkitRequestFullscreen && w.webkitRequestFullscreen()); if(p && p.catch) p.catch(() => toast('Vollbild nicht möglich')); } catch { toast('Vollbild nicht möglich'); }
+}
+
+/* ---------- Eingaben ---------- */
+function parseGender(t){
+  t = (t || '').toLowerCase().replace(/[().]/g, '');
+  if(['w','f','mädchen','maedchen','girl','weiblich'].includes(t)) return 'w';
+  if(['m','j','k','junge','knabe','boy','männlich','maennlich'].includes(t)) return 'm';
+  return null;
+}
+function addStudents(lines){
+  const c = cls(); let n = 0;
+  for(let raw of lines){
+    raw = raw.trim(); if(!raw) continue;
+    let g = null, name = raw;
+    const mm = raw.match(/^(.*?)[\s,;\t]+\(?([^\s,;\t]+)\)?$/);
+    if(mm && parseGender(mm[2])){ g = parseGender(mm[2]); name = mm[1].trim(); }
+    name = name.replace(/[,;]+$/, '').trim().slice(0, 40);
+    if(!name) continue;
+    c.students.push({id:newId(), name, g: g || newGender}); n++;
+  }
+  return n;
+}
+
+document.addEventListener('click', e => {
+  const t = e.target;
+  const tabBtn = t.closest('.tabs button');
+  if(tabBtn){ tab = tabBtn.dataset.tab; sel = null; selItem = null; groupEdit = false; render(); return; }
+
+  if(t.closest('#backupBtn')){ openBackup(); return; }
+  if(t.closest('#pdfSeat')){ closeModal(); try { pdfSeating(); toast('PDF erstellt'); } catch(err){ toast('PDF konnte nicht erstellt werden'); } return; }
+  if(t.closest('#pdfGroups')){ closeModal(); try { pdfGroups(); toast('PDF erstellt'); } catch(err){ toast('PDF konnte nicht erstellt werden'); } return; }
+  if(t.closest('#dlBackup')){ downloadBackup(); closeModal(); return; }
+  if(t.closest('#upBackup')){ closeModal(); const f = $('#restoreFile'); f.value = ''; f.click(); return; }
+  if(t.closest('#addClass')){
+    openModal({ title:'Neue Klasse', html:`<input id="mName" style="padding:9px 10px;border:1px solid var(--line);border-radius:8px" placeholder="z. B. 2b">`,
+      actions:[{label:'Abbrechen'},{label:'Erstellen', cls:'primary', primary:true, onClick:() => {
+        const v = $('#mName').value.trim(); if(!v) return false;
+        const c = newClass(v.slice(0,40)); state.classes.push(c); state.activeClassId = c.id; sel = null; tab = 'klasse'; commit();
+      }}]});
+    return;
+  }
+  if(t.closest('#renClass')){
+    const c = cls();
+    openModal({ title:'Klasse umbenennen', html:`<input id="mName" style="padding:9px 10px;border:1px solid var(--line);border-radius:8px" value="${esc(c.name)}">`,
+      actions:[{label:'Abbrechen'},{label:'Speichern', cls:'primary', primary:true, onClick:() => { const v = $('#mName').value.trim(); if(!v) return false; c.name = v.slice(0,40); commit(); }}]});
+    return;
+  }
+  if(t.closest('#delClass')){
+    const c = cls(); if(state.classes.length < 2) return;
+    openModal({ title:'Klasse löschen?', html:`<p class="hint">«${esc(c.name)}» mit allen Kindern, Regeln, Gruppen und der Sitzordnung wird gelöscht.</p>`,
+      actions:[{label:'Abbrechen'},{label:'Löschen', cls:'primary', onClick:() => { state.classes = state.classes.filter(x => x.id !== c.id); state.activeClassId = state.classes[0].id; sel = null; commit(); }}]});
+    return;
+  }
+
+  const act = t.closest('[data-act]');
+  if(act){
+    const a = act.dataset.act;
+    if(a === 'cancel'){ sel = null; render(); }
+    else if(a === 'unseat' && sel){ unseat(sel.studentId); sel = null; commit(); }
+    else if(a === 'pin' && sel){ togglePin(sel.studentId); sel = null; commit(); }
+    return;
+  }
+
+  // Sitzplätze
+  const seatEl = t.closest('.seat[data-seat]');
+  if(seatEl && !isEditing()){
+    const seat = seatEl.dataset.seat; const c = cls();
+    if(inGroupView()){
+      const occ = c.gw.seats[seat];
+      if(sel){ if(sel.fromSeat !== seat) groupMove(sel.fromSeat, seat); sel = null; commit(); return; }
+      if(occ){ sel = {studentId:occ, fromSeat:seat}; render(); }
+      return;
+    }
+    if(tab === 'gruppen') return;
+    const occ = c.seats[seat];
+    if(sel){
+      if(sel.fromSeat === seat){ sel = null; render(); return; }
+      placeStudent(sel.studentId, sel.fromSeat, seat); sel = null; commit(); return;
+    }
+    if(occ){ sel = {studentId:occ, fromSeat:seat}; render(); return; }
+    openPicker(seat); return;
+  }
+
+  // Sitzplan
+  const chip = t.closest('#unplacedBox .chip[data-student]');
+  if(chip){ const id = chip.dataset.student; sel = (sel && sel.studentId === id) ? null : {studentId:id, fromSeat:null}; render(); return; }
+  if(t.closest('#unplacedBox') && sel && sel.fromSeat){ unseat(sel.studentId); sel = null; commit(); return; }
+  const modeBtn = t.closest('[data-mode]');
+  const mixBtn = t.closest('[data-mix]');
+  if(mixBtn){ cls().gw.mix = mixBtn.dataset.mix; commit(); return; }
+  const pairBtn = t.closest('[data-pairing]');
+  if(pairBtn){ cls().pairing = pairBtn.dataset.pairing; commit(); return; }
+  if(modeBtn){ state.settings.mode = modeBtn.dataset.mode; sel = null; commit(); return; }
+  if(t.closest('#genBtn')){
+    const n = generate(); sel = null; commit();
+    toast(n ? `Neue Sitzordnung – ${n === 1 ? 'eine Regel konnte' : n + ' Regeln konnten'} nicht eingehalten werden` : 'Neue Sitzordnung erstellt');
+    return;
+  }
+  if(t.closest('#clearBtn')){
+    const c = cls(); const keep = new Set(c.pinned);
+    for(const k in c.seats) if(!keep.has(c.seats[k])) delete c.seats[k];
+    sel = null; commit(); return;
+  }
+  if(t.closest('#copyTxt')){
+    const c = cls(); const byId = Object.fromEntries(c.students.map(s => [s.id, s]));
+    const lines = [...tables()].sort((a,b) => +tableNo(a) - +tableNo(b)).map(tb => {
+      const [a,b] = seatsOf(tb).map(k => byId[c.seats[k]]);
+      return `Pult ${tableNo(tb)}: ${a ? a.name : '–'} | ${b ? b.name : '–'}`;
+    });
+    const seated = new Set(Object.values(c.seats)); const rest = c.students.filter(s => !seated.has(s.id));
+    let txt = `Sitzordnung ${c.name}\n\n` + lines.join('\n');
+    if(rest.length) txt += `\n\nOhne Platz: ${rest.map(s => s.name).join(', ')}`;
+    copyText(txt, 'Sitzordnung kopiert'); return;
+  }
+  if(t.closest('#fullBtn')){ goFullscreen(); return; }
+
+  // Gruppen
+  const sz = t.closest('[data-size]');
+  if(sz){ const c = cls(); const n = +sz.dataset.size; if(c.gw.size !== n){ c.gw.size = n; c.gw.choice = null; } commit(); return; }
+  const ch = t.closest('[data-choice]');
+  if(ch){ cls().gw.choice = ch.dataset.choice; commit(); return; }
+  const ab = t.closest('[data-absent]');
+  if(ab){ const gw = cls().gw; const id = ab.dataset.absent; const i = gw.absent.indexOf(id); if(i >= 0) gw.absent.splice(i,1); else gw.absent.push(id); commit(); return; }
+  if(t.closest('#groupBtn')){
+    const n = generateGroups(); if(n === null) return; sel = null; groupEdit = false; selItem = null; commit();
+    toast(n ? `Gruppen gebildet – ${n === 1 ? 'eine Regel konnte' : n + ' Regeln konnten'} nicht eingehalten werden` : 'Gruppen gebildet');
+    return;
+  }
+  if(t.closest('#rearrange')){ const c = cls(); const r = packGroups(c.gw.groups, c.gw.groupGender); c.gw.layout = r.layout; c.gw.seats = r.seats; selItem = null; commit(); return; }
+  if(t.closest('#copyGroups')){
+    const c = cls();
+    const txt = `Gruppen ${c.name}\n\n` + c.gw.groups.map((g,i) => `Gruppe ${i+1}: ${g.map(id => nameOf(c,id)).join(', ')}`).join('\n') +
+      (c.gw.absent.length ? `\n\nAbwesend: ${c.gw.absent.map(id => nameOf(c,id)).join(', ')}` : '');
+    copyText(txt, 'Gruppen kopiert'); return;
+  }
+  if(t.closest('#endGroups')){
+    const gw = cls().gw; gw.groups = []; gw.groupOf = {}; gw.seats = {}; gw.layout = null; groupEdit = false; selItem = null; sel = null;
+    tab = 'plan'; commit(); toast('Zurück zur normalen Sitzordnung'); return;
+  }
+
+  // Klasse
+  const gp = t.closest('.gpick [data-g]');
+  if(gp){ newGender = gp.dataset.g; document.querySelectorAll('.gpick button').forEach(b => b.classList.toggle('on', b.dataset.g === newGender)); return; }
+  const tg = t.closest('[data-toggleg]');
+  if(tg){ const s = cls().students.find(x => x.id === tg.dataset.toggleg); if(s){ s.g = s.g === 'w' ? 'm' : 'w'; commit(); } return; }
+  const del = t.closest('[data-del]');
+  if(del){ removeStudent(cls(), del.dataset.del); commit(); return; }
+  if(t.closest('#apAdd')){
+    const c = cls(); const a = $('#apA').value, b = $('#apB').value;
+    if(!a || !b || a === b){ toast('Bitte zwei verschiedene Kinder wählen'); return; }
+    if(c.apart.some(p => p.includes(a) && p.includes(b))){ toast('Diese Regel gibt es schon'); return; }
+    c.apart.push([a, b]); commit(); toast('Regel gespeichert'); return;
+  }
+  const apd = t.closest('[data-apdel]');
+  if(apd){ cls().apart.splice(+apd.dataset.apdel, 1); commit(); return; }
+  if(t.closest('#bulkAdd')){ const n = addStudents($('#bulk').value.split('\n')); if(n){ toast(n + ' Kinder hinzugefügt'); commit(); } return; }
+  if(t.closest('#sampleBtn')){
+    addStudents(['Lea w','Mia w','Elena w','Lina w','Emma w','Sofia w','Nina w','Laura w','Alina w','Lara w','Noah m','Luca m','Leon m','Elias m','Nico m','Jonas m','Levin m','Samuel m','David m']);
+    commit(); return;
+  }
+
+  // Zimmer
+  const pr = t.closest('[data-preset]');
+  if(pr){ state.layout = presetItems(pr.dataset.preset, tables().length, sortedTableIds()); selItem = null; regroupAll(); commit(); return; }
+  if(t.closest('#addTable')){ addTable(); return; }
+  if(t.closest('#delTable')){ if(selItem && selItem[0] === 'T') removeTable(selItem); return; }
+  if(t.closest('#rotBtn')){ const it = activeLayout().find(i => i.id === selItem); if(it){ it.rot = it.rot ? 0 : 90; clampItem(it); commit(); } return; }
+});
+
+document.addEventListener('submit', e => {
+  if(e.target.id === 'addForm'){
+    e.preventDefault();
+    const v = $('#newName').value.trim(); if(!v) return;
+    cls().students.push({id:newId(), name:v.slice(0,40), g:newGender});
+    commit(); const ni = $('#newName'); if(ni) ni.focus();
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if(t.id === 'restoreFile'){ if(t.files && t.files[0]) restoreFrom(t.files[0]); return; }
+  if(t.id === 'classSel'){ state.activeClassId = t.value; sel = null; groupEdit = false; commit(); }
+  else if(t.id === 'fillSel'){ state.settings.fill = t.value; commit(); }
+  else if(t.id === 'showG'){ state.settings.showGender = t.checked; commit(); }
+  else if(t.id === 'showN'){ state.settings.showNums = t.checked; commit(); }
+  else if(t.id === 'flipV'){ state.settings.flip = t.checked; commit(); }
+  else if(t.id === 'className'){ const v = t.value.trim(); if(v){ cls().name = v.slice(0,40); commit(); } }
+  else if(t.id === 'moveDesks'){ const c = cls(); c.gw.move = t.checked; groupEdit = false; selItem = null; if(c.gw.groups.length) placeGroups(c); commit(); }
+  else if(t.id === 'groupEdit'){ groupEdit = t.checked; selItem = null; sel = null; render(); }
+});
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ if(!$('#modal').hidden) closeModal(); else if(sel){ sel = null; render(); } }
+});
+
+/* ---------- Ziehen (Computer) ---------- */
+document.addEventListener('dragstart', e => {
+  if(isEditing()) return;
+  const seat = e.target.closest && e.target.closest('.seat[data-seat]');
+  const chip = e.target.closest && e.target.closest('.chip[data-student]');
+  const gv = inGroupView();
+  if(seat){ const sid = (gv ? cls().gw.seats : cls().seats)[seat.dataset.seat]; if(!sid){ e.preventDefault(); return; } drag = {studentId:sid, fromSeat:seat.dataset.seat, gv}; }
+  else if(chip && !gv && chip.closest('#unplacedBox')){ drag = {studentId:chip.dataset.student, fromSeat:null, gv}; }
+  else return;
+  e.dataTransfer.effectAllowed = 'move';
+  try { e.dataTransfer.setData('text/plain', drag.studentId); } catch {}
+});
+document.addEventListener('dragover', e => {
+  if(!drag) return;
+  const tgt = e.target.closest && (e.target.closest('.seat[data-seat]') || (!drag.gv && e.target.closest('#unplacedBox')));
+  document.querySelectorAll('.over').forEach(x => { if(x !== tgt) x.classList.remove('over'); });
+  if(tgt){ e.preventDefault(); tgt.classList.add('over'); }
+});
+document.addEventListener('drop', e => {
+  if(!drag) return;
+  const seat = e.target.closest && e.target.closest('.seat[data-seat]');
+  const box = e.target.closest && e.target.closest('#unplacedBox');
+  if(seat){ e.preventDefault(); if(drag.gv) groupMove(drag.fromSeat, seat.dataset.seat); else placeStudent(drag.studentId, drag.fromSeat, seat.dataset.seat); }
+  else if(box && !drag.gv){ e.preventDefault(); if(drag.fromSeat) unseat(drag.studentId); }
+  drag = null; sel = null; commit();
+});
+document.addEventListener('dragend', () => { drag = null; document.querySelectorAll('.over').forEach(x => x.classList.remove('over')); });
+
+/* ---------- Möbel verschieben ---------- */
+function clampItem(it){
+  const sz = SIZES[it.type]; const w = it.rot ? sz.h : sz.w, h = it.rot ? sz.w : sz.h;
+  it.cx = Math.min(W - w/2, Math.max(w/2, it.cx));
+  it.cy = Math.min(H - h/2, Math.max(h/2, it.cy));
+}
+const roomEl = $('#room');
+roomEl.addEventListener('pointerdown', e => {
+  if(!isEditing()) return;
+  const el = e.target.closest('.item');
+  if(!el){ selItem = null; renderRoom(); renderPanel(); return; }
+  const it = activeLayout().find(i => i.id === el.dataset.item); if(!it) return;
+  selItem = it.id;
+  roomEl.querySelectorAll('.item.picked').forEach(x => x.classList.remove('picked'));
+  el.classList.add('picked');
+  dragItem = { it, el, sx:e.clientX, sy:e.clientY, cx:it.cx, cy:it.cy, r:roomEl.getBoundingClientRect(), moved:false };
+  try { el.setPointerCapture(e.pointerId); } catch {}
+  renderPanel();
+});
+roomEl.addEventListener('pointermove', e => {
+  if(!dragItem) return;
+  const d = dragItem; const f = state.settings.flip ? -1 : 1;
+  const dx = (e.clientX - d.sx) / d.r.width * W * f, dy = (e.clientY - d.sy) / d.r.height * H * f;
+  if(Math.abs(dx) + Math.abs(dy) > .3) d.moved = true;
+  d.it.cx = Math.round((d.cx + dx) * 2) / 2; d.it.cy = Math.round((d.cy + dy) * 2) / 2;
+  clampItem(d.it);
+  d.el.setAttribute('style', displayRect(d.it));
+});
+function endItemDrag(){ if(!dragItem) return; const moved = dragItem.moved; dragItem = null; if(moved){ state.updatedAt = Date.now(); persist(); } }
+roomEl.addEventListener('pointerup', endItemDrag);
+roomEl.addEventListener('pointercancel', endItemDrag);
+
+
+/* ---------- PDF (ohne externe Bibliothek, alles lokal) ---------- */
+const HELV = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+function pdfText(str){
+  let out = '';
+  for(const ch of String(str)){
+    let c = ch.codePointAt(0);
+    if(c > 255){ const b = ch.normalize('NFD')[0]; c = b.codePointAt(0); if(c > 255) c = 63; }
+    if(c < 32 || (c >= 127 && c < 160)) c = 32;
+    out += String.fromCharCode(c);
+  }
+  return out;
+}
+function charW(c){
+  if(c >= 32 && c <= 126) return HELV[c - 32];
+  if(c === 223) return 611;
+  if(c >= 192){ const b = String.fromCharCode(c).normalize('NFD').charCodeAt(0); if(b >= 32 && b <= 126) return HELV[b - 32]; }
+  return 556;
+}
+function textW(s, size, bold){ let w = 0; for(let i = 0; i < s.length; i++) w += charW(s.charCodeAt(i)); return w * size / 1000 * (bold ? 1.07 : 1); }
+const pdfStr = s => '(' + s.replace(/[\\()]/g, m => '\\' + m) + ')';
+const f2 = n => (Math.round(n * 100) / 100).toString();
+function rgbOf(hex){ const n = parseInt(hex.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => (v / 255).toFixed(3)).join(' '); }
+
+function buildPdf(draw, PW = 842, PH = 595){
+  const ops = [];
+  const P = {
+    rect(x, y, w, h, {fill, stroke, lw = 1, r = 0, dash} = {}){
+      r = Math.min(r, w/2, h/2); const k = 0.5523 * r;
+      const path = r > 0
+        ? `${f2(x+r)} ${f2(y)} m ${f2(x+w-r)} ${f2(y)} l ${f2(x+w-r+k)} ${f2(y)} ${f2(x+w)} ${f2(y+r-k)} ${f2(x+w)} ${f2(y+r)} c ${f2(x+w)} ${f2(y+h-r)} l ${f2(x+w)} ${f2(y+h-r+k)} ${f2(x+w-r+k)} ${f2(y+h)} ${f2(x+w-r)} ${f2(y+h)} c ${f2(x+r)} ${f2(y+h)} l ${f2(x+r-k)} ${f2(y+h)} ${f2(x)} ${f2(y+h-r+k)} ${f2(x)} ${f2(y+h-r)} c ${f2(x)} ${f2(y+r)} l ${f2(x)} ${f2(y+r-k)} ${f2(x+r-k)} ${f2(y)} ${f2(x+r)} ${f2(y)} c h`
+        : `${f2(x)} ${f2(y)} ${f2(w)} ${f2(h)} re`;
+      const op = fill && stroke ? 'B' : fill ? 'f' : 'S';
+      ops.push(`q ${f2(lw)} w ${dash ? '[2 2] 0 d ' : ''}${fill ? rgbOf(fill) + ' rg ' : ''}${stroke ? rgbOf(stroke) + ' RG ' : ''}${path} ${op} Q`);
+    },
+    text(x, y, s, size, {bold = false, color = '#1e2a2d', align = 'left', rot = false} = {}){
+      s = pdfText(s); const w = textW(s, size, bold);
+      const off = align === 'center' ? w/2 : align === 'right' ? w : 0;
+      const m = rot ? `0 1 -1 0 ${f2(x)} ${f2(y - off)}` : `1 0 0 1 ${f2(x - off)} ${f2(y)}`;
+      ops.push(`BT /${bold ? 'F2' : 'F1'} ${f2(size)} Tf ${rgbOf(color)} rg ${m} Tm ${pdfStr(s)} Tj ET`);
+    }
+  };
+  draw(P, PW, PH);
+  const content = ops.join('\n');
+  const objs = [
+    '<< /Type /Catalog /Pages 2 0 R >>',
+    '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+    `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>`,
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>',
+    `<< /Length ${content.length} >>\nstream\n${content}\nendstream`
+  ];
+  let out = '%PDF-1.4\n%âãÏÓ\n'; const offs = [];
+  objs.forEach((o, i) => { offs.push(out.length); out += `${i+1} 0 obj\n${o}\nendobj\n`; });
+  const xref = out.length;
+  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offs.map(o => String(o).padStart(10, '0') + ' 00000 n \n').join('');
+  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  const bytes = new Uint8Array(out.length);
+  for(let i = 0; i < out.length; i++) bytes[i] = out.charCodeAt(i) & 255;
+  return bytes;
+}
+function fitName(name, maxW, maxH){
+  const s = pdfText(name);
+  let size = Math.min(10, maxH * 0.42);
+  while(size > 5.5 && textW(s, size, true) > maxW) size -= 0.25;
+  if(textW(s, size, true) <= maxW) return {lines:[s], size};
+  const words = s.split(' ');
+  if(words.length > 1){
+    let best = null;
+    for(let i = 1; i < words.length; i++){
+      const a = words.slice(0, i).join(' '), b = words.slice(i).join(' ');
+      const w = Math.max(textW(a, 1, true), textW(b, 1, true));
+      if(!best || w < best.w) best = {a, b, w};
+    }
+    let sz = Math.min(9, maxH * 0.34);
+    while(sz > 5 && best.w * sz > maxW) sz -= 0.25;
+    if(best.w * sz <= maxW) return {lines:[best.a, best.b], size:sz};
+  }
+  let t = s; while(t.length > 1 && textW(t + '.', 5.5, true) > maxW) t = t.slice(0, -1);
+  return {lines:[t + '.'], size:5.5};
+}
+function wrapWords(s, size, maxW, bold){
+  const words = pdfText(s).split(' '); const lines = []; let cur = '';
+  for(const w of words){ const tr = cur ? cur + ' ' + w : w; if(textW(tr, size, bold) <= maxW || !cur) cur = tr; else { lines.push(cur); cur = w; } }
+  if(cur) lines.push(cur);
+  return lines;
+}
+function drawRoomPdf(P, layout, seats, styleOf, box){
+  const sc = Math.min(box.w / W, box.h / H); const rw = W * sc, rh = H * sc;
+  const ox = box.x, oy = box.top; const flip = state.settings.flip; const badges = [];
+  P.rect(ox, oy - rh, rw, rh, {fill:'#fbf8f1', stroke:'#c9bfa8', lw:1.2, r:6});
+  const toPdf = (cx, cy, w, h) => { const dx = flip ? W - cx : cx, dy = flip ? H - cy : cy; return {x:ox + (dx - w/2) * sc, y:oy - (dy + h/2) * sc, w:w * sc, h:h * sc}; };
+  for(const it of layout){
+    const sz = SIZES[it.type]; const w = it.rot ? sz.h : sz.w, h = it.rot ? sz.w : sz.h; const r = toPdf(it.cx, it.cy, w, h);
+    if(it.type !== 'table'){
+      const label = it.type === 'board' ? 'SMARTBILDSCHIRM' : 'Lehrerpult';
+      P.rect(r.x, r.y, r.w, r.h, {fill: it.type === 'board' ? '#22313a' : '#8a6a45', r:2.5});
+      const fs = Math.min(9, Math.min(r.w, r.h) * 0.55);
+      if(it.rot) P.text(r.x + r.w/2 + fs * 0.35, r.y + r.h/2, label, fs, {bold:true, color:'#ffffff', align:'center', rot:true});
+      else P.text(r.x + r.w/2, r.y + r.h/2 - fs * 0.35, label, fs, {bold:true, color:'#ffffff', align:'center'});
+      continue;
+    }
+    P.rect(r.x, r.y, r.w, r.h, {fill:'#ead9b9', stroke:'#c6a874', lw:.8, r:3});
+    badges.push({x:r.x, y:r.y + r.h, n:tableNo(it)});
+    const pad = 0.45 * sc; const ids = seatsOf(it); if(flip) ids.reverse();
+    ids.forEach((seat, d) => {
+      let x, y, sw, sh;
+      if(!it.rot){ sw = (r.w - 3*pad) / 2; sh = r.h - 2*pad; x = r.x + pad + d * (sw + pad); y = r.y + pad; }
+      else { sw = r.w - 2*pad; sh = (r.h - 3*pad) / 2; x = r.x + pad; y = r.y + pad + (1 - d) * (sh + pad); }
+      const sid = seats[seat]; const st = styleOf(sid);
+      P.rect(x, y, sw, sh, {fill:st.fill, stroke:st.stroke, lw:st.empty ? .6 : 1, r:2, dash:st.empty});
+      if(st.tag) P.text(x + 1.8, y + sh - 5.2, st.tag, 4.6, {bold:true, color:st.color});
+      const {lines, size} = st.empty ? {lines:['frei'], size:Math.min(7, sh * 0.35)} : fitName(st.name, sw - 4, sh);
+      const lh = size * 1.12; const y0 = y + sh/2 + (lines.length - 1) * lh / 2 - size * 0.35;
+      lines.forEach((ln, i) => P.text(x + sw/2, y0 - i * lh, ln, size, {bold:!st.empty, color:st.color, align:'center'}));
+    });
+  }
+  // Pultnummern zuletzt zeichnen, damit sie obenauf liegen
+  for(const b of badges){
+    const label = String(b.n); const fs = 7.5; const w = Math.max(12, textW(label, fs, true) + 6), h = 12;
+    P.rect(b.x - 4, b.y - h + 4, w, h, {fill:'#2f5d62', stroke:'#ffffff', lw:1, r:h/2});
+    P.text(b.x - 4 + w/2, b.y - h + 4 + 3.6, label, fs, {bold:true, color:'#ffffff', align:'center'});
+  }
+  return {rw, rh};
+}
+function fmtDate(){ return new Date().toLocaleDateString('de-CH', {day:'2-digit', month:'2-digit', year:'numeric'}); }
+function savePdf(bytes, name){
+  const url = URL.createObjectURL(new Blob([bytes], {type:'application/pdf'}));
+  const a = document.createElement('a'); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+const fileSafe = s => s.replace(/[^\p{L}\p{N}_-]+/gu, '-').replace(/^-+|-+$/g, '') || 'Klasse';
+
+function pdfSeating(){
+  const c = cls(); const byId = Object.fromEntries(c.students.map(s => [s.id, s])); const showG = state.settings.showGender;
+  const styleOf = sid => {
+    const st = byId[sid];
+    if(!st) return {empty:true, fill:'#ffffff', stroke:'#d9ccb0', color:'#b4a68a'};
+    if(!showG) return {name:st.name, fill:'#ffffff', stroke:'#bca57a', color:'#1e2a2d'};
+    return st.g === 'w' ? {name:st.name, fill:'#fbe4dc', stroke:'#c8553d', color:'#7a2d1d'} : {name:st.name, fill:'#d6edef', stroke:'#2a7b86', color:'#174a51'};
+  };
+  const bytes = buildPdf((P, PW, PH) => {
+    P.text(36, PH - 50, `Sitzordnung ${c.name}`, 20, {bold:true});
+    P.text(36, PH - 66, `${fmtDate()} · ${state.settings.flip ? 'Ansicht vom Lehrerpult aus' : 'Ansicht von hinten (Smartbildschirm vorne)'}`, 9.5, {color:'#6a7376'});
+    const box = {x:36, top:PH - 82, w:520, h:PH - 82 - 52};
+    const {rw, rh} = drawRoomPdf(P, state.layout, c.seats, styleOf, box);
+    if(showG){
+      const ly = PH - 82 - rh - 18;
+      P.rect(36, ly, 9, 9, {fill:'#fbe4dc', stroke:'#c8553d', r:1.5}); P.text(49, ly + 1.5, 'Mädchen', 8.5, {color:'#6a7376'});
+      P.rect(100, ly, 9, 9, {fill:'#d6edef', stroke:'#2a7b86', r:1.5}); P.text(113, ly + 1.5, 'Jungs', 8.5, {color:'#6a7376'});
+    }
+    const cx = 36 + rw + 26, cw = PW - 36 - cx; let y = PH - 96;
+    P.text(cx, y, 'Pulte', 12, {bold:true}); y -= 18;
+    [...tables()].sort((a,b) => +tableNo(a) - +tableNo(b)).forEach(t => {
+      const [a, b] = seatsOf(t).map(k => byId[c.seats[k]]);
+      P.text(cx, y, `Pult ${tableNo(t)}`, 9, {bold:true, color:'#6a7376'});
+      const lines = wrapWords(`${a ? a.name : '-'}  |  ${b ? b.name : '-'}`, 9.5, cw - 42);
+      lines.forEach((ln, i) => P.text(cx + 42, y - i * 12, ln, 9.5));
+      y -= (lines.length - 1) * 12 + 15;
+    });
+    const seated = new Set(Object.values(c.seats)); const rest = c.students.filter(s => !seated.has(s.id));
+    if(rest.length){ y -= 6; P.text(cx, y, 'Ohne Platz', 10, {bold:true}); y -= 14; wrapWords(rest.map(s => s.name).join(', '), 9.5, cw).forEach(ln => { P.text(cx, y, ln, 9.5); y -= 12; }); }
+    P.text(36, 24, `${c.students.length} Kinder · erstellt mit der Sitzordnungs-App`, 7.5, {color:'#9aa1a3'});
+  });
+  savePdf(bytes, `Sitzordnung-${fileSafe(c.name)}-${todayStr()}.pdf`);
+}
+function pdfGroups(){
+  const c = cls(); const gw = c.gw; if(!gw.groups.length) return;
+  const byId = Object.fromEntries(c.students.map(s => [s.id, s]));
+  const styleOf = sid => {
+    const st = byId[sid];
+    if(!st) return {empty:true, fill:'#ffffff', stroke:'#d9ccb0', color:'#b4a68a'};
+    const gi = gw.groupOf[sid] ?? 0; const [bg, fg] = PALETTE[gi % PALETTE.length];
+    return {name:st.name, fill:bg, stroke:fg, color:fg, tag:'G' + (gi + 1)};
+  };
+  const layout = gw.move && gw.layout ? gw.layout : state.layout;
+  const bytes = buildPdf((P, PW, PH) => {
+    P.text(36, PH - 50, `Gruppenarbeit ${c.name}`, 20, {bold:true});
+    const mix = gw.mix === 'separate' ? 'Mädchen- und Jungsgruppen' : gw.mix === 'egal' ? 'zufällig gemischt' : 'Mädchen und Jungs gemischt';
+    P.text(36, PH - 66, `${fmtDate()} · ${gw.groups.length} Gruppen · ${mix}`, 9.5, {color:'#6a7376'});
+    const box = {x:36, top:PH - 82, w:520, h:PH - 82 - 40};
+    const {rw} = drawRoomPdf(P, layout, gw.seats, styleOf, box);
+    const cx = 36 + rw + 26, cw = PW - 36 - cx; let y = PH - 96;
+    gw.groups.forEach((g, i) => {
+      const [bg, fg] = PALETTE[i % PALETTE.length];
+      const lines = wrapWords(g.map(id => (byId[id] || {name:'?'}).name).join(', '), 9.5, cw - 16);
+      const hBox = 20 + lines.length * 12;
+      P.rect(cx, y - hBox + 12, cw, hBox, {fill:bg, stroke:fg, lw:1, r:4});
+      const gtag = gw.mix === 'separate' && gw.groupGender && gw.groupGender[i] ? (gw.groupGender[i] === 'w' ? ' · Mädchen' : ' · Jungs') : '';
+      P.text(cx + 8, y, `Gruppe ${i + 1}${gtag}`, 10, {bold:true, color:fg});
+      P.text(cx + cw - 8, y, String(g.length), 10, {bold:true, color:fg, align:'right'});
+      lines.forEach((ln, k) => P.text(cx + 8, y - 14 - k * 12, ln, 9.5, {color:'#1e2a2d'}));
+      y -= hBox + 6;
+    });
+    if(gw.absent.length){ y -= 4; P.text(cx, y, 'Abwesend', 10, {bold:true}); y -= 14; wrapWords(gw.absent.map(id => (byId[id] || {name:'?'}).name).join(', '), 9.5, cw).forEach(ln => { P.text(cx, y, ln, 9.5); y -= 12; }); }
+    P.text(36, 24, 'erstellt mit der Sitzordnungs-App', 7.5, {color:'#9aa1a3'});
+  });
+  savePdf(bytes, `Gruppen-${fileSafe(c.name)}-${todayStr()}.pdf`);
+}
+
+render();
+setSync();
+</script>
+</body>
+</html>

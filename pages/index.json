@@ -28,7 +28,12 @@
   ],
   "tree": {
     "deutsch": {
-      "files": [],
+      "files": [
+        {
+          "name": "1795706915005-hoerverstehen-polizist.html",
+          "path": "pages/deutsch/1795706915005-hoerverstehen-polizist.html"
+        }
+      ],
       "folders": {
         "Verben Teil 2": {
           "files": [
